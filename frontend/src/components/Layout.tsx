@@ -12,6 +12,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import VantaBackground from './VantaBackground';
 
 export default function Layout() {
   const [scrolled, setScrolled] = useState(false);
@@ -28,18 +29,14 @@ export default function Layout() {
     <div className="min-h-screen text-white flex flex-col font-sans selection:bg-indigo-500/20 overflow-x-hidden relative">
       
       {/* ═══════════════════════════════════════════════════════════════
-         STEP 3: ADD THE BACKGROUND LAYER TO THE DOM (FUSIONAI EXACT)
+         3D VANTA.HALO BACKGROUND LAYER (GLOBAL)
          ═══════════════════════════════════════════════════════════════ */}
-      <div className="fusion-bg-layer">
-        <div className="fusion-blob-top"></div>
-        <div className="fusion-blob-mid"></div>
-        <div className="fusion-blob-bottom"></div>
-      </div>
+      <VantaBackground />
 
-      {/* WRAP CONTENT IN RELATIVE Z-1 CONTAINER */}
+      {/* WRAP CONTENT IN RELATIVE Z-10 CONTAINER */}
       <div className="relative z-10 flex flex-col min-h-screen">
           
-          {/* TOP NAVIGATION — FUSIONAI EXACT GLASS STYLE */}
+          {/* TOP NAVIGATION — FUSIONAI GLASS STYLE */}
           <header className={`fixed top-0 inset-x-0 h-16 z-50 flex items-center justify-between px-8 transition-all duration-300 ${
             scrolled 
             ? 'nav-glass' 
@@ -149,7 +146,7 @@ export default function Layout() {
                </div>
             </aside>
 
-            {/* MAIN VIEWER AREA — REMOVED BACKGROUND CLASSES */}
+            {/* MAIN VIEWER AREA */}
             <main className="flex-1 min-w-0 overflow-y-auto animate-fade-up bg-transparent">
                <Outlet />
             </main>
@@ -168,7 +165,6 @@ export default function Layout() {
                </div>
 
                <div className="flex-1 overflow-y-auto p-6 no-scrollbar">
-                  {/* INTERACTIVE GUIDE CARD — TRANSPARENT GLASS */}
                   <div className="bg-white/[0.02] border border-white/[0.07] rounded-xl p-5 mb-5 backdrop-blur-sm">
                      <div className="flex items-center gap-2.5 mb-3">
                         <Info size={14} className="text-[#3b82f6]" />
@@ -184,7 +180,6 @@ export default function Layout() {
                      </div>
                   </div>
 
-                  {/* CONVERSATION AREA */}
                   <div className="flex flex-col gap-5 py-2">
                      <div className="self-end max-w-[85%] bg-[#7c3aed]/10 border border-[#7c3aed]/20 rounded-2xl p-4 text-[13px] text-white/80 leading-[1.6]">
                         Documentation security report?
@@ -195,7 +190,6 @@ export default function Layout() {
                   </div>
                </div>
 
-               {/* SEARCH INPUT AREA */}
                <div className="p-5 border-t border-white/[0.05]">
                   <div className="relative">
                      <input 

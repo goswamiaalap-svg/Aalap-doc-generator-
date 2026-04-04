@@ -1,9 +1,9 @@
 @import "tailwindcss";
 
 @theme {
-  --color-fusion-bg: #0a0a12;
+  --color-fusion-bg: #131a43;
   --color-fusion-accent: #7c3aed;
-  --color-fusion-blue: #4338ca;
+  --color-fusion-blue: #1a59;
   --color-fusion-border: rgba(255, 255, 255, 0.07);
   --color-fusion-text-main: #ffffff;
   --color-fusion-text-secondary: rgba(255, 255, 255, 0.60);
@@ -14,7 +14,7 @@
 }
 
 html, body, #root {
-  background-color: #0a0a12 !important;
+  background-color: #131a43 !important;
   color: white;
   font-family: 'Inter', -apple-system, sans-serif;
   min-height: 100vh;
@@ -25,96 +25,25 @@ html, body, #root {
 }
 
 /* ═══════════════════════════════════════════════════════════════
-   STEP 2: THE GRADIENT BLOB BACKGROUND
-   ═══════════════════════════════════════════════════════════════ */
-
-.fusion-bg-layer {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  z-index: 0;
-  pointer-events: none;
-  overflow: hidden;
-  background-color: #0a0a12;
-}
-
-.fusion-blob-top {
-  position: absolute;
-  top: -300px;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 1100px;
-  height: 800px;
-  background: radial-gradient(
-    ellipse 60% 50% at 50% 50%,
-    rgba(88, 28, 220, 0.22) 0%,
-    rgba(67, 56, 202, 0.14) 35%,
-    rgba(49, 46, 129, 0.06) 60%,
-    transparent 80%
-  );
-  filter: blur(60px);
-  border-radius: 50%;
-}
-
-.fusion-blob-mid {
-  position: absolute;
-  top: 20%;
-  right: -200px;
-  width: 700px;
-  height: 700px;
-  background: radial-gradient(
-    circle at 50% 50%,
-    rgba(124, 58, 237, 0.16) 0%,
-    rgba(99, 102, 241, 0.09) 40%,
-    transparent 70%
-  );
-  filter: blur(80px);
-  border-radius: 50%;
-}
-
-.fusion-blob-bottom {
-  position: absolute;
-  bottom: -200px;
-  left: -150px;
-  width: 800px;
-  height: 700px;
-  background: radial-gradient(
-    ellipse at 50% 50%,
-    rgba(55, 48, 163, 0.18) 0%,
-    rgba(67, 56, 202, 0.10) 40%,
-    transparent 70%
-  );
-  filter: blur(90px);
-  border-radius: 50%;
-}
-
-/* ═══════════════════════════════════════════════════════════════
-   CORE DESIGN UTILITIES
+   3D VANTA.HALO TRANSITION CLEANUP
    ═══════════════════════════════════════════════════════════════ */
 
 @layer components {
   /* UI Transparency Overrides */
-  .trans-glass {
-    background: transparent !important;
-    backdrop-filter: none;
-  }
-
   .sidebar-glass {
-    background: rgba(10, 10, 18, 0.4) !important;
+    background: rgba(19, 26, 67, 0.4) !important;
     backdrop-filter: blur(20px);
     border-right: 1px solid rgba(255, 255, 255, 0.07);
   }
 
   .right-panel-glass {
-    background: rgba(10, 10, 18, 0.3) !important;
+    background: rgba(19, 26, 67, 0.3) !important;
     backdrop-filter: blur(16px);
     border-left: 1px solid rgba(255, 255, 255, 0.07);
   }
 
   .nav-glass {
-    background: rgba(10, 10, 18, 0.7) !important;
+    background: rgba(19, 26, 67, 0.7) !important;
     backdrop-filter: blur(24px);
     border-bottom: 1px solid rgba(255, 255, 255, 0.07);
   }
@@ -128,7 +57,7 @@ html, body, #root {
   /* Buttons */
   .fusion-btn-primary {
     background-color: white !important;
-    color: #0a0a12 !important;
+    color: #131a43 !important;
     font-size: 14px;
     font-weight: 700;
     padding: 12px 28px;
