@@ -1,15 +1,11 @@
 import { useState, useEffect } from 'react';
 import { 
-  ChevronRight, 
-  BookOpen, 
-  Share2,
+  Share2, 
   Download,
-  Settings,
   Zap,
-  MoreVertical,
-  Check
+  MoreVertical
 } from 'lucide-react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import toast from 'react-hot-toast';
 

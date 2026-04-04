@@ -3,7 +3,6 @@ import {
   Code2, 
   Search, 
   Zap, 
-  Sparkles,
   ArrowRight,
   Activity,
   Shield,

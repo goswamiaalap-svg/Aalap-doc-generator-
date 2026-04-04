@@ -1,20 +1,15 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { 
   Sparkles, 
-  BookOpen, 
   Code2,
   Menu, 
   X,
   Zap,
   Info,
-  ChevronRight,
   FileText,
   Search,
   MessageSquare,
-  ArrowRight,
-  User,
-  Settings,
-  ChevronDown
+  ArrowRight
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
