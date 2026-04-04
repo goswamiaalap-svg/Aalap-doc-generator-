@@ -32,7 +32,7 @@ const DocumentationViewer = () => {
         setDocs(data);
         if (!docId && data.length > 0) navigate('/docs/' + data[0].id);
       } catch (err) {
-        toast.error('NEURAL INDEX ERROR');
+        toast.error('INDEX FAILURE');
       } finally {
         setLoading(false);
       }
@@ -55,84 +55,78 @@ const DocumentationViewer = () => {
   if (loading) return null;
 
   return (
-    <div className="flex-1 flex flex-col h-full relative z-10 animate-fade-up bg-transparent selection:bg-indigo-500/30">
+    <div className="flex-1 flex flex-col h-full relative z-10 animate-apple-in bg-[#ffffff] selection:bg-blue-500/10">
       
-      {/* LOADING BAR */}
-      <div className={`absolute top-0 inset-x-0 h-[2.5px] bg-[#7c3aed]/10 z-[100] transition-opacity duration-300 ${docLoading ? 'opacity-100' : 'opacity-0'}`}>
-         <div className="h-full bg-gradient-to-r from-[#7c3aed] to-[#3b82f6] w-1/3 animate-[shimmer_1.5s_infinite] shadow-[0_0_12px_rgba(124,58,237,0.5)]" />
+      {/* 🍏 APPLE LIGHT LOADING BAR */}
+      <div className={`absolute top-0 inset-x-0 h-[2px] bg-black/[0.03] z-[100] transition-opacity duration-300 ${docLoading ? 'opacity-100' : 'opacity-0'}`}>
+         <div className="h-full bg-black w-1/3 animate-[shimmer_1.5s_infinite]" />
       </div>
 
       <div className="flex-1 overflow-y-auto w-full no-scrollbar">
-        <div className="max-w-[780px] mx-auto px-8 md:px-12 py-12 md:py-20">
+        <div className="max-w-[800px] mx-auto px-8 md:px-16 py-16 md:py-24">
           
-          {/* STATUS ROW — FUSIONAI BOLD PILL STYLE */}
-          <div className="flex items-center gap-3.5 mb-10">
-             <div className="flex items-center gap-1.5 px-3.5 py-1.2 rounded-full bg-green-500/10 border border-green-500/25 text-[10.5px] font-bold text-green-500 tracking-[0.1em] uppercase">
-                <div className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-                NEURAL SYNC ACTIVE
+          {/* STATUS ROW — 🍏 APPLE SOBRIETY PILLS */}
+          <div className="flex items-center gap-3 mb-12">
+             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 border border-emerald-500/15 text-[10px] font-bold text-emerald-600 tracking-[0.06em] uppercase">
+                Active
              </div>
-             <div className="px-3 py-1.2 rounded-full bg-white/5 border border-white/10 text-[10.5px] font-bold text-white/30 tracking-[0.05em] uppercase">
-                v2.4.0 ALPHA
+             <div className="px-3 py-1 rounded-full bg-black/[0.04] border border-black/[0.04] text-[10px] font-bold text-black/30 tracking-[0.05em] uppercase">
+                Architecture v2.4
              </div>
           </div>
 
           {!currentDoc || docLoading ? (
              <div className="animate-pulse space-y-12">
-                <div className="h-14 w-2/3 bg-white/5 rounded-2xl" />
+                <div className="h-16 w-3/4 bg-black/[0.03] rounded-2xl" />
                 <div className="space-y-6">
-                   <div className="h-4 w-full bg-white/5 rounded-lg" />
-                   <div className="h-4 w-5/6 bg-white/5 rounded-lg" />
-                   <div className="h-48 w-full bg-white/5 rounded-[2rem]" />
+                   <div className="h-4 w-full bg-black/[0.03] rounded-lg" />
+                   <div className="h-4 w-5/6 bg-black/[0.03] rounded-lg" />
+                   <div className="h-64 w-full bg-black/[0.03] rounded-3xl" />
                 </div>
              </div>
           ) : (
-            <article className="animate-fade-up">
+            <article className="animate-apple-in">
               
-              {/* PAGE TITLE ROW — FUSIONAI EXACT SPACING/FONT-SIZE */}
-              <div className="flex flex-col md:flex-row md:items-start justify-between gap-8 mb-10">
-                 <h1 className="text-[44px] md:text-[52px] font-bold tracking-[-0.03em] leading-[1.05] text-white">
+              {/* PAGE TITLE ROW — 🍏 APPLE TYPOGRAPHY SOBRIETY */}
+              <div className="flex flex-col md:flex-row md:items-start justify-between gap-10 mb-12">
+                 <h1 className="text-[48px] md:text-[56px] font-bold tracking-[-0.04em] leading-[1.05] text-[#1d1d1f]">
                    {currentDoc.title}
                  </h1>
-                 <div className="flex gap-2.5 shrink-0">
+                 <div className="flex gap-2 shrink-0">
                     {[Share2, Download, MoreVertical].map((Icon, i) => (
-                      <button key={i} className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/[0.04] border border-white/[0.08] text-white/35 hover:bg-white/[0.08] hover:text-white transition-all active:scale-90 outline-none backdrop-blur-md">
-                         <Icon size={16} />
+                      <button key={i} className="w-9 h-9 flex items-center justify-center rounded-xl bg-black/[0.03] border border-black/[0.05] text-black/20 hover:bg-black/[0.06] hover:text-black/60 transition-all active:scale-95">
+                         <Icon size={15} />
                       </button>
                     ))}
                  </div>
               </div>
 
-              {/* BODY: FUSIONAI CONTENT RENDER (TRANSPARENT BACKGROUND) */}
-              <div className="prose prose-invert max-w-none 
-                    text-[15.5px] text-white/60 leading-[1.85] font-medium
-                    prose-headings:text-white prose-headings:font-bold prose-headings:tracking-[-0.02em]
-                    prose-h2:text-[24px] prose-h2:font-bold prose-h2:mt-14 prose-h2:mb-5
-                    prose-h3:text-[18px] prose-h3:font-bold prose-h3:text-white/85 prose-h3:mt-10 prose-h3:mb-4
-                    prose-a:text-[#a78bfa] prose-a:no-underline hover:prose-a:underline
-                    prose-strong:text-white prose-strong:font-bold
+              {/* BODY: 🍏 APPLE LIGHT CONTENT RENDER (BLACK TEXT) */}
+              <div className="prose prose-stone max-w-none 
+                    text-[16px] text-black/60 leading-[1.85] font-medium
+                    prose-headings:text-[#1d1d1f] prose-headings:font-bold prose-headings:tracking-tight
+                    prose-h2:text-[24px] prose-h2:mt-16 prose-h2:mb-6
+                    prose-h3:text-[19px] prose-h3:mt-10 prose-h3:mb-4
+                    prose-a:text-blue-600 prose-a:no-underline hover:prose-a:underline
+                    prose-strong:text-black
                     
-                    prose-pre:bg-white/[0.03] prose-pre:border prose-pre:border-white/[0.07] prose-pre:rounded-[1.5rem] prose-pre:p-7 prose-pre:mt-8 prose-pre:mb-8 backdrop-blur-sm
-                    prose-code:text-white/85 prose-code:bg-transparent prose-code:p-0 prose-code:font-['JetBrains_Mono'] prose-code:text-[13.5px] prose-code:before:content-none prose-code:after:content-none
+                    prose-pre:bg-[#f5f5f7] prose-pre:border prose-pre:border-black/[0.04] prose-pre:rounded-2xl prose-pre:p-8 prose-pre:mt-10 prose-pre:mb-10
+                    prose-code:text-black prose-code:bg-transparent prose-code:font-['JetBrains_Mono'] prose-code:text-[14px]
                     
-                    prose-table:w-full prose-table:border prose-table:border-white/[0.06] prose-table:rounded-2xl prose-table:overflow-hidden prose-table:my-8 backdrop-blur-sm
-                    prose-thead:bg-white/[0.03] prose-thead:text-[11px] prose-thead:text-white/30 prose-thead:uppercase prose-thead:tracking-[0.1em]
-                    prose-th:px-5 prose-th:py-4 prose-th:font-black
-                    prose-td:px-5 prose-td:py-4 prose-td:border-t prose-td:border-white/[0.05] prose-td:text-[14px] prose-td:text-white/50
-                    
-                    prose-blockquote:border-l-[3.5px] prose-blockquote:border-[#7c3aed]/40 prose-blockquote:bg-[#7c3aed]/5 prose-blockquote:rounded-r-2xl prose-blockquote:px-7 prose-blockquote:py-5 prose-blockquote:my-8 prose-blockquote:text-white/50 prose-blockquote:italic
+                    prose-blockquote:border-l-4 prose-blockquote:border-black/10 prose-blockquote:bg-black/[0.02] prose-blockquote:rounded-r-2xl prose-blockquote:px-8 prose-blockquote:py-6 prose-blockquote:my-10 prose-blockquote:text-black/50
               ">
                 <MarkdownRenderer content={currentDoc.content} />
               </div>
             </article>
           )}
 
-          {/* BOTTOM FOOTER — FUSIONAI MINIMAL */}
-          <div className="mt-28 pt-10 border-t border-white/[0.04] flex flex-col sm:flex-row items-center justify-between gap-6 opacity-30">
-             <div className="text-[10px] font-bold tracking-[0.12em] uppercase flex items-center gap-2.5">
-                <Zap size={14} className="text-[#a78bfa]" />
-                Neural Documentation Engine v2.4.0 Alpha
+          {/* BOTTOM FOOTER SYNC */}
+          <div className="mt-40 pt-10 border-t border-black/[0.04] flex flex-col sm:flex-row items-center justify-between gap-6 opacity-30">
+             <div className="text-[10px] font-bold tracking-[0.1em] uppercase flex items-center gap-2.5">
+                <Zap size={14} className="text-black" />
+                HGM-06 LABS — NEURAL ARCHIVE PROTOCOL
              </div>
-             <div className="text-[10px] font-bold tracking-[0.12em] uppercase text-white/50">Vercel Edge Global Priority</div>
+             <div className="text-[10px] font-bold tracking-[0.1em] uppercase text-black/50">EDGE SYNC: GLOBAL</div>
           </div>
         </div>
       </div>

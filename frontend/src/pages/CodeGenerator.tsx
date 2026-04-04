@@ -2,12 +2,11 @@ import React, { useState, useRef } from 'react';
 import { 
   Zap,
   Loader2,
-  Settings,
-  FileCode,
-  CheckCircle2,
-  AlertCircle,
-  Activity,
-  Cpu
+  Cpu,
+  Share2,
+  Trash2,
+  Download,
+  Info
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import MarkdownRenderer from '../components/MarkdownRenderer';
@@ -30,7 +29,7 @@ const CodeGenerator: React.FC = () => {
     reader.onload = (e) => {
       const content = e.target?.result as string;
       setCode(content);
-      toast.success(`LOADED: ${file.name}`);
+      toast.success(`DATA INJECTED: ${file.name}`);
     };
     reader.readAsText(file);
   };
@@ -64,9 +63,9 @@ const CodeGenerator: React.FC = () => {
           accumulated = '';
         } catch (e) {}
       }
-      toast.success('NEURAL SCAN COMPLETE');
+      toast.success('DECODING COMPLETE');
     } catch (err: any) {
-      toast.error('SYNC ENCOUNTERED INTERRUPT');
+      toast.error('SYNC INTERRUPT');
     } finally {
       setIsGenerating(false);
     }
@@ -75,136 +74,144 @@ const CodeGenerator: React.FC = () => {
   const score = results.QUALITY ? parseInt(results.QUALITY) : 0;
 
   return (
-    <div className="flex-1 flex flex-col p-12 lg:p-16 gap-10 animate-apple-in relative z-10 h-[calc(100vh-40px)] bg-[#ffffff]">
+    <div className="flex-1 flex flex-col p-10 lg:p-14 gap-12 animate-apple-in relative z-10 h-[calc(100vh-40px)] bg-[#ffffff] selection:bg-blue-500/10 no-scrollbar overflow-y-auto">
       
       <div className="flex flex-col xl:flex-row gap-12 items-stretch h-full overflow-hidden">
         
-        {/* 🍏 INPUT PANEL — APPLE LIGHT MODE */}
-        <div className="xl:w-[45%] flex flex-col min-h-0">
-           <div className="flex items-center justify-between mb-6">
-              <div className="flex items-center gap-2.5">
-                 <Cpu size={16} className="text-black/20" />
-                 <span className="text-[14px] font-bold text-[#1d1d1f] tracking-tight uppercase">Source Entry</span>
-              </div>
+        {/* 🍏 INPUT PANEL — APPLE LIGHT MODE SOBRIETY */}
+        <div className="xl:w-[42%] flex flex-col min-h-0 bg-[#f5f5f7] border border-black/[0.04] p-8 rounded-[2.5rem]">
+           <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-3">
+                 <Cpu size={18} className="text-black/30" />
+                 <span className="text-[12px] font-bold text-black/40 tracking-[0.1em] uppercase">Neural Source Terminal</span>
+              </div>
+              <div className="flex items-center gap-4">
+                 <button onClick={() => setCode('')} className="p-2 text-black/20 hover:text-red-500 transition-colors">
+                    <Trash2 size={16} />
+                 </button>
                  <select 
                     value={language} onChange={e => setLanguage(e.target.value)}
-                    className="bg-[#f5f5f7] border border-black/[0.1] rounded-xl px-4 py-2 text-[12.5px] text-[#1d1d1f]/60 outline-none hover:text-[#1d1d1f] transition-all cursor-pointer font-medium"
+                    className="bg-white border border-black/[0.06] shadow-sm rounded-xl px-4 py-2 text-[12.5px] text-[#1d1d1f] hover:border-black/20 transition-all cursor-pointer font-bold outline-none"
                  >
-                    <option value="javascript">JavaScript / React</option>
-                    <option value="typescript">TypeScript</option>
-                    <option value="python">Python</option>
-                    <option value="rust">Rust</option>
-                    <option value="cpp">C++ (Standard)</option>
-                    <option value="java">Java (Oracle)</option>
-                    <option value="go">Golang</option>
-                    <option value="swift">Swift (Apple Native)</option>
-                    <option value="php">PHP (Modern)</option>
+                    {[ 'javascript', 'typescript', 'python', 'rust', 'cpp', 'java', 'go', 'swift', 'php' ].map(l => (
+                       <option key={l} value={l}>{l.toUpperCase()}</option>
+                    ))}
                  </select>
               </div>
            </div>
 
-           <div className="flex-1 bg-[#f5f5f7] border border-black/[0.08] rounded-2xl relative transition-all duration-300">
+           <div className="flex-1 bg-white border border-black/[0.04] rounded-[1.5rem] relative shadow-sm">
               <textarea 
                 value={code} onChange={e => setCode(e.target.value)}
-                placeholder="Paste code or drop file..."
-                className="w-full h-full bg-transparent p-7 font-['JetBrains_Mono'] text-[13px] text-black/60 resize-none outline-none placeholder:text-black/10 custom-scrollbar leading-[1.6]"
+                placeholder="Synchronize source logic..."
+                className="w-full h-full bg-transparent p-7 font-['JetBrains_Mono'] text-[14px] text-black/70 resize-none outline-none placeholder:text-black/5 custom-scrollbar leading-[1.6]"
               />
            </div>
            
-           <div className="flex justify-between items-center mt-6">
-              <span className="text-[10px] text-black/15 font-bold uppercase tracking-[0.06em]">
-                {code.length.toLocaleString()} BYTES IN BUFFER
-              </span>
+           <div className="flex justify-between items-center mt-8">
+              <div className="flex items-center gap-2">
+                 <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                 <span className="text-[10px] text-black/30 font-bold uppercase tracking-[0.08em]">Logic Buffer Ready</span>
+              </div>
               <div className="flex gap-3">
                 <button 
                   onClick={() => fileInputRef.current?.click()}
-                  className="apple-btn-outline px-6 text-[13px]"
+                  className="apple-btn-outline px-6 text-[13px] border-black/10"
                 >
-                   File Input
+                   Data Sync
                 </button>
                 <button 
                   onClick={handleGenerate} disabled={isGenerating || !code.trim()}
-                  className={`apple-btn-black px-10 text-[14px] flex items-center justify-center gap-2 ${
-                     isGenerating || !code.trim() ? 'opacity-20 cursor-not-allowed' : 'opacity-100'
+                  className={`apple-btn-black px-10 text-[14px] flex items-center justify-center gap-2.5 h-[52px] ${
+                     isGenerating || !code.trim() ? 'opacity-10 cursor-not-allowed' : 'opacity-100 hover:scale-105 active:scale-95'
                   }`}
                 >
-                   {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Zap size={14} fill="currentColor" />}
-                   {isGenerating ? 'Synthesizing...' : 'Generate Docs'}
+                   {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Zap size={16} fill="white" />}
+                   {isGenerating ? 'Decoding...' : 'Engage Meta-Analysis'}
                 </button>
               </div>
            </div>
         </div>
 
-        {/* 🍎 OUTPUT PANEL — APPLE LIGHT MODE MINIMALISM */}
-        <div className="xl:w-[55%] flex flex-col min-h-0">
-           <div className="flex items-center gap-4 mb-6 overflow-x-auto no-scrollbar py-1">
-              {(['DOCSTRINGS', 'README', 'API_REF', 'DIAGRAM', 'SECURITY', 'PERFORMANCE', 'TESTS', 'QUALITY'] as TabType[]).map(tab => (
-                <button 
-                  key={tab} onClick={() => setActiveTab(tab)}
-                  className={`shrink-0 px-5 py-2.5 rounded-xl text-[11px] uppercase font-bold tracking-[0.05em] transition-all ${
-                     activeTab === tab 
-                       ? 'bg-black text-white' 
-                       : 'bg-black/[0.04] text-black/30 hover:bg-black/[0.08] hover:text-black/60'
-                  }`}
-                >
-                   {tab.replace('_', ' ')}
-                </button>
-              ))}
+        {/* 🍎 OUTPUT PANEL — APPLE LIGHT MODE PROVISO (FORCED BLACK TEXT) */}
+        <div className="xl:w-[58%] flex flex-col min-h-0 bg-[#ffffff] border border-black/[0.06] p-8 rounded-[2.5rem] shadow-xl shadow-black/5 overflow-hidden">
+           <div className="flex items-center justify-between mb-8 overflow-x-auto no-scrollbar gap-8">
+              <div className="flex items-center gap-3 no-scrollbar overflow-x-auto pr-4">
+                {(['DOCSTRINGS', 'README', 'API_REF', 'DIAGRAM', 'SECURITY', 'PERFORMANCE', 'TESTS', 'QUALITY'] as TabType[]).map(tab => (
+                    <button 
+                    key={tab} onClick={() => setActiveTab(tab)}
+                    className={`shrink-0 px-4 py-2.5 rounded-xl text-[11px] uppercase font-bold tracking-[0.08em] transition-all ${
+                        activeTab === tab 
+                        ? 'bg-black text-white shadow-lg shadow-black/20' 
+                        : 'text-black/35 hover:text-black hover:bg-black/[0.04]'
+                    }`}
+                    >
+                    {tab.replace('_', ' ')}
+                    </button>
+                ))}
+              </div>
+              <div className="flex gap-2">
+                 {[Share2, Download, Info].map((Icon, i) => (
+                    <button key={i} className="w-9 h-9 flex items-center justify-center rounded-xl bg-black/[0.03] text-black/20 hover:text-black">
+                       <Icon size={14} />
+                    </button>
+                 ))}
+              </div>
            </div>
 
-           <div className="flex-1 bg-[#ffffff] border border-black/[0.08] rounded-2xl p-10 overflow-y-auto custom-scrollbar shadow-sm">
+           <div className="flex-1 bg-white p-2 overflow-y-auto custom-scrollbar">
               {!Object.values(results).some(v => v.length > 5) && !isGenerating ? (
-                 <div className="h-full flex flex-col items-center justify-center text-center opacity-10">
-                    <h2 className="text-[16px] font-bold text-black uppercase tracking-[0.08em]">Neural Output</h2>
-                    <p className="text-[12px] text-black/50 max-w-[200px] mt-4 font-medium uppercase tracking-[0.05em]">Ready for documentation synthesis.</p>
+                 <div className="h-full flex flex-col items-center justify-center text-center">
+                    <div className="p-4 rounded-full bg-black/5 mb-6">
+                       <Sparkles size={32} className="text-black/10" />
+                    </div>
+                    <h2 className="text-[17px] font-bold text-[#1d1d1f] tracking-tight uppercase">Cognitive Forge</h2>
+                    <p className="text-[12px] text-black/30 max-w-[240px] mt-4 font-medium leading-relaxed">The DocGen neural bridge is connected. Awaiting code injection for world-class technical analysis.</p>
                  </div>
               ) : (
                 <div className="h-full">
                   {activeTab === 'QUALITY' ? (
-                     <div className="flex flex-col items-center justify-center h-full gap-16 py-6 font-sans">
-                        {/* 🍎 APPLE LIGHT MODE SCORE */}
-                        <div className="relative">
-                           <svg width="150" height="150" viewBox="0 0 150 150" className="transform -rotate-90">
-                              <circle cx="75" cy="75" r="68" stroke="rgba(0,0,0,0.04)" strokeWidth="6" fill="transparent" />
+                     <div className="flex flex-col items-center justify-center h-full gap-20 py-10 font-sans">
+                        {/* 🍎 APPLE QUALITY SYNC (BLACK ON WHITE) */}
+                        <div className="relative group">
+                           <svg width="200" height="200" viewBox="0 0 150 150" className="transform -rotate-90">
+                              <circle cx="75" cy="75" r="68" stroke="rgba(0,0,0,0.03)" strokeWidth="4" fill="transparent" />
                               <circle 
                                 cx="75" cy="75" r="68" 
                                 stroke="#1d1d1f" 
-                                strokeWidth="6" 
+                                strokeWidth="4" 
                                 fill="transparent" 
                                 strokeDasharray={427} 
                                 strokeDashoffset={427 - (427 * score * 10) / 100} 
                                 strokeLinecap="round" 
-                                className="transition-all duration-[1500ms] ease-out opacity-80" 
+                                className="transition-all duration-[2000ms] ease-[cubic-bezier(0.16,1,0.3,1)]" 
                               />
                            </svg>
                            <div className="absolute inset-0 flex items-center justify-center">
                               <div className="flex flex-col items-center">
-                                 <span className="text-[48px] font-bold text-[#1d1d1f] tracking-[-0.05em] leading-none">{score}</span>
-                                 <span className="text-[10px] font-bold text-[#1d1d1f]/20 uppercase tracking-[0.12em] mt-3">QUALITY</span>
+                                 <span className="text-[64px] font-bold text-[#1d1d1f] tracking-[-0.05em] leading-none">{score}</span>
+                                 <span className="text-[11px] font-bold text-black/20 uppercase tracking-[0.15em] mt-5">Architecture Tier</span>
                               </div>
                            </div>
                         </div>
                         
-                        {/* 🍏 LIGHT MODE DIMENSION BARS */}
-                        <div className="w-full max-w-[340px] space-y-8">
+                        <div className="w-full max-w-[360px] space-y-10">
                            {[
-                              { label: 'Clarity', val: score + 0.5 },
-                              { label: 'Completeness', val: score - 0.5 },
-                              { label: 'Architecture', val: score + 0.2 },
-                              { label: 'Maintainability', val: score - 0.2 }
+                              { label: 'Density', val: score + 0.4 },
+                              { label: 'Coherence', val: score - 0.2 },
+                              { label: 'Complexity', val: score + 0.6 }
                            ].map((dim, i) => (
-                             <div key={dim.label} className="space-y-3">
-                                <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-[0.05em] text-black/20">
+                             <div key={dim.label} className="space-y-4">
+                                <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-[0.1em] text-black/25">
                                    <span>{dim.label}</span>
                                    <span className="text-black/60">{Math.min(10, Math.max(0, dim.val)).toFixed(1)}</span>
                                 </div>
-                                <div className="h-[3px] w-full bg-black/[0.04] rounded-full overflow-hidden">
+                                <div className="h-[2px] w-full bg-black/[0.04] rounded-full overflow-hidden">
                                    <div 
-                                     className="h-full bg-black transition-all duration-[1000ms] ease-out opacity-60"
+                                     className="h-full bg-black transition-all duration-[1200ms] ease-out opacity-60"
                                      style={{ 
                                        width: `${Math.min(10, Math.max(0, dim.val)) * 10}%`,
-                                       transitionDelay: `${i * 100}ms`
+                                       transitionDelay: `${i * 150}ms`
                                      }}
                                     />
                                 </div>
@@ -214,14 +221,15 @@ const CodeGenerator: React.FC = () => {
                      </div>
                   ) : (
                      <div className="prose prose-stone max-w-none 
-                         text-[16px] text-black/60 leading-[1.8] font-medium
-                         prose-headings:text-black prose-headings:font-bold
-                         prose-h2:text-[20px] prose-h2:mt-10 prose-h2:mb-4
-                         prose-a:text-black/60 prose-a:underline hover:prose-black
-                         prose-code:text-black prose-code:bg-black/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none prose-code:font-['JetBrains_Mono']
-                         prose-pre:bg-stone-50 prose-pre:border prose-pre:border-black/5 prose-pre:rounded-xl prose-pre:p-7
+                         text-[16.5px] text-[#1d1d1f]/70 leading-[1.9] font-medium
+                         prose-headings:text-[#1d1d1f] prose-headings:font-bold prose-headings:tracking-tighter
+                         prose-h2:text-[24px] prose-h2:mt-12 prose-h2:mb-6
+                         prose-a:text-blue-600 prose-a:underline hover:text-black
+                         prose-strong:text-black
+                         prose-pre:bg-[#f5f5f7] prose-pre:border prose-pre:border-black/[0.04] prose-pre:rounded-3xl prose-pre:p-10
+                         prose-code:text-black prose-code:font-['JetBrains_Mono']
                      ">
-                        <MarkdownRenderer content={results[activeTab] || (isGenerating ? '# Neural analysis initiated...' : '# Ready to process code entry...')} />
+                        <MarkdownRenderer content={results[activeTab] || (isGenerating ? '# Initializing neural analysis engine...' : '# Ready for meta-documentation logic...')} />
                      </div>
                   )}
                 </div>
