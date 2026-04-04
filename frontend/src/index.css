@@ -1,0 +1,124 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #3b82f6;
+  --color-secondary: #0f172a;
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    background-color: #020617;
+  }
+  
+  body {
+    background-color: #020617;
+    color: #e5e7eb;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* Premium Custom Scrollbar */
+  ::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 20px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgba(59, 130, 246, 0.2);
+  }
+
+  /* Full Transparent HUD Textarea Scrollbar */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 3px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background: rgba(59, 130, 246, 0.1);
+  }
+
+  /* Advanced Animations */
+  @keyframes shimmer {
+    0% { transform: translateX(-100%); opacity: 0; }
+    50% { opacity: 0.2; }
+    100% { transform: translateX(100%); opacity: 0; }
+  }
+
+  @keyframes pulse-slow {
+    0%, 100% { opacity: 0.2; transform: scale(1); }
+    50% { opacity: 0.4; transform: scale(1.08); }
+  }
+
+  @keyframes rotate-slow {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+  }
+
+  @keyframes move-up {
+    from { transform: translateY(10px); opacity: 0; }
+    to { transform: translateY(0); opacity: 1; }
+  }
+
+  .animate-shimmer {
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
+    animation: shimmer 3s infinite linear;
+  }
+
+  .animate-pulse-slow {
+    animation: pulse-slow 8s infinite ease-in-out;
+  }
+
+  .animate-move-up {
+    animation: move-up 0.5s ease-out forwards;
+  }
+
+  /* Visual Styles */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .glass-card {
+    background: rgba(255, 255, 255, 0.02);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+
+  .neon-border {
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
+    border: 1px solid rgba(59, 130, 246, 0.3);
+  }
+
+  .shadow-3xl {
+    box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 0.8);
+  }
+}
+
+/* Mermaid Customization */
+.mermaid svg {
+  background-color: transparent !important;
+  color: white !important;
+}
+.mermaid .node rect, .mermaid .node circle {
+  fill: rgba(255,255,255,0.05) !important;
+  stroke: rgba(59, 130, 246, 0.4) !important;
+  stroke-width: 2px !important;
+}
+.mermaid .edgeLabel {
+  background-color: #020617 !important;
+  color: #94a3b8 !important;
+}
+.mermaid .label text {
+  fill: #e5e7eb !important;
+}
+.mermaid .edgePath .path {
+  stroke: rgba(255, 255, 255, 0.1) !important;
+}

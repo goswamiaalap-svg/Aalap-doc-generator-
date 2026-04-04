@@ -1,0 +1,22 @@
+[
+  {
+    "id": "quickstart",
+    "title": "Quickstart",
+    "path": "/docs/quickstart.md"
+  },
+  {
+    "id": "authentication",
+    "title": "Authentication",
+    "path": "/docs/authentication.md"
+  },
+  {
+    "id": "api-reference",
+    "title": "API Reference",
+    "path": "/docs/api-reference.md"
+  },
+  {
+    "id": "features",
+    "title": "Platform Features",
+    "path": "/docs/features.md"
+  }
+]
