@@ -4,7 +4,6 @@ import {
   Loader2, 
   Sparkles, 
   Send, 
-  BookOpen, 
   FileText, 
   ChevronRight, 
   Clock,
