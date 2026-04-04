@@ -50,7 +50,7 @@ const CodeGenerator: React.FC = () => {
   const [history, setHistory] = useState<DocHistory[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
-  const [isDragging] = useState(false);
+  const [isDragging, setIsDragging] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -84,13 +84,69 @@ const CodeGenerator: React.FC = () => {
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      setFileName(file.name);
-      const reader = new FileReader();
-      reader.onload = (e) => setCode(e.target?.result as string);
-      reader.readAsText(file);
-      const ext = file.name.split('.').pop()?.toLowerCase();
-      const langMap: Record<string, string> = { 'js': 'javascript', 'ts': 'typescript', 'py': 'python', 'rs': 'rust', 'go': 'go', 'cpp': 'cpp', 'java': 'java' };
-      if (ext && langMap[ext]) setLanguage(langMap[ext]);
+      processFile(file);
+      // Reset input value to allow selecting same file again
+      e.target.value = '';
+    }
+  };
+
+  const processFile = (file: File) => {
+    if (!file) return;
+    
+    // Check if it's a binary file (basic check)
+    const fileName = file.name;
+    const isBinary = fileName.endsWith('.zip') || fileName.endsWith('.pdf') || fileName.endsWith('.png') || fileName.endsWith('.jpg');
+    
+    if (isBinary) {
+      toast.error('Binary fragments rejected. Pulse source code only.');
+      return;
+    }
+
+    setFileName(fileName);
+    const reader = new FileReader();
+    
+    reader.onload = (event) => {
+      const content = event.target?.result as string;
+      if (content) {
+        setCode(content);
+        toast.success(`Source Injected: ${fileName}`);
+        
+        const ext = fileName.split('.').pop()?.toLowerCase();
+        const langMap: Record<string, string> = { 
+          'js': 'javascript', 'jsx': 'javascript',
+          'ts': 'typescript', 'tsx': 'typescript',
+          'py': 'python', 'rs': 'rust', 'go': 'go', 
+          'cpp': 'cpp', 'cc': 'cpp', 'h': 'cpp',
+          'java': 'java', 'swift': 'swift', 'kt': 'kotlin'
+        };
+        if (ext && langMap[ext]) setLanguage(langMap[ext]);
+      } else {
+        toast.error('Fragment Empty or Corrupt.');
+      }
+    };
+
+    reader.onerror = () => {
+      toast.error('Injection Failure: FileReader Error');
+    };
+
+    reader.readAsText(file);
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
+
+  const handleDragLeave = () => {
+    setIsDragging(false);
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file) {
+      processFile(file);
     }
   };
 
@@ -254,7 +310,12 @@ const CodeGenerator: React.FC = () => {
           <div className="lg:col-span-5 space-y-8 flex flex-col">
             
             {/* INJECTION MATRIX */}
-            <div className={`flex-1 rounded-3xl bg-white/[0.03] border border-white/10 overflow-hidden shadow-2xl flex flex-col transition-all duration-700 ${isDragging ? 'bg-blue-500/5 border-blue-500' : ''}`}>
+            <div 
+               onDragOver={handleDragOver}
+               onDragLeave={handleDragLeave}
+               onDrop={handleDrop}
+               className={`flex-1 rounded-3xl bg-white/[0.03] border border-white/10 overflow-hidden shadow-2xl flex flex-col transition-all duration-700 ${isDragging ? 'bg-blue-500/10 border-blue-500 scale-[1.02] ring-4 ring-blue-500/20' : ''}`}
+            >
                <div className="flex items-center justify-between px-6 py-5 bg-white/[0.03] border-b border-white/10">
                   <div className="flex items-center gap-3">
                      <Fingerprint size={20} className="text-blue-400" />
