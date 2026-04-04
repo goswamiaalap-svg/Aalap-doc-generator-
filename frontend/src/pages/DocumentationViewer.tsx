@@ -157,14 +157,15 @@ export default function DocumentationViewer() {
     <div className="flex h-[calc(100vh-5rem)] bg-[#020617] text-white flex-col md:flex-row relative overflow-hidden transition-all duration-700">
       
       {/* Subtle Background Glow */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-600/5 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-purple-600/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-600/5 blur-[120px] rounded-full pointer-events-none" />
+      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-yellow-600/5 blur-[120px] rounded-full pointer-events-none" />
 
       {/* LEFT SIDEBAR: NAV STACK */}
       <aside className="w-full md:w-80 flex flex-col border-r border-white/5 bg-black/20 backdrop-blur-xl z-20 overflow-hidden pt-4">
         <div className="p-6 border-b border-white/5">
            <h3 className="text-[10px] font-black tracking-[0.2em] text-gray-500 uppercase flex items-center gap-2">
              <Layout size={12} className="text-blue-500" /> Structure Index
+             <Layout size={12} className="text-amber-500" /> Structure Index
            </h3>
         </div>
         <nav className="flex-1 overflow-y-auto px-4 py-8 custom-scrollbar">
@@ -175,16 +176,16 @@ export default function DocumentationViewer() {
                      onClick={() => navigate('/docs/' + d.id)}
                      className={`w-full flex items-center gap-3 text-left px-4 py-3 rounded-2xl transition-all duration-300 relative overflow-hidden ${
                        docId === d.id 
-                         ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20 shadow-[0_0_20px_rgba(59,130,246,0.1)]' 
+                         ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20 shadow-[0_0_20px_rgba(245,158,11,0.1)]' 
                          : 'text-gray-500 hover:text-white hover:bg-white/5'
                      }`}
                    >
                      {docId === d.id && (
-                       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-1/2 bg-blue-500 rounded-r-full shadow-[0_0_10px_rgba(59,130,246,0.8)]" />
+                       <div className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-1/2 bg-amber-500 rounded-r-full shadow-[0_0_10px_rgba(245,158,11,0.8)]" />
                      )}
-                     <FileText size={16} className={docId === d.id ? 'text-blue-400' : 'text-gray-500 group-hover/item:text-gray-300'} />
+                     <FileText size={16} className={docId === d.id ? 'text-amber-400' : 'text-gray-500 group-hover/item:text-gray-300'} />
                      <span className="text-[13px] font-bold tracking-tight uppercase">{d.title}</span>
-                     {docId === d.id && <Sparkles size={12} className="ml-auto animate-pulse text-blue-500" />}
+                     {docId === d.id && <Sparkles size={12} className="ml-auto animate-pulse text-amber-500" />}
                    </button>
 
                    <div className={`overflow-hidden transition-all duration-500 ${docId === d.id ? 'max-h-[500px] opacity-100 mt-2' : 'max-h-0 opacity-0'}`}>
@@ -225,8 +226,8 @@ export default function DocumentationViewer() {
       <div className="flex-1 flex flex-col h-full relative overflow-hidden z-10">
         
         {/* Loading Bar Pulse */}
-        <div className={`absolute top-0 inset-x-0 h-0.5 bg-blue-500/10 z-50 transition-all duration-500 ${docLoading ? 'opacity-100' : 'opacity-0'}`}>
-           <div className="h-full bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,1)] w-1/3 animate-[shimmer_1.5s_infinite]" style={{ background: 'linear-gradient(90deg, transparent, #3b82f6, transparent)' }} />
+        <div className={`absolute top-0 inset-x-0 h-0.5 bg-amber-500/10 z-50 transition-all duration-500 ${docLoading ? 'opacity-100' : 'opacity-0'}`}>
+           <div className="h-full bg-amber-500 shadow-[0_0_10px_rgba(245,158,11,1)] w-1/3 animate-[shimmer_1.5s_infinite]" style={{ background: 'linear-gradient(90deg, transparent, #f59e0b, transparent)' }} />
         </div>
 
         <div className="flex-1 overflow-y-auto w-full custom-scrollbar">

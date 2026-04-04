@@ -1,7 +1,7 @@
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #3b82f6;
+  --color-primary: #f59e0b;
   --color-secondary: #0f172a;
 }
 
@@ -31,7 +31,7 @@
     border-radius: 20px;
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: rgba(59, 130, 246, 0.2);
+    background: rgba(245, 158, 11, 0.2);
   }
 
   /* Full Transparent HUD Textarea Scrollbar */
@@ -92,9 +92,18 @@
     border: 1px solid rgba(255, 255, 255, 0.05);
   }
 
+  .radiant-arc {
+    position: absolute;
+    width: 600px;
+    height: 600px;
+    border-radius: 50%;
+    border: 1px solid rgba(245, 158, 11, 0.1);
+    background: radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.05) 0%, transparent 70%);
+  }
+
   .neon-border {
-    box-shadow: 0 0 20px rgba(59, 130, 246, 0.15);
-    border: 1px solid rgba(59, 130, 246, 0.3);
+    box-shadow: 0 0 20px rgba(245, 158, 11, 0.15);
+    border: 1px solid rgba(245, 158, 11, 0.3);
   }
 
   .shadow-3xl {

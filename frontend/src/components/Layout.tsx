@@ -29,8 +29,9 @@ export default function Layout() {
       
       {/* RADIANT BACKGROUND EFFECTS */}
       <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
-        <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/5 blur-[120px] rounded-full" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-purple-600/5 blur-[120px] rounded-full" />
+        <div className="absolute top-[-10%] left-[-10%] w-[800px] h-[800px] bg-amber-600/10 blur-[140px] rounded-full animate-pulse-slow" />
+        <div className="radiant-arc top-[10%] left-[-5%] ring-1 ring-amber-500/10" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-yellow-600/5 blur-[120px] rounded-full" />
       </div>
 
       {/* TOP NAVIGATION: ULTIMATE GLASSMORPHY */}
@@ -40,7 +41,7 @@ export default function Layout() {
         <div className="max-w-[1600px] mx-auto h-full px-6 flex items-center justify-between">
           
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="p-2 bg-gradient-to-tr from-blue-600 to-indigo-600 rounded-xl shadow-[0_0_15px_rgba(59,130,246,0.3)] group-hover:scale-110 transition-transform">
+            <div className="p-2 bg-gradient-to-tr from-amber-500 to-orange-600 rounded-xl shadow-[0_0_15px_rgba(245,158,11,0.3)] group-hover:scale-110 transition-transform">
                <Sparkles size={20} className="text-white" />
             </div>
             <span className="text-xl font-black tracking-tighter uppercase">HGM-06</span>
@@ -57,14 +58,14 @@ export default function Layout() {
                 to={link.to} 
                 className={`flex items-center gap-2 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all relative group ${
                   location.pathname.startsWith(link.to) 
-                    ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20' 
+                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' 
                     : 'text-gray-500 hover:text-white hover:bg-white/5'
                 }`}
               >
                 {link.icon}
                 {link.label}
                 {location.pathname.startsWith(link.to) && (
-                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-[2px] bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,1)] rounded-full" />
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-[2px] bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,1)] rounded-full" />
                 )}
               </Link>
             ))}
@@ -73,8 +74,8 @@ export default function Layout() {
           {/* SYSTEM STATUS & CTAs */}
           <div className="flex items-center gap-6">
             <div className="hidden lg:flex items-center gap-4 text-[10px] font-black uppercase tracking-widest text-gray-500">
-               <span className="flex items-center gap-1.5"><Globe size={12} className="text-blue-500"/> Edge: Verified</span>
-               <span className="flex items-center gap-1.5"><Zap size={12} className="text-amber-500"/> Power: Unlimited</span>
+               <span className="flex items-center gap-1.5"><Globe size={12} className="text-amber-500"/> Edge: Verified</span>
+               <span className="flex items-center gap-1.5"><Zap size={12} className="text-orange-500"/> Power: Unlimited</span>
             </div>
             <div className="h-6 w-[1px] bg-white/10 hidden lg:block" />
             <button className="hidden sm:flex p-2 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white transition-colors">

@@ -256,32 +256,33 @@ const CodeGenerator: React.FC = () => {
     <div className="min-h-full pb-12 px-4 sm:px-6 lg:px-8 bg-[#020617] relative overflow-hidden">
       
       {/* Visual Ambiance */}
-      <div className="absolute top-[-15%] left-[-10%] w-[600px] h-[600px] bg-blue-600/10 blur-[140px] rounded-full animate-pulse-slow" />
-      <div className="absolute bottom-10 right-[-5%] w-[500px] h-[500px] bg-purple-600/10 blur-[130px] rounded-full" />
+      <div className="absolute top-[-15%] left-[-10%] w-[600px] h-[600px] bg-amber-600/10 blur-[140px] rounded-full animate-pulse-slow" />
+      <div className="radiant-arc top-[20%] left-[-5%] rotate-[-15deg] opacity-20" />
+      <div className="absolute bottom-10 right-[-5%] w-[500px] h-[500px] bg-yellow-600/10 blur-[130px] rounded-full" />
 
       <div className="max-w-[1600px] mx-auto relative z-10">
         
         {/* HEADER HUB */}
         <header className="mb-12 flex flex-col md:flex-row items-end justify-between gap-8 border-b border-white/5 pb-10">
           <div className="max-w-2xl text-left">
-            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 text-xs font-black uppercase tracking-[0.3em] text-blue-400 mb-6 group cursor-default">
+            <div className="inline-flex items-center gap-3 px-4 py-2 rounded-2xl bg-white/5 border border-white/10 text-xs font-black uppercase tracking-[0.3em] text-amber-500 mb-6 group cursor-default">
               <Activity size={14} className="group-hover:animate-ping" />
               <span>Neural Laboratories v4.1 (Stable)</span>
             </div>
-            <h1 className="text-5xl sm:text-7xl font-black text-white tracking-tighter sm:leading-[1.1] mb-6">
-              COGNITIVE <br/> 
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500 drop-shadow-[0_0_15px_rgba(59,130,246,0.25)]">DOC ENVIRONMENT</span>
+            <h1 className="text-5xl sm:text-7xl font-black text-white tracking-tighter sm:leading-[1.1] mb-6 uppercase">
+              Achieve <br/> 
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-400 via-orange-400 to-yellow-500 drop-shadow-[0_0_15px_rgba(245,158,11,0.25)]">NEURAL FLOW</span>
             </h1>
           </div>
           
           <div className="flex items-center gap-4">
              <button 
                onClick={() => setShowHistory(!showHistory)}
-               className={`flex items-center gap-3 px-6 py-3 rounded-2xl border transition-all text-xs font-black uppercase tracking-widest ${showHistory ? 'bg-blue-500 border-blue-500 text-white shadow-lg' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:text-white'}`}
+               className={`flex items-center gap-3 px-6 py-3 rounded-2xl border transition-all text-xs font-black uppercase tracking-widest ${showHistory ? 'bg-amber-500 border-amber-500 text-white shadow-lg' : 'bg-white/5 border-white/10 text-gray-400 hover:bg-white/10 hover:text-white'}`}
              >
                 <HistoryIcon size={16} /> History
              </button>
-             <button className="flex items-center gap-3 px-8 py-3 bg-white text-black rounded-2xl text-xs font-black uppercase tracking-[0.2em] transform active:scale-95 transition-all shadow-xl hover:bg-blue-400">
+             <button className="flex items-center gap-3 px-8 py-3 bg-white text-black rounded-2xl text-xs font-black uppercase tracking-[0.2em] transform active:scale-95 transition-all shadow-xl hover:bg-amber-400">
                 <Layers size={16} /> Enterprise Link
              </button>
           </div>
@@ -318,12 +319,12 @@ const CodeGenerator: React.FC = () => {
             >
                <div className="flex items-center justify-between px-6 py-5 bg-white/[0.03] border-b border-white/10">
                   <div className="flex items-center gap-3">
-                     <Fingerprint size={20} className="text-blue-400" />
+                     <Fingerprint size={20} className="text-amber-500" />
                      <span className="text-[11px] font-black uppercase tracking-widest text-white">Source Injection</span>
                   </div>
                   <select 
                     value={language} onChange={e => setLanguage(e.target.value)}
-                    className="bg-black/60 border border-white/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] outline-none hover:border-blue-500 transition-all cursor-pointer"
+                    className="bg-black/60 border border-white/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] outline-none hover:border-amber-500 transition-all cursor-pointer"
                   >
                     <option value="javascript">JS / React</option>
                     <option value="typescript">TypeScript</option>
@@ -347,15 +348,15 @@ const CodeGenerator: React.FC = () => {
                   />
                   {!code && <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none uppercase font-black tracking-[1em] text-4xl -rotate-12">Neural Pure</div>}
                   {isDragging && (
-                     <div className="absolute inset-x-4 inset-y-4 rounded-2xl bg-blue-500/20 backdrop-blur-md border-2 border-dashed border-blue-400 flex flex-col items-center justify-center z-50 animate-in fade-in zoom-in duration-300 pointer-events-none">
-                        <Upload size={48} className="text-blue-400 animate-bounce mb-4" />
+                     <div className="absolute inset-x-4 inset-y-4 rounded-2xl bg-amber-500/20 backdrop-blur-md border-2 border-dashed border-amber-400 flex flex-col items-center justify-center z-50 animate-in fade-in zoom-in duration-300 pointer-events-none">
+                        <Upload size={48} className="text-amber-400 animate-bounce mb-4" />
                         <span className="text-sm font-black uppercase tracking-[0.3em] text-white">Drop Neural Packet</span>
                      </div>
-                   )}
+                  )}
                </div>
 
                <div className="p-6 bg-white/[0.03] border-t border-white/10 flex items-center justify-between">
-                  <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-blue-400 hover:text-white transition-colors">
+                  <button onClick={() => fileInputRef.current?.click()} className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-amber-500 hover:text-white transition-colors">
                      <Upload size={14} /> Local Module
                   </button>
                   <div className="flex gap-4 text-[10px] font-black uppercase tracking-widest text-gray-600">
@@ -369,7 +370,7 @@ const CodeGenerator: React.FC = () => {
             <div className="rounded-3xl bg-white/[0.03] border border-white/10 p-8 space-y-8 shadow-xl">
                <div className="flex items-center justify-between">
                   <h3 className="text-xs font-black uppercase tracking-[0.2em] text-gray-400">Cognitive Switches</h3>
-                  <div className={`p-1 w-10 h-6 rounded-full transition-all cursor-pointer flex items-center ${advancedMode ? 'bg-indigo-600 justify-end' : 'bg-white/10 justify-start'}`} onClick={() => setAdvancedMode(!advancedMode)}>
+                  <div className={`p-1 w-10 h-6 rounded-full transition-all cursor-pointer flex items-center ${advancedMode ? 'bg-orange-600 justify-end' : 'bg-white/10 justify-start'}`} onClick={() => setAdvancedMode(!advancedMode)}>
                      <div className="w-4 h-4 bg-white rounded-full shadow-lg" />
                   </div>
                </div>
@@ -383,7 +384,7 @@ const CodeGenerator: React.FC = () => {
                     <div 
                       key={opt.id} 
                       onClick={() => setOptions({...options, [opt.id]: !options[opt.id as keyof typeof options]})}
-                      className={`flex flex-col items-center gap-3 p-4 rounded-2xl border transition-all cursor-pointer ${options[opt.id as keyof typeof options] ? 'bg-blue-500/10 border-blue-500/30 text-blue-400' : 'bg-white/5 border-white/5 text-gray-500'}`}
+                      className={`flex flex-col items-center gap-3 p-4 rounded-2xl border transition-all cursor-pointer ${options[opt.id as keyof typeof options] ? 'bg-amber-500/10 border-amber-500/30 text-amber-500' : 'bg-white/5 border-white/5 text-gray-500'}`}
                     >
                        {opt.icon}
                        <span className="text-[10px] font-black uppercase tracking-widest">{opt.label}</span>
@@ -394,7 +395,7 @@ const CodeGenerator: React.FC = () => {
                <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                      <label className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-600 ml-2">Logic Model</label>
-                     <select value={verbosity} onChange={e => setVerbosity(e.target.value)} className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-[11px] font-bold outline-none uppercase focus:border-blue-500">
+                     <select value={verbosity} onChange={e => setVerbosity(e.target.value)} className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-[11px] font-bold outline-none uppercase focus:border-amber-500">
                         <option value="brief">Lightning</option>
                         <option value="normal">Standard</option>
                         <option value="comprehensive">Deep Reason</option>
@@ -402,7 +403,7 @@ const CodeGenerator: React.FC = () => {
                   </div>
                   <div className="space-y-2">
                      <label className="text-[9px] font-black uppercase tracking-[0.2em] text-gray-600 ml-2">Persona</label>
-                     <select value={audience} onChange={e => setAudience(e.target.value)} className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-[11px] font-bold outline-none uppercase focus:border-indigo-500">
+                     <select value={audience} onChange={e => setAudience(e.target.value)} className="w-full bg-black/60 border border-white/10 rounded-xl p-3 text-[11px] font-bold outline-none uppercase focus:border-orange-500">
                         <option value="dev">Engineer</option>
                         <option value="senior">Architect</option>
                         <option value="non-technical">PM / Lead</option>
@@ -413,7 +414,7 @@ const CodeGenerator: React.FC = () => {
 
             <button 
               onClick={handleGenerate} disabled={isGenerating}
-              className="w-full h-20 group relative rounded-[2rem] bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-600 overflow-hidden shadow-[0_20px_50px_rgba(37,99,235,0.3)] transform transition-active active:scale-95 duration-500"
+              className="w-full h-20 group relative rounded-[2rem] bg-gradient-to-br from-amber-500 via-orange-600 to-yellow-600 overflow-hidden shadow-[0_20px_50px_rgba(245,158,11,0.3)] transform transition-active active:scale-95 duration-500"
             >
                <div className="absolute inset-x-0 h-full w-20 bg-white/20 blur-3xl -translate-x-[200%] group-hover:translate-x-[200%] transition-transform duration-1000" />
                <div className="relative flex items-center justify-center gap-4 text-white text-md font-black uppercase tracking-[0.5em]">
@@ -433,15 +434,15 @@ const CodeGenerator: React.FC = () => {
                       {(['DOCSTRINGS', 'README', 'API_REF', 'DIAGRAM', 'SECURITY', 'PERFORMANCE', 'TESTS', 'QUALITY'] as TabType[]).map(tab => (
                         <button 
                           key={tab} onClick={() => setActiveTab(tab)}
-                          className={`px-5 py-6 text-[10px] font-black uppercase tracking-[0.2em] relative transition-all duration-500 ${activeTab === tab ? 'text-blue-400' : 'text-gray-500 hover:text-white'}`}
+                          className={`px-5 py-6 text-[10px] font-black uppercase tracking-[0.2em] relative transition-all duration-500 ${activeTab === tab ? 'text-amber-500' : 'text-gray-500 hover:text-white'}`}
                         >
                            {tab.replace('_', ' ')}
-                           {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-1 bg-blue-500 shadow-[0_0_20px_rgba(59,130,246,0.8)] rounded-t-full transition-all" />}
+                           {activeTab === tab && <div className="absolute bottom-0 left-0 right-0 h-1 bg-amber-500 shadow-[0_0_20px_rgba(245,158,11,0.8)] rounded-t-full transition-all" />}
                         </button>
                       ))}
                    </div>
                    <div className="flex items-center gap-4 ml-6">
-                      <button className="p-2.5 bg-white/5 rounded-xl border border-white/10 hover:border-blue-500 transition-all text-gray-500 hover:text-white">
+                      <button className="p-2.5 bg-white/5 rounded-xl border border-white/10 hover:border-amber-500 transition-all text-gray-500 hover:text-white">
                          <Download size={16} />
                       </button>
                       <button className="p-2.5 bg-white/5 rounded-xl border border-white/10 hover:border-red-500/50 transition-all text-gray-500 hover:text-red-400" onClick={() => setResults({DOCSTRINGS:'',README:'',API_REF:'',DIAGRAM:'',SECURITY:'',PERFORMANCE:'',TESTS:'',QUALITY:''})}>
@@ -454,7 +455,7 @@ const CodeGenerator: React.FC = () => {
                 <div className="flex-1 overflow-y-auto p-12 custom-scrollbar relative">
                    {!Object.values(results).some(v => v.length > 5) ? (
                       <div className="h-full flex flex-col items-center justify-center text-center">
-                         <div className="w-32 h-32 bg-gradient-to-br from-blue-500/10 to-indigo-500/10 rounded-[3rem] border border-white/10 flex items-center justify-center mb-10 group-hover:scale-110 transition-transform">
+                         <div className="w-32 h-32 bg-gradient-to-br from-amber-500/10 to-orange-500/10 rounded-[3rem] border border-white/10 flex items-center justify-center mb-10 group-hover:scale-110 transition-transform">
                             <Sparkles size={56} className="text-white opacity-20 animate-shimmer" />
                          </div>
                          <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-4">Neural Buffer Idle</h2>
@@ -466,7 +467,7 @@ const CodeGenerator: React.FC = () => {
                             <div className="relative w-56 h-56">
                                <svg className="w-full h-full transform -rotate-90">
                                   <circle cx="112" cy="112" r="100" stroke="currentColor" strokeWidth="12" fill="transparent" className="text-white/5"/>
-                                  <circle cx="112" cy="112" r="100" stroke="currentColor" strokeWidth="14" fill="transparent" strokeDasharray={628} strokeDashoffset={628 - (628 * score * 10) / 100} strokeLinecap="round" className={`transition-all duration-1000 ease-out drop-shadow-[0_0_15px_currentColor] ${score >= 8 ? 'text-emerald-500' : 'text-blue-500'}`} />
+                                  <circle cx="112" cy="112" r="100" stroke="currentColor" strokeWidth="14" fill="transparent" strokeDasharray={628} strokeDashoffset={628 - (628 * score * 10) / 100} strokeLinecap="round" className={`transition-all duration-1000 ease-out drop-shadow-[0_0_15px_currentColor] ${score >= 8 ? 'text-emerald-500' : 'text-amber-500'}`} />
                                </svg>
                                <div className="absolute inset-0 flex flex-col items-center justify-center">
                                   <span className="text-7xl font-black text-white tracking-tighter">{score}</span>
@@ -475,7 +476,7 @@ const CodeGenerator: React.FC = () => {
                             </div>
                             <div className="mt-12 flex gap-4">
                                <div className="px-6 py-2 rounded-full border border-white/10 bg-white/5 text-[10px] font-black uppercase tracking-widest">Stability: High</div>
-                               <div className="px-6 py-2 rounded-full border border-blue-500/20 bg-blue-500/5 text-[10px] font-black uppercase tracking-widest text-blue-400">Risk: Minimal</div>
+                               <div className="px-6 py-2 rounded-full border border-amber-500/20 bg-amber-500/5 text-[10px] font-black uppercase tracking-widest text-amber-500">Risk: Minimal</div>
                             </div>
                          </div>}
                          
@@ -492,7 +493,7 @@ const CodeGenerator: React.FC = () => {
                          <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Engine: Live</span>
                       </div>
                       <div className="flex items-center gap-3">
-                         <Cpu size={14} className="text-blue-400" />
+                         <Cpu size={14} className="text-amber-500" />
                          <span className="text-[10px] font-black uppercase text-gray-500 tracking-widest">Llama 3.3.70b</span>
                       </div>
                    </div>
