@@ -1,20 +1,24 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { 
   Upload, 
-  Zap, 
+  Play, 
   Loader2,
-  Fingerprint,
-  Box,
+  Settings,
+  X,
+  FileCode,
+  CheckCircle2,
+  AlertCircle,
+  Activity
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import MarkdownRenderer from '../components/MarkdownRenderer';
-import TiltCard from '../components/TiltCard';
 
 type TabType = 'DOCSTRINGS' | 'README' | 'API_REF' | 'DIAGRAM' | 'SECURITY' | 'PERFORMANCE' | 'TESTS' | 'QUALITY';
 
 const CodeGenerator: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('DOCSTRINGS');
   const [code, setCode] = useState('');
+  const [filename, setFilename] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [results, setResults] = useState<Record<string, string>>({
     DOCSTRINGS: '', README: '', API_REF: '', DIAGRAM: '', SECURITY: '', PERFORMANCE: '', TESTS: '', QUALITY: ''
@@ -25,6 +29,7 @@ const CodeGenerator: React.FC = () => {
 
   const processFile = (file: File) => {
     if (!file) return;
+    setFilename(file.name);
     const reader = new FileReader();
     reader.onload = (e) => {
       const content = e.target?.result as string;
@@ -59,13 +64,13 @@ const CodeGenerator: React.FC = () => {
         
         try {
           const parsed = JSON.parse(accumulated);
-          setResults(parsed);
+          setResults(prev => ({ ...prev, ...parsed }));
           accumulated = '';
         } catch (e) {}
       }
-      toast.success('SYNTHESIS COMPLETE');
+      toast.success('NEURAL SCAN COMPLETE');
     } catch (err: any) {
-      toast.error('NEURAL LINK FAILURE');
+      toast.error('CONNECTION INTERRUPTED');
     } finally {
       setIsGenerating(false);
     }
@@ -74,147 +79,174 @@ const CodeGenerator: React.FC = () => {
   const score = results.QUALITY ? parseInt(results.QUALITY) : 0;
 
   return (
-    <div className="flex-1 flex flex-col p-6 lg:p-12 gap-8 relative z-10 animate-in fade-in duration-1000">
+    <div className="flex-1 flex flex-col p-8 lg:p-12 gap-8 animate-fade-up relative z-10 h-[calc(100vh-64px)]">
       
-      <div className="flex flex-col xl:flex-row gap-8 items-stretch h-full">
+      <div className="flex flex-col xl:flex-row gap-10 items-stretch h-full overflow-hidden">
         
-        {/* INPUT: 3D GLASS HARBOR */}
-        <div className="xl:w-2/5 flex flex-col gap-6">
-           <TiltCard maxTilt={3} className="flex-1 flex flex-col rounded-[2rem] overflow-hidden glass-panel">
-              <div className="px-6 py-5 bg-white/[0.04] border-b border-indigo-500/20 flex items-center justify-between">
-                 <div className="flex items-center gap-3">
-                    <Fingerprint size={18} className="text-indigo-400" />
-                    <span className="text-[11px] font-black uppercase tracking-widest">SOURCE INJECTION</span>
-                 </div>
-                 <div className="flex items-center gap-3">
-                    <select 
-                      value={language} onChange={e => setLanguage(e.target.value)}
-                      className="bg-black/40 border border-white/10 rounded-xl px-4 py-2 text-[10px] font-black uppercase tracking-[0.2em] outline-none hover:border-indigo-500 transition-all cursor-pointer"
-                    >
-                      <option value="javascript">JS / REACT</option>
-                      <option value="typescript">TYPESCRIPT</option>
-                      <option value="python">PYTHON</option>
-                      <option value="rust">RUST / WASM</option>
-                    </select>
-                 </div>
-              </div>
-              
-              <div 
-                onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
-                onDragLeave={() => setIsDragging(false)}
-                onDrop={e => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files[0]; if(f) processFile(f); }}
-                className="flex-1 relative bg-black/40"
-              >
-                 <textarea 
-                   value={code} onChange={e => setCode(e.target.value)}
-                   placeholder="PASTE RAW SOURCE LOGIC..."
-                   className="w-full h-full min-h-[500px] bg-transparent p-10 font-mono text-[13px] text-white/50 resize-none outline-none placeholder:text-white/10 custom-scrollbar"
-                 />
-                 {isDragging && (
-                    <div className="absolute inset-0 bg-indigo-500/20 backdrop-blur-md border-2 border-dashed border-indigo-500 flex flex-col items-center justify-center z-50">
-                       <Upload size={48} className="text-white animate-bounce mb-4" />
-                       <span className="text-sm font-black uppercase tracking-[0.4em]">DROP NEURAL PACKET</span>
-                    </div>
-                 )}
-                 <div className="absolute bottom-6 right-8 text-[10px] font-black uppercase tracking-widest text-white/20">
-                    {code.length} PROTOCOLS IN BUFFER
-                 </div>
-              </div>
-
-              <div className="p-6 bg-white/[0.04] border-t border-indigo-500/20 flex items-center justify-between gap-4">
-                 <button 
-                   onClick={() => fileInputRef.current?.click()}
-                   className="flex-1 px-6 py-4 rounded-xl glass-card text-[11px] font-black uppercase tracking-widest text-white/60 hover:bg-white/10 hover:text-white transition-all flex items-center justify-center gap-3 shadow-inner shadow-white/5"
+        {/* INPUT PANEL */}
+        <div className="xl:w-[45%] flex flex-col min-h-0">
+           <div className="flex items-center justify-between mb-4">
+              <span className="text-[15px] font-semibold text-white tracking-tight">Source Input</span>
+              <div className="flex items-center gap-2">
+                 <select 
+                    value={language} onChange={e => setLanguage(e.target.value)}
+                    className="bg-white/5 border border-white/10 rounded-[9px] px-3 py-1.5 text-[13px] text-white outline-none hover:border-white/20 transition-all cursor-pointer"
                  >
-                    <Upload size={14} /> SELECT MODULE
+                    <option value="javascript">JavaScript / React</option>
+                    <option value="typescript">TypeScript</option>
+                    <option value="python">Python</option>
+                    <option value="rust">Rust</option>
+                 </select>
+                 <button className="p-2 rounded-[9px] bg-white/5 border border-white/10 text-white/40 hover:text-white transition-all">
+                    <Settings size={16} />
                  </button>
-                 <button 
-                   onClick={handleGenerate} disabled={isGenerating || !code.trim()}
-                   className="flex-[2] py-4 rounded-xl bg-gradient-to-r from-indigo-500 to-cyan-500 text-[12px] font-black uppercase tracking-[0.4em] text-white shadow-[0_8px_32px_rgba(99,102,241,0.3)] hover:-translate-y-1 hover:shadow-[0_12px_40px_rgba(99,102,241,0.5)] active:translate-y-0 transition-all flex items-center justify-center gap-4 group"
-                 >
-                    {isGenerating ? <Loader2 className="animate-spin" /> : <Zap size={18} className="group-hover:rotate-[360deg] transition-all duration-700" />}
-                    {isGenerating ? 'SYNTHESIZING' : 'GENERATE DOCS'}
-                 </button>
-              </div>
-           </TiltCard>
-        </div>
-
-        {/* OUTPUT: 3D DATA HARVEST */}
-        <div className="xl:w-3/5 flex flex-col glass-panel rounded-[2.5rem] overflow-hidden backdrop-blur-2xl transition-all duration-700 shadow-3xl">
-           <div className="px-10 py-5 bg-white/[0.04] border-b border-indigo-500/20 flex items-center justify-between">
-              <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-2">
-                 {(['DOCSTRINGS', 'README', 'API_REF', 'DIAGRAM', 'SECURITY', 'PERFORMANCE', 'TESTS', 'QUALITY'] as TabType[]).map(tab => (
-                   <button 
-                     key={tab} onClick={() => setActiveTab(tab)}
-                     className={`px-5 py-2.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] transition-all whitespace-nowrap ${
-                        activeTab === tab 
-                          ? 'bg-indigo-500/20 border border-indigo-500/50 text-white shadow-[0_0_20px_rgba(99,102,241,0.2)]' 
-                          : 'bg-white/[0.04] border border-white/[0.08] text-white/45'
-                     }`}
-                   >
-                      {tab.replace('_', ' ')}
-                   </button>
-                 ))}
               </div>
            </div>
 
-           <div className="flex-1 overflow-y-auto p-12 custom-scrollbar relative">
+           {filename && (
+              <div className="mb-4 flex items-center gap-2.5 px-3 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20 w-fit animate-fade-up">
+                 <FileCode size={14} className="text-[#c4b5fd]" />
+                 <span className="text-xs font-medium text-[#c4b5fd] tracking-tight">{filename}</span>
+                 <button onClick={() => {setFilename(null); setCode('');}} className="ml-1 text-[#c4b5fd]/50 hover:text-[#c4b5fd]">
+                    <X size={14} />
+                 </button>
+              </div>
+           )}
+
+           <div 
+             onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
+             onDragLeave={() => setIsDragging(false)}
+             onDrop={e => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files[0]; if(f) processFile(f); }}
+             className={`flex-1 relative transition-all duration-300 rounded-2xl border ${
+                isDragging ? 'border-[#8b5cf6] bg-indigo-500/5' : 'border-white/[0.07] bg-white/[0.03]'
+             }`}
+           >
+              <textarea 
+                value={code} onChange={e => setCode(e.target.value)}
+                placeholder="Paste raw source logic or drag a file here..."
+                className="w-full h-full bg-transparent p-6 font-['JetBrains_Mono'] text-[13px] text-white/85 resize-none outline-none placeholder:text-white/25 custom-scrollbar"
+              />
+              {isDragging && (
+                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                    <Upload size={32} className="text-[#8b5cf6] mb-3 animate-bounce" />
+                    <span className="text-[13px] font-bold text-[#8b5cf6] uppercase tracking-widest">Inject Neural Packet</span>
+                 </div>
+              )}
+           </div>
+           
+           <div className="mt-2 text-[11px] text-white/25 text-right tracking-tight font-medium">
+              {code.length.toLocaleString()} PROTOCOLS BUFFERED
+           </div>
+
+           <div className="flex gap-2.5 mt-4">
+              <button 
+                onClick={() => fileInputRef.current?.click()}
+                className="bg-white/5 border border-white/10 rounded-xl px-5 py-2.5 text-[13px] font-medium text-white/60 hover:bg-white/[0.08] hover:text-white transition-all flex items-center gap-2 group active:scale-95 outline-none"
+              >
+                 <Upload size={14} className="group-hover:-translate-y-0.5 transition-transform" />
+                 Select File
+              </button>
+              <button 
+                onClick={handleGenerate} disabled={isGenerating || !code.trim()}
+                className={`flex-1 rounded-xl h-[44px] text-[14px] font-bold transition-all flex items-center justify-center gap-2 shadow-lg active:scale-98 relative overflow-hidden ${
+                   isGenerating || !code.trim()
+                   ? 'bg-white/5 text-white/30 cursor-not-allowed'
+                   : 'bg-white text-[#08080f] hover:bg-white/90 animate-fade-up'
+                }`}
+              >
+                 {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Play size={16} fill="currentColor" />}
+                 {isGenerating ? 'Synthesizing...' : 'Generate Docs'}
+              </button>
+           </div>
+        </div>
+
+        {/* OUTPUT PANEL */}
+        <div className="xl:w-[55%] flex flex-col min-h-0">
+           <div className="flex items-center gap-1.5 mb-5 overflow-x-auto no-scrollbar py-1">
+              {(['DOCSTRINGS', 'README', 'API_REF', 'DIAGRAM', 'SECURITY', 'PERFORMANCE', 'TESTS', 'QUALITY'] as TabType[]).map(tab => (
+                <button 
+                  key={tab} onClick={() => setActiveTab(tab)}
+                  className={`shrink-0 px-4 py-2 rounded-lg text-[12px] uppercase tracking-[0.04em] transition-all ${
+                     activeTab === tab 
+                       ? 'bg-indigo-500/15 border border-indigo-500/30 text-[#c4b5fd] font-bold shadow-inner' 
+                       : 'bg-white/[0.04] border border-white/[0.07] text-white/40 hover:bg-white/[0.07] hover:text-white/70'
+                  }`}
+                >
+                   {tab.replace('_', ' ')}
+                </button>
+              ))}
+           </div>
+
+           <div className="flex-1 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-8 overflow-y-auto custom-scrollbar">
               {!Object.values(results).some(v => v.length > 5) && !isGenerating ? (
-                 <div className="h-full flex flex-col items-center justify-center text-center opacity-20">
-                    <Box size={100} className="mb-8" />
-                    <h2 className="text-3xl font-black text-white uppercase tracking-tighter mb-4">NEURAL BUFFER IDLE</h2>
-                    <p className="max-w-xs text-xs text-white font-medium leading-relaxed uppercase tracking-widest">AWAITING SOURCE INJECTION FOR COGNITIVE SYNTHESIS.</p>
+                 <div className="h-full flex flex-col items-center justify-center text-center opacity-10">
+                    <div className="w-16 h-16 rounded-3xl bg-white/5 flex items-center justify-center mb-6">
+                       <FileCode size={32} />
+                    </div>
+                    <h2 className="text-[17px] font-bold text-white uppercase tracking-widest mb-2">Neural Output Idle</h2>
+                    <p className="text-[13px] text-white/60 max-w-[200px]">Waiting for a code segment to start cognitive synthesis.</p>
                  </div>
               ) : (
-                <div className="animate-in fade-in slide-in-from-bottom-6 duration-1000 h-full">
+                <div className="animate-fade-up h-full">
                   {activeTab === 'QUALITY' ? (
-                     <div className="flex flex-col items-center justify-center h-full gap-16 py-10 px-8">
-                        {/* 3D SCORE RING */}
-                        <div className="relative w-[180px] h-[180px] scale-125">
-                           <svg className="w-full h-full transform -rotate-90">
+                     <div className="flex flex-col items-center justify-center h-full gap-12 py-6">
+                        {/* FUSIONAI SCORE RING */}
+                        <div className="relative">
+                           <svg width="140" height="140" viewBox="0 0 140 140" className="transform -rotate-90">
                               <defs>
-                                 <linearGradient id="scoreGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="0%" stopColor="#6366f1" />
-                                    <stop offset="100%" stopColor="#06b6d4" />
+                                 <linearGradient id="qualGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                    <stop offset="0%" stopColor="#7c3aed" />
+                                    <stop offset="100%" stopColor="#3b82f6" />
                                  </linearGradient>
                               </defs>
-                              <circle cx="90" cy="90" r="80" stroke="rgba(255,255,255,0.06)" strokeWidth="12" fill="transparent" />
+                              <circle cx="70" cy="70" r="62" stroke="rgba(255,255,255,0.06)" strokeWidth="8" fill="transparent" />
                               <circle 
-                                cx="90" cy="90" r="80" 
-                                stroke="url(#scoreGradient)" 
-                                strokeWidth="14" 
+                                cx="70" cy="70" r="62" 
+                                stroke="url(#qualGradient)" 
+                                strokeWidth="8" 
                                 fill="transparent" 
-                                strokeDasharray={502} 
-                                strokeDashoffset={502 - (502 * score * 10) / 100} 
+                                strokeDasharray={389.5} 
+                                strokeDashoffset={389.5 - (389.5 * score * 10) / 100} 
                                 strokeLinecap="round" 
-                                className="transition-all duration-[1500ms] ease-out drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]" 
+                                className="transition-all duration-[1200ms] ease-out drop-shadow-[0_0_8px_rgba(124,58,237,0.4)]" 
                               />
                            </svg>
-                           <div className="absolute inset-0 flex flex-col items-center justify-center">
-                              <span className="text-6xl font-black text-white tracking-widest">{score}</span>
-                              <span className="text-[12px] font-black uppercase text-white/30 tracking-[0.4em]">QUAL / 10</span>
+                           <div className="absolute inset-0 flex items-center justify-center">
+                              <div className="flex flex-col items-center">
+                                 <div className="flex items-baseline">
+                                    <span className="text-[40px] font-bold text-white tracking-tighter leading-none">{score}</span>
+                                    <span className="text-[15px] font-bold text-white/35 ml-0.5">/10</span>
+                                 </div>
+                                 <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.1em] mt-1">QUALITY</span>
+                              </div>
                            </div>
                         </div>
                         
                         {/* DIMENSION BARS */}
-                        <div className="w-full max-w-lg space-y-10">
+                        <div className="w-full max-w-[400px] space-y-7">
                            {[
-                              { label: 'ARCHITECTURE', val: score + (Math.random() * 2 - 1) },
-                              { label: 'NEURAL DENSITY', val: score + (Math.random() * 2 - 1) },
-                              { label: 'SYNC PERFORMANCE', val: score + (Math.random() * 2 - 1) },
-                              { label: 'DATA INTEGRITY', val: score + (Math.random() * 2 - 1) }
-                           ].map(dim => (
-                             <div key={dim.label} className="space-y-4">
-                                <div className="flex justify-between items-center text-[11px] font-black uppercase tracking-[0.2em]">
-                                   <span className="text-white/40">{dim.label}</span>
-                                   <span className="text-[#06b6d4]">{Math.max(0, Math.min(10, dim.val)).toFixed(1)} SYNC</span>
+                              { label: 'Clarity', val: score + 0.5, icon: <CheckCircle2 size={13} /> },
+                              { label: 'Completeness', val: score - 0.5, icon: <Activity size={13} /> },
+                              { label: 'Architecture', val: score + 0.2, icon: <FileCode size={13} /> },
+                              { label: 'Maintainability', val: score - 0.2, icon: <AlertCircle size={13} /> }
+                           ].map((dim, i) => (
+                             <div key={dim.label} className="space-y-2.5">
+                                <div className="flex justify-between items-center text-[12px] font-medium uppercase tracking-[0.05em]">
+                                   <div className="flex items-center gap-2 text-white/50">
+                                      {dim.icon}
+                                      {dim.label}
+                                   </div>
+                                   <span className="text-white">{Math.min(10, Math.max(0, dim.val)).toFixed(1)}</span>
                                 </div>
-                                <div className="h-2 w-full bg-white/[0.06] rounded-full overflow-hidden shadow-inner">
+                                <div className="h-[5px] w-full bg-white/[0.06] rounded-full overflow-hidden">
                                    <div 
-                                     className={`h-full rounded-full transition-all duration-[1500ms] ease-out shadow-[0_0_12px_currentColor] ${
-                                       dim.val < 5 ? 'bg-red-500 text-red-500' : dim.val < 7.5 ? 'bg-amber-500 text-amber-500' : 'bg-cyan-500 text-cyan-500'
+                                     className={`h-full rounded-full transition-all duration-[1000ms] ease-out ${
+                                       dim.val >= 8 ? 'bg-[#22c55e]' : dim.val >= 6 ? 'bg-[#f59e0b]' : 'bg-[#ef4444]'
                                      }`}
-                                     style={{ width: `${Math.max(0, Math.min(10, dim.val)) * 10}%` }}
+                                     style={{ 
+                                       width: `${Math.min(10, Math.max(0, dim.val)) * 10}%`,
+                                       transitionDelay: `${i * 150}ms`
+                                     }}
                                    />
                                 </div>
                              </div>
@@ -222,8 +254,15 @@ const CodeGenerator: React.FC = () => {
                         </div>
                      </div>
                   ) : (
-                     <div className="prose prose-invert max-w-none prose-pre:bg-transparent prose-pre:p-0 prose-pre:border-none">
-                        <MarkdownRenderer content={results[activeTab] || (isGenerating ? '# NEURAL STREAM OPENED...' : '# AWAITING DATAFEED...')} />
+                     <div className="prose prose-invert max-w-none 
+                         text-[15px] text-white/65 leading-[1.8]
+                         prose-headings:text-white prose-headings:font-bold
+                         prose-h2:text-[18px] prose-h2:mt-8 prose-h2:mb-3
+                         prose-a:text-indigo-400
+                         prose-code:text-white/90 prose-code:bg-white/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-lg prose-code:before:content-none prose-code:after:content-none prose-code:font-['JetBrains_Mono']
+                         prose-pre:bg-black/40 prose-pre:border prose-pre:border-white/5 prose-pre:rounded-xl prose-pre:p-5
+                     ">
+                        <MarkdownRenderer content={results[activeTab] || (isGenerating ? '# Neural scan initiated...\nSearching for semantic patterns...' : '# Waiting for buffer...')} />
                      </div>
                   )}
                 </div>
