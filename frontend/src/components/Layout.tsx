@@ -27,192 +27,189 @@ export default function Layout() {
   return (
     <div className="min-h-screen text-white flex flex-col font-sans selection:bg-indigo-500/20 overflow-x-hidden relative">
       
-      {/* FUSIONAI GLOBAL BACKGROUND */}
-      <div className="fusion-bg">
-        <div className="fusion-blob-1"></div>
-        <div className="fusion-blob-2"></div>
-        <div className="fusion-blob-3"></div>
+      {/* ═══════════════════════════════════════════════════════════════
+         STEP 3: ADD THE BACKGROUND LAYER TO THE DOM (FUSIONAI EXACT)
+         ═══════════════════════════════════════════════════════════════ */}
+      <div className="fusion-bg-layer">
+        <div className="fusion-blob-top"></div>
+        <div className="fusion-blob-mid"></div>
+        <div className="fusion-blob-bottom"></div>
       </div>
 
-      {/* TOP NAVIGATION — FUSIONAI EXACT STYLE */}
-      <header className={`fixed top-0 inset-x-0 h-16 z-50 flex items-center justify-between px-8 transition-all duration-300 border-b ${
-        scrolled 
-        ? 'bg-black/60 backdrop-blur-2xl border-white/[0.06]' 
-        : 'bg-transparent border-transparent'
-      }`}>
-        {/* LEFT — Logo area */}
-        <Link to="/" className="flex items-center group">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#7c3aed] to-[#3b82f6] flex items-center justify-center transition-transform group-hover:scale-105">
-             <Sparkles size={16} className="text-white" />
-          </div>
-          <span className="ml-2.5 text-[17px] font-bold tracking-[-0.02em] text-white">HGM-06</span>
-        </Link>
-
-        {/* CENTER — Nav links */}
-        <nav className="hidden md:flex items-center gap-2">
-          {[
-            { to: '/docs', label: 'Platform Docs' },
-            { to: '/codegen', label: 'DocGen AI' }
-          ].map(link => (
-            <Link 
-              key={link.to} 
-              to={link.to} 
-              className={`px-3.5 py-1.5 rounded-lg text-sm transition-all duration-200 ${
-                location.pathname.startsWith(link.to)
-                ? 'text-white font-medium bg-white/5'
-                : 'text-white/55 hover:text-white hover:bg-white/[0.06]'
-              }`}
-            >
-              {link.label}
+      {/* WRAP CONTENT IN RELATIVE Z-1 CONTAINER */}
+      <div className="relative z-10 flex flex-col min-h-screen">
+          
+          {/* TOP NAVIGATION — FUSIONAI EXACT GLASS STYLE */}
+          <header className={`fixed top-0 inset-x-0 h-16 z-50 flex items-center justify-between px-8 transition-all duration-300 ${
+            scrolled 
+            ? 'nav-glass' 
+            : 'bg-transparent border-transparent'
+          }`}>
+            {/* LEFT — Logo area */}
+            <Link to="/" className="flex items-center group">
+              <div className="w-8 h-8 rounded-full bg-gradient-to-br from-[#7c3aed] to-[#3b82f6] flex items-center justify-center transition-transform group-hover:scale-105">
+                 <Sparkles size={16} className="text-white" />
+              </div>
+              <span className="ml-2.5 text-[17px] font-bold tracking-[-0.02em] text-white">HGM-06</span>
             </Link>
-          ))}
-        </nav>
 
-        {/* RIGHT — CTA button */}
-        <div className="flex items-center gap-4">
-          <button className="hidden sm:block fusion-btn-primary">
-            Get Started
-          </button>
-          <button 
-            className="md:hidden p-2 text-white/50" 
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </button>
-        </div>
-      </header>
+            {/* CENTER — Nav links */}
+            <nav className="hidden md:flex items-center gap-2">
+              {[
+                { to: '/docs', label: 'Platform Docs' },
+                { to: '/codegen', label: 'DocGen AI' }
+              ].map(link => (
+                <Link 
+                  key={link.to} 
+                  to={link.to} 
+                  className={`px-3.5 py-1.5 rounded-lg text-sm transition-all duration-200 ${
+                    location.pathname.startsWith(link.to)
+                    ? 'text-white font-medium bg-white/5'
+                    : 'text-white/55 hover:text-white hover:bg-white/[0.06]'
+                  }`}
+                >
+                  {link.label}
+                </Link>
+              ))}
+            </nav>
 
-      {/* MAIN CONTAINER */}
-      <div className="flex-1 flex pt-16 w-full relative z-10 min-h-0">
-        
-        {/* LEFT SIDEBAR — FUSIONAI MINIMAL CLEAN STYLE */}
-        <aside className="hidden lg:flex w-[240px] flex-col border-r border-white/[0.05] sticky top-16 h-[calc(100vh-64px)] overflow-hidden">
-           <div className="flex-1 overflow-y-auto py-6 custom-scrollbar no-scrollbar scroll-smooth">
-              <div className="px-4 mb-3">
-                 <h3 className="text-[10px] font-bold tracking-[0.12em] text-white/25 uppercase">NAVIGATION</h3>
-              </div>
-              <div className="space-y-[2px]">
-                 {[
-                   { label: 'Overview', to: '/docs/intro', icon: <FileText size={15} /> },
-                   { label: 'Architecture', to: '/docs/architecture', icon: <Code2 size={15} /> },
-                   { label: 'API Reference', to: '/docs/api-reference', icon: <Search size={15} /> },
-                   { label: 'Deployment', to: '/docs/deployment', icon: <Zap size={15} /> },
-                   { label: 'Security', to: '/docs/security', icon: <MessageSquare size={15} /> }
-                 ].map(item => (
-                   <Link 
-                     key={item.to}
-                     to={item.to}
-                     className={`flex items-center gap-2.5 px-4 py-2.5 mx-2 rounded-lg text-[13.5px] transition-all relative ${
-                        location.pathname === item.to 
-                          ? 'bg-indigo-500/10 text-white font-medium shadow-inner' 
-                          : 'text-white/50 hover:bg-white/[0.05] hover:text-white/85'
-                     }`}
-                   >
-                      {location.pathname === item.to && (
-                        <div className="absolute left-0 top-1 bottom-1 w-[2.5px] bg-gradient-to-b from-[#8b5cf6] to-[#3b82f6] rounded-r-sm" />
-                      )}
-                      <span className={`${location.pathname === item.to ? 'text-indigo-400' : 'text-inherit'}`}>
-                        {item.icon}
-                      </span>
-                      {item.label}
-                   </Link>
-                 ))}
-              </div>
-
-              <div className="h-[1px] bg-white/[0.05] mx-4 my-4" />
-
-              <div className="px-4 mb-2">
-                 <h3 className="text-[10px] font-bold tracking-[0.12em] text-white/25 uppercase">AI ENGINE</h3>
-              </div>
-              <Link to="/codegen" className="flex items-center gap-2.5 px-4 py-2.5 mx-2 rounded-lg text-[13.5px] text-white/50 hover:bg-white/[0.05] hover:text-white/85 transition-all">
-                <Sparkles size={15} className="text-white/30" />
-                DocGen Studio
+            {/* RIGHT AREA */}
+            <div className="flex items-center gap-4">
+              <Link to="/docs" className="hidden sm:block fusion-btn-primary">
+                Get Started
               </Link>
-           </div>
-
-           {/* BOTTOM USER CARD */}
-           <div className="mt-auto border-t border-white/[0.05] p-4">
-              <div className="flex items-center gap-3">
-                 <div className="w-[34px] h-[34px] rounded-full bg-gradient-to-br from-[#7c3aed] to-[#3b82f6] flex items-center justify-center text-[12px] font-bold text-white">
-                    AG
-                 </div>
-                 <div className="flex flex-col min-w-0">
-                    <span className="text-[13px] font-medium text-white truncate">Standard User</span>
-                    <span className="text-[11px] text-white/35 font-normal">Free Neural Tier</span>
-                 </div>
-              </div>
-              <button className="w-full mt-4 bg-white/[0.04] border border-white/[0.07] rounded-lg py-2 text-[12px] text-white/50 hover:bg-white/[0.07] hover:text-white transition-all">
-                 System Settings
+              <button 
+                className="md:hidden p-2 text-white/50" 
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              >
+                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
-           </div>
-        </aside>
+            </div>
+          </header>
 
-        {/* MAIN VIEWER AREA */}
-        <main className={`flex-1 min-w-0 overflow-y-auto animate-fade-up`}>
-           <Outlet />
-        </main>
+          {/* MAIN CONTAINER */}
+          <div className="flex-1 flex pt-16 w-full relative min-h-0">
+            
+            {/* LEFT SIDEBAR — FUSIONAI SEMI-TRANSPARENT STYLE */}
+            <aside className="hidden lg:flex w-[240px] flex-col sidebar-glass sticky top-16 h-[calc(100vh-64px)] overflow-hidden">
+               <div className="flex-1 overflow-y-auto py-6 no-scrollbar scroll-smooth">
+                  <div className="px-5 mb-3">
+                     <h3 className="text-[10px] font-bold tracking-[0.14em] text-white/20 uppercase">SYSTEM INDEX</h3>
+                  </div>
+                  <div className="space-y-[4px]">
+                     {[
+                       { label: 'Overview', to: '/docs/intro', icon: <FileText size={15} /> },
+                       { label: 'Architecture', to: '/docs/architecture', icon: <Code2 size={15} /> },
+                       { label: 'API Reference', to: '/docs/api-reference', icon: <Search size={15} /> },
+                       { label: 'Deployment', to: '/docs/deployment', icon: <Zap size={15} /> },
+                       { label: 'Security', to: '/docs/security', icon: <MessageSquare size={15} /> }
+                     ].map(item => (
+                       <Link 
+                         key={item.to}
+                         to={item.to}
+                         className={`flex items-center gap-3 px-5 py-2.5 mx-1.5 rounded-lg text-[13.5px] transition-all relative ${
+                            location.pathname === item.to 
+                              ? 'bg-white/[0.04] text-white font-medium' 
+                              : 'text-white/45 hover:bg-white/[0.02] hover:text-white/85'
+                         }`}
+                       >
+                          {location.pathname === item.to && (
+                            <div className="absolute left-0 top-2 bottom-2 w-[2.5px] bg-[#7c3aed] rounded-r-full" />
+                          )}
+                          <span className={location.pathname === item.to ? 'text-[#7c3aed]' : 'text-inherit opacity-40'}>
+                            {item.icon}
+                          </span>
+                          {item.label}
+                       </Link>
+                     ))}
+                  </div>
 
-        {/* RIGHT PANEL — AI SEARCH (FUSIONAI STYLE) */}
-        <aside className="hidden xl:flex w-[300px] flex-col border-l border-white/[0.05] glass-panel sticky top-16 h-[calc(100vh-64px)] overflow-hidden">
-           {/* HEADER */}
-           <div className="p-5 flex items-center justify-between border-b border-white/[0.05]">
-              <div className="flex items-center gap-2 px-1">
-                 <Sparkles size={16} className="text-[#8b5cf6]" />
-                 <h2 className="text-[13px] font-semibold text-white tracking-[0.04em] uppercase">NEURO SEARCH</h2>
-              </div>
-              <div className="px-2 py-0.5 bg-indigo-500/10 border border-indigo-500/25 rounded-md text-[10px] text-[#a78bfa] tracking-[0.06em] uppercase font-bold">
-                 GROQ-L3
-              </div>
-           </div>
+                  <div className="h-[1px] bg-white/[0.05] mx-5 my-5" />
 
-           <div className="flex-1 overflow-y-auto p-5 custom-scrollbar">
-              {/* INTERACTIVE GUIDE CARD */}
-              <div className="bg-white/[0.03] border border-white/[0.07] rounded-2xl p-4 mb-4">
-                 <div className="flex items-center gap-2 mb-2.5">
-                    <Info size={14} className="text-[#60a5fa]" />
-                    <span className="text-[11px] font-bold tracking-[0.07em] text-[#60a5fa] uppercase">INTERACTIVE GUIDE</span>
-                 </div>
-                 <p className="text-[12.5px] text-white/45 leading-[1.6] mb-4">Explore our neural protocols or seek architectural enlightenment.</p>
-                 <div className="flex flex-wrap gap-1.5 font-medium">
-                    {['INSTALLER', 'API KEYS', 'THEMES'].map(chip => (
-                      <button key={chip} className="bg-white/[0.04] border border-white/[0.09] rounded-lg px-2.5 py-1 text-[11px] text-white/50 tracking-[0.04em] uppercase hover:bg-indigo-500/10 hover:border-indigo-500/35 hover:text-[#c4b5fd] transition-all">
-                        {chip}
-                      </button>
-                    ))}
-                 </div>
-              </div>
+                  <div className="px-5 mb-2">
+                     <h3 className="text-[10px] font-bold tracking-[0.14em] text-white/20 uppercase">AI ENGINE</h3>
+                  </div>
+                  <Link to="/codegen" className="flex items-center gap-3 px-5 py-2.5 mx-1.5 rounded-lg text-[13.5px] text-white/45 hover:bg-white/[0.02] hover:text-white/85 transition-all">
+                    <Sparkles size={15} className="text-white/40" />
+                    DocGen Studio
+                  </Link>
+               </div>
 
-              {/* CONVERSATION AREA */}
-              <div className="flex flex-col gap-4 py-2">
-                 <div className="self-end max-w-[85%] bg-indigo-500/[0.15] border border-indigo-500/25 rounded-[14px_14px_4px_14px] px-3.5 py-2.5 text-[13px] text-white/85 leading-[1.6]">
-                    Explain API Security
-                 </div>
-                 <div className="self-start max-w-[92%] bg-white/[0.03] border border-white/[0.07] border-l-[2px] border-[#8b5cf6]/50 rounded-[4px_14px_14px_14px] px-3.5 py-2.5 text-[13px] text-white/70 leading-[1.6]">
-                    Our neural gateway employs AES-256 rotation protocols...
-                 </div>
-                 
-                 {/* TYPING INDICATOR */}
-                 <div className="flex gap-1 px-3.5 py-3">
-                    {[0, 0.2, 0.4].map(delay => (
-                      <div key={delay} className="w-1.5 h-1.5 rounded-full bg-indigo-500/60" style={{ animation: `typingBounce 1.2s infinite ${delay}s` }} />
-                    ))}
-                 </div>
-              </div>
-           </div>
+               {/* BOTTOM USER CARD */}
+               <div className="mt-auto border-t border-white/[0.05] p-5">
+                  <div className="flex items-center gap-3">
+                     <div className="w-[34px] h-[34px] rounded-full bg-gradient-to-br from-[#7c3aed] to-[#3b82f6] flex items-center justify-center text-[12px] font-bold text-white shadow-lg">
+                        AG
+                     </div>
+                     <div className="flex flex-col min-w-0">
+                        <span className="text-[13px] font-medium text-white truncate">goswamiaalap-svg</span>
+                        <span className="text-[11px] text-white/30 font-normal">Neural Tier Premium</span>
+                     </div>
+                  </div>
+               </div>
+            </aside>
 
-           {/* SEARCH INPUT */}
-           <div className="p-4 border-t border-white/[0.05]">
-              <div className="relative">
-                 <input 
-                   placeholder="Ask the AI agent..."
-                   className="w-full bg-white/[0.04] border border-white/[0.09] rounded-xl py-3 pl-4 pr-12 text-[13px] text-white outline-none focus:border-indigo-500/45 focus:bg-white/[0.06] focus:ring-4 focus:ring-indigo-500/10 transition-all placeholder:text-white/25"
-                 />
-                 <button className="absolute right-2 top-1/2 -translate-y-1/2 w-8 h-8 bg-gradient-to-br from-[#7c3aed] to-[#3b82f6] rounded-lg flex items-center justify-center hover:opacity-85 hover:scale-105 active:scale-95 transition-all">
-                    <ArrowRight size={14} className="text-white" />
-                 </button>
-              </div>
-           </div>
-        </aside>
+            {/* MAIN VIEWER AREA — REMOVED BACKGROUND CLASSES */}
+            <main className="flex-1 min-w-0 overflow-y-auto animate-fade-up bg-transparent">
+               <Outlet />
+            </main>
+
+            {/* RIGHT PANEL — FUSIONAI SEMI-TRANSPARENT GLASS STYLE */}
+            <aside className="hidden xl:flex w-[300px] flex-col right-panel-glass sticky top-16 h-[calc(100vh-64px)] overflow-hidden">
+               {/* PANEL HEADER */}
+               <div className="p-6 flex items-center justify-between border-b border-white/[0.05]">
+                  <div className="flex items-center gap-2">
+                     <Sparkles size={15} className="text-[#a78bfa]" />
+                     <h2 className="text-[11px] font-bold text-white/40 tracking-[0.15em] uppercase">NEURO CORE</h2>
+                  </div>
+                  <div className="px-2 py-0.5 bg-[#7c3aed]/10 border border-[#7c3aed]/20 rounded-md text-[9px] text-[#a78bfa] tracking-[0.1em] uppercase font-bold">
+                     AI ACTIVE
+                  </div>
+               </div>
+
+               <div className="flex-1 overflow-y-auto p-6 no-scrollbar">
+                  {/* INTERACTIVE GUIDE CARD — TRANSPARENT GLASS */}
+                  <div className="bg-white/[0.02] border border-white/[0.07] rounded-xl p-5 mb-5 backdrop-blur-sm">
+                     <div className="flex items-center gap-2.5 mb-3">
+                        <Info size={14} className="text-[#3b82f6]" />
+                        <span className="text-[10px] font-bold tracking-[0.1em] text-[#60a5fa] uppercase">SYSTEM ANALYTICS</span>
+                     </div>
+                     <p className="text-[12.5px] text-white/40 leading-[1.6] mb-5">Current engine latency: 14ms. Ready for architectural synthesis.</p>
+                     <div className="flex flex-wrap gap-2">
+                        {['KEYS', 'THEMES', 'DEPLOY'].map(chip => (
+                          <button key={chip} className="bg-white/[0.05] border border-white/[0.08] rounded-lg px-2.5 py-1 text-[10px] text-white/50 tracking-[0.04em] uppercase hover:bg-[#7c3aed]/10 hover:border-[#7c3aed]/30 hover:text-white transition-all">
+                            {chip}
+                          </button>
+                        ))}
+                     </div>
+                  </div>
+
+                  {/* CONVERSATION AREA */}
+                  <div className="flex flex-col gap-5 py-2">
+                     <div className="self-end max-w-[85%] bg-[#7c3aed]/10 border border-[#7c3aed]/20 rounded-2xl p-4 text-[13px] text-white/80 leading-[1.6]">
+                        Documentation security report?
+                     </div>
+                     <div className="self-start max-w-[92%] bg-white/[0.03] border border-white/[0.05] rounded-2xl p-4 text-[13px] text-white/60 leading-[1.6]">
+                        Our neural gateway utilizes AES-256 rotation for all repository analysis packets...
+                     </div>
+                  </div>
+               </div>
+
+               {/* SEARCH INPUT AREA */}
+               <div className="p-5 border-t border-white/[0.05]">
+                  <div className="relative">
+                     <input 
+                       placeholder="Consult the Oracle..."
+                       className="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl py-3.5 pl-4 pr-12 text-[13px] text-white outline-none focus:border-[#7c3aed]/40 focus:bg-white/[0.04] transition-all placeholder:text-white/15"
+                     />
+                     <button className="absolute right-2 top-1/2 -translate-y-1/2 w-9 h-9 bg-gradient-to-br from-[#7337ed] to-[#3b82f6] rounded-lg flex items-center justify-center hover:opacity-90 active:scale-95 transition-all">
+                        <ArrowRight size={15} className="text-white" />
+                     </button>
+                  </div>
+               </div>
+            </aside>
+
+          </div>
       </div>
 
     </div>

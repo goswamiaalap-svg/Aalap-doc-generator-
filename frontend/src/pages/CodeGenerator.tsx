@@ -1,10 +1,8 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import { 
-  Upload, 
-  Play, 
+  Zap,
   Loader2,
   Settings,
-  X,
   FileCode,
   CheckCircle2,
   AlertCircle,
@@ -18,18 +16,15 @@ type TabType = 'DOCSTRINGS' | 'README' | 'API_REF' | 'DIAGRAM' | 'SECURITY' | 'P
 const CodeGenerator: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('DOCSTRINGS');
   const [code, setCode] = useState('');
-  const [filename, setFilename] = useState<string | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
   const [results, setResults] = useState<Record<string, string>>({
     DOCSTRINGS: '', README: '', API_REF: '', DIAGRAM: '', SECURITY: '', PERFORMANCE: '', TESTS: '', QUALITY: ''
   });
   const [language, setLanguage] = useState('javascript');
-  const [isDragging, setIsDragging] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const processFile = (file: File) => {
     if (!file) return;
-    setFilename(file.name);
     const reader = new FileReader();
     reader.onload = (e) => {
       const content = e.target?.result as string;
@@ -83,93 +78,69 @@ const CodeGenerator: React.FC = () => {
       
       <div className="flex flex-col xl:flex-row gap-10 items-stretch h-full overflow-hidden">
         
-        {/* INPUT PANEL */}
+        {/* INPUT PANEL — FUSIONAI GLASS */}
         <div className="xl:w-[45%] flex flex-col min-h-0">
            <div className="flex items-center justify-between mb-4">
-              <span className="text-[15px] font-semibold text-white tracking-tight">Source Input</span>
+              <span className="text-[15px] font-bold text-white tracking-tight">Source Input</span>
               <div className="flex items-center gap-2">
                  <select 
                     value={language} onChange={e => setLanguage(e.target.value)}
-                    className="bg-white/5 border border-white/10 rounded-[9px] px-3 py-1.5 text-[13px] text-white outline-none hover:border-white/20 transition-all cursor-pointer"
+                    className="bg-white/5 border border-white/10 rounded-xl px-3.5 py-1.5 text-[13.5px] text-white/50 outline-none hover:bg-white/10 hover:text-white transition-all cursor-pointer"
                  >
                     <option value="javascript">JavaScript / React</option>
                     <option value="typescript">TypeScript</option>
                     <option value="python">Python</option>
                     <option value="rust">Rust</option>
                  </select>
-                 <button className="p-2 rounded-[9px] bg-white/5 border border-white/10 text-white/40 hover:text-white transition-all">
+                 <button className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/30 hover:text-white transition-all">
                     <Settings size={16} />
                  </button>
               </div>
            </div>
 
-           {filename && (
-              <div className="mb-4 flex items-center gap-2.5 px-3 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20 w-fit animate-fade-up">
-                 <FileCode size={14} className="text-[#c4b5fd]" />
-                 <span className="text-xs font-medium text-[#c4b5fd] tracking-tight">{filename}</span>
-                 <button onClick={() => {setFilename(null); setCode('');}} className="ml-1 text-[#c4b5fd]/50 hover:text-[#c4b5fd]">
-                    <X size={14} />
-                 </button>
-              </div>
-           )}
-
-           <div 
-             onDragOver={e => { e.preventDefault(); setIsDragging(true); }}
-             onDragLeave={() => setIsDragging(false)}
-             onDrop={e => { e.preventDefault(); setIsDragging(false); const f = e.dataTransfer.files[0]; if(f) processFile(f); }}
-             className={`flex-1 relative transition-all duration-300 rounded-2xl border ${
-                isDragging ? 'border-[#8b5cf6] bg-indigo-500/5' : 'border-white/[0.07] bg-white/[0.03]'
-             }`}
-           >
+           <div className="flex-1 relative transition-all duration-300 rounded-3xl border card-glass border-white/[0.08]">
               <textarea 
                 value={code} onChange={e => setCode(e.target.value)}
                 placeholder="Paste raw source logic or drag a file here..."
-                className="w-full h-full bg-transparent p-6 font-['JetBrains_Mono'] text-[13px] text-white/85 resize-none outline-none placeholder:text-white/25 custom-scrollbar"
+                className="w-full h-full bg-transparent p-6 font-['JetBrains_Mono'] text-[13px] text-white/70 resize-none outline-none placeholder:text-white/15 custom-scrollbar"
               />
-              {isDragging && (
-                 <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                    <Upload size={32} className="text-[#8b5cf6] mb-3 animate-bounce" />
-                    <span className="text-[13px] font-bold text-[#8b5cf6] uppercase tracking-widest">Inject Neural Packet</span>
-                 </div>
-              )}
            </div>
            
-           <div className="mt-2 text-[11px] text-white/25 text-right tracking-tight font-medium">
+           <div className="mt-2 text-[10px] text-white/20 text-right tracking-[0.05em] font-bold uppercase">
               {code.length.toLocaleString()} PROTOCOLS BUFFERED
            </div>
 
-           <div className="flex gap-2.5 mt-4">
+           <div className="flex gap-3 mt-4">
               <button 
                 onClick={() => fileInputRef.current?.click()}
-                className="bg-white/5 border border-white/10 rounded-xl px-5 py-2.5 text-[13px] font-medium text-white/60 hover:bg-white/[0.08] hover:text-white transition-all flex items-center gap-2 group active:scale-95 outline-none"
+                className="bg-white/[0.05] border border-white/[0.1] rounded-2xl px-6 h-[48px] text-[13.5px] font-bold text-white/50 hover:bg-white/[0.08] hover:text-white transition-all active:scale-95 outline-none"
               >
-                 <Upload size={14} className="group-hover:-translate-y-0.5 transition-transform" />
                  Select File
               </button>
               <button 
                 onClick={handleGenerate} disabled={isGenerating || !code.trim()}
-                className={`flex-1 rounded-xl h-[44px] text-[14px] font-bold transition-all flex items-center justify-center gap-2 shadow-lg active:scale-98 relative overflow-hidden ${
+                className={`flex-1 rounded-2xl h-[48px] text-[14.5px] font-bold transition-all flex items-center justify-center gap-2 shadow-lg active:scale-98 relative overflow-hidden ${
                    isGenerating || !code.trim()
-                   ? 'bg-white/5 text-white/30 cursor-not-allowed'
-                   : 'bg-white text-[#08080f] hover:bg-white/90 animate-fade-up'
+                   ? 'bg-white/5 text-white/30 cursor-not-allowed border border-white/5'
+                   : 'bg-white text-[#0a0a12] hover:bg-white/88'
                 }`}
               >
-                 {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Play size={16} fill="currentColor" />}
+                 {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Zap size={16} fill="currentColor" />}
                  {isGenerating ? 'Synthesizing...' : 'Generate Docs'}
               </button>
            </div>
         </div>
 
-        {/* OUTPUT PANEL */}
+        {/* OUTPUT PANEL — FUSIONAI GLASS */}
         <div className="xl:w-[55%] flex flex-col min-h-0">
-           <div className="flex items-center gap-1.5 mb-5 overflow-x-auto no-scrollbar py-1">
+           <div className="flex items-center gap-2 mb-5 overflow-x-auto no-scrollbar py-1">
               {(['DOCSTRINGS', 'README', 'API_REF', 'DIAGRAM', 'SECURITY', 'PERFORMANCE', 'TESTS', 'QUALITY'] as TabType[]).map(tab => (
                 <button 
                   key={tab} onClick={() => setActiveTab(tab)}
-                  className={`shrink-0 px-4 py-2 rounded-lg text-[12px] uppercase tracking-[0.04em] transition-all ${
+                  className={`shrink-0 px-4.5 py-2.5 rounded-xl text-[12px] uppercase font-bold tracking-[0.06em] transition-all border ${
                      activeTab === tab 
-                       ? 'bg-indigo-500/15 border border-indigo-500/30 text-[#c4b5fd] font-bold shadow-inner' 
-                       : 'bg-white/[0.04] border border-white/[0.07] text-white/40 hover:bg-white/[0.07] hover:text-white/70'
+                       ? 'bg-[#7c3aed]/15 border-[#7c3aed]/35 text-[#a78bfa] shadow-inner' 
+                       : 'bg-white/[0.03] border-white/[0.07] text-white/35 hover:bg-white/[0.06] hover:text-white/60'
                   }`}
                 >
                    {tab.replace('_', ' ')}
@@ -177,7 +148,7 @@ const CodeGenerator: React.FC = () => {
               ))}
            </div>
 
-           <div className="flex-1 bg-white/[0.02] border border-white/[0.06] rounded-2xl p-8 overflow-y-auto custom-scrollbar">
+           <div className="flex-1 bg-transparent border border-white/[0.07] rounded-3xl p-8 overflow-y-auto custom-scrollbar backdrop-blur-[4px]">
               {!Object.values(results).some(v => v.length > 5) && !isGenerating ? (
                  <div className="h-full flex flex-col items-center justify-center text-center opacity-10">
                     <div className="w-16 h-16 rounded-3xl bg-white/5 flex items-center justify-center mb-6">
@@ -247,7 +218,7 @@ const CodeGenerator: React.FC = () => {
                                        width: `${Math.min(10, Math.max(0, dim.val)) * 10}%`,
                                        transitionDelay: `${i * 150}ms`
                                      }}
-                                   />
+                                    />
                                 </div>
                              </div>
                            ))}
