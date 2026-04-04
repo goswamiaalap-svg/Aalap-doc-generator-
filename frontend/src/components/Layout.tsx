@@ -1,8 +1,8 @@
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { 
   Sparkles, 
-  Code2, 
   BookOpen, 
+  Code2,
   Menu, 
   X,
   Zap,
@@ -25,27 +25,25 @@ export default function Layout() {
   useEffect(() => { setMobileMenuOpen(false); }, [location.pathname]);
 
   return (
-    <div className="min-h-screen bg-[#020617] text-white flex flex-col font-sans selection:bg-blue-500/30">
+    <div className="min-h-screen bg-[#050a14] text-white flex flex-col font-sans selection:bg-orange-500/30 overflow-x-hidden">
       
-      {/* DUAL-TONE RADIANT BACKGROUND (Canva Inspired) */}
-      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
-        {/* GLOBAL NEON OVERLAYS: Dual-Tone Gold & Blue */}
-      <div className="absolute top-[-10%] left-[-20%] w-[1200px] h-[1200px] bg-amber-600/15 blur-[180px] rounded-full animate-pulse-slow pointer-events-none" />
-      <div className="radiant-arc top-[5%] left-[-15%] opacity-40 pointer-events-none rotate-6" />
-      <div className="absolute bottom-[-20%] right-[-15%] w-[1000px] h-[1000px] bg-blue-600/10 blur-[160px] rounded-full animate-pulse delay-700 pointer-events-none" />
+      {/* 🔮 ORB CONTAINER: THE PURE BACKGROUND Glow */}
+      <div className="orb-container">
+        <div className="orb-gold" />
+        <div className="orb-blue" />
       </div>
 
       {/* TOP NAVIGATION: ULTIMATE GLASSMORPHY */}
       <header className={`fixed top-0 inset-x-0 z-[100] transition-all duration-500 border-b ${
-        scrolled ? 'h-16 bg-black/40 backdrop-blur-2xl border-white/10 shadow-2xl' : 'h-20 bg-transparent border-transparent'
+        scrolled ? 'h-16 bg-black/40 backdrop-blur-2xl border-white/5 shadow-2xl' : 'h-20 bg-transparent border-transparent'
       }`}>
-        <div className="max-w-[1600px] mx-auto h-full px-6 flex items-center justify-between">
+        <div className="max-w-[1600px] mx-auto h-full px-6 flex items-center justify-between relative z-10">
           
           <Link to="/" className="flex items-center gap-3 group">
-            <div className="p-2 bg-gradient-to-tr from-amber-500 to-orange-600 rounded-xl shadow-[0_0_15px_rgba(245,158,11,0.3)] group-hover:scale-110 transition-transform">
+            <div className="p-2 bg-gradient-to-tr from-orange-500 to-amber-600 rounded-xl shadow-[0_0_15px_rgba(245,158,11,0.3)] group-hover:scale-110 transition-transform">
                <Sparkles size={20} className="text-white" />
             </div>
-            <span className="text-xl font-black tracking-tighter uppercase">HGM-06</span>
+            <span className="text-xl font-black tracking-tighter uppercase logo-gradient">HGM-06</span>
           </Link>
 
           {/* MAIN NAV LINKS */}
@@ -59,14 +57,14 @@ export default function Layout() {
                 to={link.to} 
                 className={`flex items-center gap-2 px-6 py-2 rounded-xl text-[10px] font-black uppercase tracking-[0.2em] transition-all relative group ${
                   location.pathname.startsWith(link.to) 
-                    ? 'bg-amber-500/10 text-amber-400 border border-amber-500/20' 
+                    ? 'bg-white/5 text-amber-400 border border-white/10' 
                     : 'text-gray-500 hover:text-white hover:bg-white/5'
                 }`}
               >
                 {link.icon}
                 {link.label}
                 {location.pathname.startsWith(link.to) && (
-                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-[2px] bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,1)] rounded-full" />
+                  <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-[2px] bg-gradient-to-r from-orange-500 to-indigo-500 shadow-[0_0_8px_rgba(245,158,11,1)] rounded-full" />
                 )}
               </Link>
             ))}
@@ -78,7 +76,7 @@ export default function Layout() {
                <span className="flex items-center gap-1.5"><Globe size={12} className="text-amber-500"/> Edge: Verified</span>
                <span className="flex items-center gap-1.5"><Zap size={12} className="text-orange-500"/> Power: Unlimited</span>
             </div>
-            <div className="h-6 w-[1px] bg-white/10 hidden lg:block" />
+            <div className="h-6 w-[1px] bg-white/5 hidden lg:block" />
             <button className="hidden sm:flex p-2 rounded-xl bg-white/5 border border-white/10 text-gray-400 hover:text-white transition-colors">
                <Settings2 size={18} />
             </button>
@@ -97,8 +95,8 @@ export default function Layout() {
         <div className="fixed inset-0 z-[200] bg-black/95 backdrop-blur-3xl animate-in fade-in duration-300 flex flex-col p-8">
            <div className="flex items-center justify-between mb-20">
               <Link to="/" className="flex items-center gap-3" onClick={() => setMobileMenuOpen(false)}>
-                <Sparkles size={24} className="text-blue-500" />
-                <span className="text-2xl font-black uppercase tracking-tighter">HGM-06</span>
+                <Sparkles size={24} className="text-orange-500" />
+                <span className="text-2xl font-black uppercase tracking-tighter logo-gradient">HGM-06</span>
               </Link>
               <button onClick={() => setMobileMenuOpen(false)} className="p-2 text-gray-400"><X size={32}/></button>
            </div>
@@ -112,7 +110,7 @@ export default function Layout() {
                   key={link.to} 
                   to={link.to} 
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-4xl font-black uppercase tracking-tighter hover:text-blue-500 transition-colors"
+                  className="text-4xl font-black uppercase tracking-tighter hover:text-orange-500 transition-colors"
                 >
                   {link.label}
                 </Link>
@@ -120,7 +118,7 @@ export default function Layout() {
            </div>
 
            <div className="mt-auto flex flex-col items-center gap-4 opacity-40">
-              <Zap size={40} className="text-blue-500" />
+              <Zap size={40} className="text-orange-500" />
               <p className="text-[10px] font-black uppercase tracking-[0.4em]">Neural Core Active</p>
            </div>
         </div>

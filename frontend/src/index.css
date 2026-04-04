@@ -8,14 +8,15 @@
 @layer base {
   html {
     scroll-behavior: smooth;
-    background-color: #020617;
+    background-color: #050a14;
   }
   
   body {
-    background-color: #020617;
+    background-color: #050a14;
     color: #e5e7eb;
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
+    min-height: 100vh;
   }
 
   /* Premium Custom Scrollbar */
@@ -40,6 +41,43 @@
   }
   .custom-scrollbar::-webkit-scrollbar-thumb {
     background: rgba(59, 130, 246, 0.1);
+  }
+
+  /* Orb Styles */
+  .orb-container {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    overflow: hidden;
+  }
+
+  .orb-gold {
+    position: absolute;
+    top: -100px;
+    left: -150px;
+    width: 700px;
+    height: 700px;
+    background: radial-gradient(circle, rgba(251,146,60,0.35) 0%, rgba(234,88,12,0.15) 40%, transparent 70%);
+    filter: blur(80px);
+    animation: orbFloat 18s ease-in-out infinite;
+  }
+
+  .orb-blue {
+    position: absolute;
+    bottom: -150px;
+    right: -100px;
+    width: 750px;
+    height: 750px;
+    background: radial-gradient(circle, rgba(99,102,241,0.3) 0%, rgba(59,130,246,0.15) 40%, transparent 70%);
+    filter: blur(100px);
+    animation: orbFloat 22s ease-in-out infinite reverse;
+  }
+
+  @keyframes orbFloat {
+    0%, 100% { transform: translate(0px, 0px) scale(1); }
+    33%       { transform: translate(40px, -30px) scale(1.08); }
+    66%       { transform: translate(-25px, 40px) scale(0.94); }
   }
 
   /* Advanced Animations */
@@ -87,19 +125,9 @@
   }
 
   .glass-card {
-    background: rgba(255, 255, 255, 0.02);
-    backdrop-filter: blur(20px);
-    border: 1px solid rgba(255, 255, 255, 0.05);
-  }
-
-  .radiant-arc {
-    position: absolute;
-    width: 900px;
-    height: 900px;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 255, 255, 0.08); /* Sharper white arc */
-    background: radial-gradient(circle at 0% 50%, rgba(245, 158, 11, 0.1) 0%, transparent 100%);
-    box-shadow: -20px 0 80px rgba(0, 0, 0, 0.5);
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
   }
 
   .neon-border {
@@ -112,6 +140,12 @@
   }
 }
 
+.logo-gradient {
+  background: linear-gradient(to right, #f97316, #6366f1);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
 /* Mermaid Customization */
 .mermaid svg {
   background-color: transparent !important;
@@ -119,7 +153,7 @@
 }
 .mermaid .node rect, .mermaid .node circle {
   fill: rgba(255,255,255,0.05) !important;
-  stroke: rgba(59, 130, 246, 0.4) !important;
+  stroke: rgba(245, 158, 11, 0.4) !important;
   stroke-width: 2px !important;
 }
 .mermaid .edgeLabel {
