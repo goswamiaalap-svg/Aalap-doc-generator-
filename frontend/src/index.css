@@ -1,15 +1,19 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@theme {
+  --color-fusion-bg: #08080f;
+  --color-fusion-accent: #8b5cf6;
+  --color-fusion-blue: #3b82f6;
+  --color-fusion-border: rgba(255, 255, 255, 0.05);
+  --color-fusion-text-main: rgba(255, 255, 255, 0.65);
+  --color-fusion-text-muted: rgba(255, 255, 255, 0.35);
+  
+  --font-inter: 'Inter', system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
 
 :root {
-  --fusion-bg: #08080f;
-  --fusion-accent: #8b5cf6;
-  --fusion-accent-glow: rgba(139, 92, 246, 0.4);
-  --fusion-blue: #3b82f6;
-  --fusion-border: rgba(255, 255, 255, 0.05);
-  --fusion-text-main: rgba(255, 255, 255, 0.65);
-  --fusion-text-muted: rgba(255, 255, 255, 0.35);
+  background-color: #08080f;
 }
 
 * {
@@ -19,9 +23,9 @@
 }
 
 body {
-  background-color: var(--fusion-bg);
+  background-color: #08080f;
   color: white;
-  font-family: 'Inter', -apple-system, system-ui, sans-serif;
+  font-family: 'Inter', -apple-system, sans-serif;
   min-height: 100vh;
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
@@ -81,15 +85,45 @@ body {
   filter: blur(90px);
 }
 
+/* CUSTOM CORE UTILITIES */
+@layer components {
+  .fusion-btn-primary {
+    background-color: white !important;
+    color: #08080f !important;
+    font-size: 14px;
+    font-weight: 700;
+    padding: 10px 24px;
+    border-radius: 9999px !important;
+    transition: all 0.2s ease;
+    cursor: pointer;
+    border: none;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .fusion-btn-primary:hover {
+    background-color: rgba(255, 255, 255, 0.9) !important;
+    transform: scale(1.02);
+  }
+
+  .glass-panel {
+    background: rgba(255, 255, 255, 0.02) !important;
+    border: 1px solid rgba(255, 255, 255, 0.07) !important;
+    backdrop-filter: blur(24px);
+  }
+
+  .body-text {
+    font-size: 15px;
+    color: rgba(255, 255, 255, 0.65);
+    line-height: 1.8;
+  }
+}
+
 /* ANIMATIONS */
 @keyframes fadeUp {
   from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.85); }
 }
 
 @keyframes typingBounce {
@@ -104,7 +138,6 @@ body {
 /* SCROLLBARS */
 ::-webkit-scrollbar {
   width: 4px;
-  height: 4px;
 }
 
 ::-webkit-scrollbar-track {
@@ -120,72 +153,8 @@ body {
   background: rgba(139, 92, 246, 0.4);
 }
 
-/* TYPOGRAPHY */
-h1 {
-  font-size: 42px;
-  font-weight: 700;
-  color: white;
-  letter-spacing: -0.02em;
-  line-height: 1.15;
-}
-
-h2 {
-  font-size: 22px;
-  font-weight: 650;
-  color: white;
-  letter-spacing: -0.01em;
-}
-
-h3 {
-  font-size: 17px;
-  font-weight: 600;
-  color: rgba(255, 255, 255, 0.85);
-}
-
-.body-text {
-  font-size: 15px;
-  color: var(--fusion-text-main);
-  line-height: 1.8;
-}
-
-.mono-text {
-  font-family: 'JetBrains Mono', 'Fira Code', monospace;
-}
-
 /* GLOBAL SELECTION */
 ::selection {
   background: rgba(139, 92, 246, 0.25);
   color: white;
-}
-
-/* CUSTOM BUTTONS & COMPONENTS */
-.fusion-btn-primary {
-  background: white;
-  color: #08080f;
-  font-size: 14px;
-  font-weight: 700;
-  padding: 10px 22px;
-  border-radius: 999px;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  border: none;
-}
-
-.fusion-btn-primary:hover {
-  background: rgba(255, 255, 255, 0.88);
-  transform: scale(1.02);
-}
-
-.fusion-btn-primary:active {
-  transform: scale(0.98);
-}
-
-.glass-panel {
-  background: rgba(255, 255, 255, 0.02);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(24px);
-}
-
-.no-scrollbar::-webkit-scrollbar {
-  display: none;
 }
