@@ -346,6 +346,12 @@ const CodeGenerator: React.FC = () => {
                     className="w-full h-full min-h-[400px] bg-transparent p-8 font-mono text-[13px] text-gray-400 resize-none outline-none placeholder:text-gray-700 custom-scrollbar"
                   />
                   {!code && <div className="absolute inset-0 flex items-center justify-center opacity-10 pointer-events-none uppercase font-black tracking-[1em] text-4xl -rotate-12">Neural Pure</div>}
+                  {isDragging && (
+                     <div className="absolute inset-x-4 inset-y-4 rounded-2xl bg-blue-500/20 backdrop-blur-md border-2 border-dashed border-blue-400 flex flex-col items-center justify-center z-50 animate-in fade-in zoom-in duration-300 pointer-events-none">
+                        <Upload size={48} className="text-blue-400 animate-bounce mb-4" />
+                        <span className="text-sm font-black uppercase tracking-[0.3em] text-white">Drop Neural Packet</span>
+                     </div>
+                   )}
                </div>
 
                <div className="p-6 bg-white/[0.03] border-t border-white/10 flex items-center justify-between">
@@ -500,7 +506,13 @@ const CodeGenerator: React.FC = () => {
         </div>
       </div>
 
-      <input type="file" ref={fileInputRef} className="hidden" onChange={handleFileUpload} />
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        className="hidden" 
+        onChange={handleFileUpload} 
+        accept=".js,.jsx,.ts,.tsx,.py,.java,.rs,.go,.cpp,.c,.h,.swift,.kt"
+      />
     </div>
   );
 };
