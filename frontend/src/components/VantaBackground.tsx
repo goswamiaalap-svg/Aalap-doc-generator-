@@ -13,7 +13,8 @@ export default function VantaBackground() {
   useEffect(() => {
     const initVanta = () => {
       // ═══════════════════════════════════════════════════════════════
-      // VANTA.HALO CONFIG SOURCE: CUSTOM REQUEST
+      // VANTA.HALO RE-CALIBRATION: LIGHTER & PERFECTLY ALIGNED
+      // Source: Custom UX Adjustment
       // ═══════════════════════════════════════════════════════════════
       if (!vantaEffect && vantaRef.current && window.VANTA) {
         setVantaEffect(
@@ -25,18 +26,18 @@ export default function VantaBackground() {
             minHeight: 200.00,
             minWidth: 200.00,
             backgroundColor: 0x131a43,
-            baseColor: 0x1a59,
-            size: 1.00,
-            amplitudeFactor: 1.00,
+            baseColor: 0x001a59, // DARKER BASE FOR SOFTER GLOW
+            size: 0.85,          // REDUCED SIZE FOR BETTER FIT
+            amplitudeFactor: 0.6, // LIGHTER/SOFT CLOUDS
             xOffset: 0,
-            yOffset: 0
+            yOffset: -0.15,      // SHIFTED DOWN BEHIND BUTTONS
+            forceAnimate: true
           })
         );
       }
     };
 
-    // Wait for external scripts to load if needed
-    const timeoutId = setTimeout(initVanta, 300);
+    const timeoutId = setTimeout(initVanta, 400);
 
     return () => {
       clearTimeout(timeoutId);
@@ -49,8 +50,11 @@ export default function VantaBackground() {
   return (
     <div 
       ref={vantaRef} 
-      className="fixed inset-0 z-0 pointer-events-none" 
-      style={{ background: '#131a43' }} 
+      className="absolute inset-0 pointer-events-none opacity-80" 
+      style={{ 
+        maskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)', 
+        WebkitMaskImage: 'linear-gradient(to bottom, black 50%, transparent 100%)' 
+      }} 
     />
   );
 }

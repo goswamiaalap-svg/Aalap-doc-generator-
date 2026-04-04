@@ -6,7 +6,8 @@ import {
   FileCode,
   CheckCircle2,
   AlertCircle,
-  Activity
+  Activity,
+  Cpu
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import MarkdownRenderer from '../components/MarkdownRenderer';
@@ -35,7 +36,7 @@ const CodeGenerator: React.FC = () => {
   };
 
   const handleGenerate = async () => {
-    if (!code.trim()) return toast.error('SOURCE BUFFER EMPTY');
+    if (!code.trim()) return toast.error('INPUT REQUIRED');
     setIsGenerating(true);
     setResults({ DOCSTRINGS: '', README: '', API_REF: '', DIAGRAM: '', SECURITY: '', PERFORMANCE: '', TESTS: '', QUALITY: '' });
     
@@ -46,7 +47,7 @@ const CodeGenerator: React.FC = () => {
         body: JSON.stringify({ code, language }),
       });
 
-      if (!response.ok) throw new Error('API SYNC FAILED');
+      if (!response.ok) throw new Error('Generation failed');
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
@@ -65,7 +66,7 @@ const CodeGenerator: React.FC = () => {
       }
       toast.success('NEURAL SCAN COMPLETE');
     } catch (err: any) {
-      toast.error('CONNECTION INTERRUPTED');
+      toast.error('SYNC ENCOUNTERED INTERRUPT');
     } finally {
       setIsGenerating(false);
     }
@@ -74,73 +75,78 @@ const CodeGenerator: React.FC = () => {
   const score = results.QUALITY ? parseInt(results.QUALITY) : 0;
 
   return (
-    <div className="flex-1 flex flex-col p-8 lg:p-12 gap-8 animate-fade-up relative z-10 h-[calc(100vh-64px)]">
+    <div className="flex-1 flex flex-col p-12 lg:p-16 gap-10 animate-apple-in relative z-10 h-[calc(100vh-40px)] bg-[#000000]">
       
-      <div className="flex flex-col xl:flex-row gap-10 items-stretch h-full overflow-hidden">
+      <div className="flex flex-col xl:flex-row gap-12 items-stretch h-full overflow-hidden">
         
-        {/* INPUT PANEL — FUSIONAI GLASS */}
+        {/* 🍏 INPUT PANEL — APPLE MINIMALIST SOBRIETY */}
         <div className="xl:w-[45%] flex flex-col min-h-0">
-           <div className="flex items-center justify-between mb-4">
-              <span className="text-[15px] font-bold text-white tracking-tight">Source Input</span>
-              <div className="flex items-center gap-2">
+           <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2.5">
+                 <Cpu size={16} className="text-white/40" />
+                 <span className="text-[14px] font-bold text-white tracking-tight">Source Logic</span>
+              </div>
+              <div className="flex items-center gap-3">
                  <select 
                     value={language} onChange={e => setLanguage(e.target.value)}
-                    className="bg-white/5 border border-white/10 rounded-xl px-3.5 py-1.5 text-[13.5px] text-white/50 outline-none hover:bg-white/10 hover:text-white transition-all cursor-pointer"
+                    className="bg-[#1c1c1e] border border-white/[0.08] rounded-xl px-4 py-2 text-[12.5px] text-white/60 outline-none hover:text-white transition-all cursor-pointer font-medium"
                  >
                     <option value="javascript">JavaScript / React</option>
                     <option value="typescript">TypeScript</option>
                     <option value="python">Python</option>
                     <option value="rust">Rust</option>
+                    {/* 🍎 NEW LANGUAGES ADDED */}
+                    <option value="cpp">C++ (Standard)</option>
+                    <option value="java">Java (Oracle)</option>
+                    <option value="go">Golang</option>
+                    <option value="swift">Swift (Apple Native)</option>
+                    <option value="php">PHP (Modern)</option>
                  </select>
-                 <button className="p-2 rounded-xl bg-white/5 border border-white/10 text-white/30 hover:text-white transition-all">
-                    <Settings size={16} />
-                 </button>
               </div>
            </div>
 
-           <div className="flex-1 relative transition-all duration-300 rounded-3xl border card-glass border-white/[0.08]">
+           <div className="flex-1 bg-[#161617] border border-white/[0.08] rounded-2xl relative transition-all duration-300">
               <textarea 
                 value={code} onChange={e => setCode(e.target.value)}
-                placeholder="Paste raw source logic or drag a file here..."
-                className="w-full h-full bg-transparent p-6 font-['JetBrains_Mono'] text-[13px] text-white/70 resize-none outline-none placeholder:text-white/15 custom-scrollbar"
+                placeholder="Paste code or drop file here..."
+                className="w-full h-full bg-transparent p-7 font-['JetBrains_Mono'] text-[13px] text-white/50 resize-none outline-none placeholder:text-white/10 custom-scrollbar leading-[1.6]"
               />
            </div>
            
-           <div className="mt-2 text-[10px] text-white/20 text-right tracking-[0.05em] font-bold uppercase">
-              {code.length.toLocaleString()} PROTOCOLS BUFFERED
-           </div>
-
-           <div className="flex gap-3 mt-4">
-              <button 
-                onClick={() => fileInputRef.current?.click()}
-                className="bg-white/[0.05] border border-white/[0.1] rounded-2xl px-6 h-[48px] text-[13.5px] font-bold text-white/50 hover:bg-white/[0.08] hover:text-white transition-all active:scale-95 outline-none"
-              >
-                 Select File
-              </button>
-              <button 
-                onClick={handleGenerate} disabled={isGenerating || !code.trim()}
-                className={`flex-1 rounded-2xl h-[48px] text-[14.5px] font-bold transition-all flex items-center justify-center gap-2 shadow-lg active:scale-98 relative overflow-hidden ${
-                   isGenerating || !code.trim()
-                   ? 'bg-white/5 text-white/30 cursor-not-allowed border border-white/5'
-                   : 'bg-white text-[#0a0a12] hover:bg-white/88'
-                }`}
-              >
-                 {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Zap size={16} fill="currentColor" />}
-                 {isGenerating ? 'Synthesizing...' : 'Generate Docs'}
-              </button>
+           <div className="flex justify-between items-center mt-6">
+              <span className="text-[10px] text-white/15 font-bold uppercase tracking-[0.06em]">
+                {code.length.toLocaleString()} BYTES IN BUFFER
+              </span>
+              <div className="flex gap-3">
+                <button 
+                  onClick={() => fileInputRef.current?.click()}
+                  className="apple-btn-outline px-6 text-[13px]"
+                >
+                   File Input
+                </button>
+                <button 
+                  onClick={handleGenerate} disabled={isGenerating || !code.trim()}
+                  className={`apple-btn-white px-10 text-[14px] flex items-center justify-center gap-2 ${
+                     isGenerating || !code.trim() ? 'opacity-20 cursor-not-allowed' : 'opacity-100'
+                  }`}
+                >
+                   {isGenerating ? <Loader2 size={16} className="animate-spin" /> : <Zap size={14} fill="currentColor" />}
+                   {isGenerating ? 'Synthesizing...' : 'Generate Docs'}
+                </button>
+              </div>
            </div>
         </div>
 
-        {/* OUTPUT PANEL — FUSIONAI GLASS */}
+        {/* 🍎 OUTPUT PANEL — APPLE CLEAN MINIMALISM */}
         <div className="xl:w-[55%] flex flex-col min-h-0">
-           <div className="flex items-center gap-2 mb-5 overflow-x-auto no-scrollbar py-1">
+           <div className="flex items-center gap-4 mb-6 overflow-x-auto no-scrollbar py-1">
               {(['DOCSTRINGS', 'README', 'API_REF', 'DIAGRAM', 'SECURITY', 'PERFORMANCE', 'TESTS', 'QUALITY'] as TabType[]).map(tab => (
                 <button 
                   key={tab} onClick={() => setActiveTab(tab)}
-                  className={`shrink-0 px-4.5 py-2.5 rounded-xl text-[12px] uppercase font-bold tracking-[0.06em] transition-all border ${
+                  className={`shrink-0 px-5 py-2.5 rounded-xl text-[11px] uppercase font-bold tracking-[0.05em] transition-all ${
                      activeTab === tab 
-                       ? 'bg-[#7c3aed]/15 border-[#7c3aed]/35 text-[#a78bfa] shadow-inner' 
-                       : 'bg-white/[0.03] border-white/[0.07] text-white/35 hover:bg-white/[0.06] hover:text-white/60'
+                       ? 'bg-white text-black' 
+                       : 'bg-white/[0.04] text-white/30 hover:bg-white/[0.08] hover:text-white/60'
                   }`}
                 >
                    {tab.replace('_', ' ')}
@@ -148,75 +154,58 @@ const CodeGenerator: React.FC = () => {
               ))}
            </div>
 
-           <div className="flex-1 bg-transparent border border-white/[0.07] rounded-3xl p-8 overflow-y-auto custom-scrollbar backdrop-blur-[4px]">
+           <div className="flex-1 bg-[#161617] border border-white/[0.08] rounded-2xl p-10 overflow-y-auto custom-scrollbar">
               {!Object.values(results).some(v => v.length > 5) && !isGenerating ? (
                  <div className="h-full flex flex-col items-center justify-center text-center opacity-10">
-                    <div className="w-16 h-16 rounded-3xl bg-white/5 flex items-center justify-center mb-6">
-                       <FileCode size={32} />
-                    </div>
-                    <h2 className="text-[17px] font-bold text-white uppercase tracking-widest mb-2">Neural Output Idle</h2>
-                    <p className="text-[13px] text-white/60 max-w-[200px]">Waiting for a code segment to start cognitive synthesis.</p>
+                    <h2 className="text-[16px] font-bold text-white uppercase tracking-[0.08em]">Output Area</h2>
+                    <p className="text-[12px] text-white/50 max-w-[200px] mt-4 font-medium">Ready for neural documentation synthesis.</p>
                  </div>
               ) : (
-                <div className="animate-fade-up h-full">
+                <div className="h-full">
                   {activeTab === 'QUALITY' ? (
-                     <div className="flex flex-col items-center justify-center h-full gap-12 py-6">
-                        {/* FUSIONAI SCORE RING */}
+                     <div className="flex flex-col items-center justify-center h-full gap-16 py-6">
+                        {/* 🍎 APPLE CLEAN SCORE */}
                         <div className="relative">
-                           <svg width="140" height="140" viewBox="0 0 140 140" className="transform -rotate-90">
-                              <defs>
-                                 <linearGradient id="qualGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                    <stop offset="0%" stopColor="#7c3aed" />
-                                    <stop offset="100%" stopColor="#3b82f6" />
-                                 </linearGradient>
-                              </defs>
-                              <circle cx="70" cy="70" r="62" stroke="rgba(255,255,255,0.06)" strokeWidth="8" fill="transparent" />
+                           <svg width="150" height="150" viewBox="0 0 150 150" className="transform -rotate-90">
+                              <circle cx="75" cy="75" r="68" stroke="rgba(255,255,255,0.04)" strokeWidth="6" fill="transparent" />
                               <circle 
-                                cx="70" cy="70" r="62" 
-                                stroke="url(#qualGradient)" 
-                                strokeWidth="8" 
+                                cx="75" cy="75" r="68" 
+                                stroke="#ffffff" 
+                                strokeWidth="6" 
                                 fill="transparent" 
-                                strokeDasharray={389.5} 
-                                strokeDashoffset={389.5 - (389.5 * score * 10) / 100} 
+                                strokeDasharray={427} 
+                                strokeDashoffset={427 - (427 * score * 10) / 100} 
                                 strokeLinecap="round" 
-                                className="transition-all duration-[1200ms] ease-out drop-shadow-[0_0_8px_rgba(124,58,237,0.4)]" 
+                                className="transition-all duration-[1500ms] ease-out opacity-80" 
                               />
                            </svg>
                            <div className="absolute inset-0 flex items-center justify-center">
                               <div className="flex flex-col items-center">
-                                 <div className="flex items-baseline">
-                                    <span className="text-[40px] font-bold text-white tracking-tighter leading-none">{score}</span>
-                                    <span className="text-[15px] font-bold text-white/35 ml-0.5">/10</span>
-                                 </div>
-                                 <span className="text-[10px] font-bold text-white/40 uppercase tracking-[0.1em] mt-1">QUALITY</span>
+                                 <span className="text-[48px] font-bold text-white tracking-[-0.05em] leading-none">{score}</span>
+                                 <span className="text-[10px] font-bold text-white/20 uppercase tracking-[0.12em] mt-3">QUALITY</span>
                               </div>
                            </div>
                         </div>
                         
-                        {/* DIMENSION BARS */}
-                        <div className="w-full max-w-[400px] space-y-7">
+                        {/* 🍏 DIMENSION BARS (SOBER) */}
+                        <div className="w-full max-w-[340px] space-y-8">
                            {[
-                              { label: 'Clarity', val: score + 0.5, icon: <CheckCircle2 size={13} /> },
-                              { label: 'Completeness', val: score - 0.5, icon: <Activity size={13} /> },
-                              { label: 'Architecture', val: score + 0.2, icon: <FileCode size={13} /> },
-                              { label: 'Maintainability', val: score - 0.2, icon: <AlertCircle size={13} /> }
+                              { label: 'Clarity', val: score + 0.5 },
+                              { label: 'Completeness', val: score - 0.5 },
+                              { label: 'Architecture', val: score + 0.2 },
+                              { label: 'Maintainability', val: score - 0.2 }
                            ].map((dim, i) => (
-                             <div key={dim.label} className="space-y-2.5">
-                                <div className="flex justify-between items-center text-[12px] font-medium uppercase tracking-[0.05em]">
-                                   <div className="flex items-center gap-2 text-white/50">
-                                      {dim.icon}
-                                      {dim.label}
-                                   </div>
-                                   <span className="text-white">{Math.min(10, Math.max(0, dim.val)).toFixed(1)}</span>
+                             <div key={dim.label} className="space-y-3">
+                                <div className="flex justify-between items-center text-[11px] font-bold uppercase tracking-[0.05em] text-white/20">
+                                   <span>{dim.label}</span>
+                                   <span className="text-white/60">{Math.min(10, Math.max(0, dim.val)).toFixed(1)}</span>
                                 </div>
-                                <div className="h-[5px] w-full bg-white/[0.06] rounded-full overflow-hidden">
+                                <div className="h-[3px] w-full bg-white/[0.04] rounded-full overflow-hidden">
                                    <div 
-                                     className={`h-full rounded-full transition-all duration-[1000ms] ease-out ${
-                                       dim.val >= 8 ? 'bg-[#22c55e]' : dim.val >= 6 ? 'bg-[#f59e0b]' : 'bg-[#ef4444]'
-                                     }`}
+                                     className="h-full bg-white transition-all duration-[1000ms] ease-out opacity-60"
                                      style={{ 
                                        width: `${Math.min(10, Math.max(0, dim.val)) * 10}%`,
-                                       transitionDelay: `${i * 150}ms`
+                                       transitionDelay: `${i * 100}ms`
                                      }}
                                     />
                                 </div>
@@ -226,14 +215,14 @@ const CodeGenerator: React.FC = () => {
                      </div>
                   ) : (
                      <div className="prose prose-invert max-w-none 
-                         text-[15px] text-white/65 leading-[1.8]
+                         text-[16px] text-white/45 leading-[1.8] font-medium
                          prose-headings:text-white prose-headings:font-bold
-                         prose-h2:text-[18px] prose-h2:mt-8 prose-h2:mb-3
-                         prose-a:text-indigo-400
-                         prose-code:text-white/90 prose-code:bg-white/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded-lg prose-code:before:content-none prose-code:after:content-none prose-code:font-['JetBrains_Mono']
-                         prose-pre:bg-black/40 prose-pre:border prose-pre:border-white/5 prose-pre:rounded-xl prose-pre:p-5
+                         prose-h2:text-[20px] prose-h2:mt-10 prose-h2:mb-4
+                         prose-a:text-white/60 prose-a:underline hover:prose-a:text-white
+                         prose-code:text-white/90 prose-code:bg-white/5 prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:before:content-none prose-code:after:content-none prose-code:font-['JetBrains_Mono']
+                         prose-pre:bg-black/50 prose-pre:border prose-pre:border-white/5 prose-pre:rounded-xl prose-pre:p-7
                      ">
-                        <MarkdownRenderer content={results[activeTab] || (isGenerating ? '# Neural scan initiated...\nSearching for semantic patterns...' : '# Waiting for buffer...')} />
+                        <MarkdownRenderer content={results[activeTab] || (isGenerating ? '# Neural analysis initiated...' : '# Ready to process code entry...')} />
                      </div>
                   )}
                 </div>

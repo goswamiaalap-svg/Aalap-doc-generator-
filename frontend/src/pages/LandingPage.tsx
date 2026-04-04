@@ -1,94 +1,83 @@
 import { Link } from 'react-router-dom';
 import { 
-  Code2, 
-  Search, 
-  Zap, 
   ArrowRight,
+  Search,
+  Code2,
   Shield,
   Layers,
-  Activity
+  Activity,
+  Zap,
+  Globe
 } from 'lucide-react';
-import VantaBackground from '../components/VantaBackground';
 
 export default function LandingPage() {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center pt-32 pb-20 px-8 relative animate-fade-up">
+    <div className="flex-1 flex flex-col items-center justify-center pt-48 pb-32 px-8 relative z-10 animate-apple-in max-w-[1400px] mx-auto bg-[#000000]">
       
-      {/* ═══════════════════════════════════════════════════════════════
-         3D VANTA.HALO BACKGROUND LAYER (FRONT-PAGE ONLY)
-         This layer is fixed behind the content on THIS page only.
-         ═══════════════════════════════════════════════════════════════ */}
-      <VantaBackground />
-
-      <div className="max-w-[1000px] w-full text-center mb-28 relative z-10">
-        {/* STATUS BADGE — FUSIONAI STYLE */}
-        <div className="flex items-center justify-center gap-2 mb-10 animate-fade-up [animation-delay:100ms]">
-           <div className="px-3.5 py-1 rounded-full bg-[#7c3aed]/10 border border-[#7c3aed]/25 text-[11px] font-bold text-[#a78bfa] tracking-[0.08em] uppercase">
-             VERSION 2.4.0 ALPHA
-           </div>
-        </div>
-
-        {/* HERO TITLE — GRADIENT HEADLINE SOURCE: FUSIONAI */}
-        <h1 className="text-5xl md:text-7xl font-bold tracking-[-0.03em] leading-[1.1] text-white mb-10 animate-fade-up [animation-delay:200ms]">
-          Streamline your <br/>
-          <span className="bg-gradient-to-r from-[#8b5cf6] to-[#6366f1] bg-clip-text text-transparent">Documentation</span> Lifecycle
+      {/* 🍏 APPLE MINIMALIST HERO */}
+      <div className="w-full text-center mb-36">
+        
+        {/* HERO TITLE — APPLE CRISP SOBRIETY */}
+        <h1 className="text-6xl md:text-8xl font-bold tracking-[-0.045em] leading-[1.0] text-white selection:bg-blue-500 mb-12">
+          Documentation. <br/>
+          <span className="text-white/40">Synthesized.</span>
         </h1>
 
-        <p className="text-lg md:text-xl text-white/55 max-w-2xl mx-auto mb-12 leading-relaxed animate-fade-up [animation-delay:300ms]">
-          Deploying the world's most advanced neural engine for automated code analysis, README generation, and interactive technical guides.
+        <p className="text-lg md:text-xl text-white/45 max-w-xl mx-auto mb-14 leading-[1.5] font-medium tracking-tight">
+          A minimalist engine for technical artifacts. Analyze logic, generate references, and deploy instant guides.
         </p>
 
-        {/* CTA BUTTONS — FUSIONAI EXACT PILL STYLE */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-5 animate-fade-up [animation-delay:400ms]">
-           <Link to="/docs" className="fusion-btn-primary min-w-[180px] h-[52px]">
-              Get Started
+        {/* PRO BUTTONS — APPLE PILLS */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
+           <Link to="/docs" className="apple-btn-white min-w-[200px] h-[58px] flex items-center justify-center text-[16px]">
+              Explore Platform
            </Link>
-           <Link to="/codegen" className="fusion-btn-secondary min-w-[180px] h-[52px] group">
-              Launch Neuro-Engine
-              <ArrowRight size={16} className="ml-1.5 opacity-40 group-hover:opacity-100 group-hover:translate-x-0.5 transition-all" />
+           <Link to="/codegen" className="apple-btn-outline min-w-[200px] h-[58px] flex items-center justify-center text-[16px] group">
+              Neural Studio
+              <ArrowRight size={18} className="ml-2 group-hover:translate-x-0.5 transition-transform text-white/40" />
            </Link>
         </div>
       </div>
 
-      {/* FEATURE GRID — FUSIONAI HIGH-GLOSS FROSTED CARDS */}
-      <div className="max-w-[1200px] w-full grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-up [animation-delay:500ms] relative z-10">
+      {/* 🍎 APPLE MINIMALIST FEATURES GRID */}
+      <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-12 border-t border-white/[0.06] pt-24 px-4 md:px-0">
         {[
           {
-            icon: <Search size={20} className="text-[#60a5fa]" />,
-            title: "Neural Search",
-            desc: "Instantly query your documentation store using our Groq-powered AI conversational agent."
+            icon: <Globe size={24} className="text-white/40" />,
+            title: "Global Sync",
+            desc: "Synchronize documentation artifacts to edge locations in milliseconds."
           },
           {
-            icon: <Code2 size={20} className="text-[#a78bfa]" />,
-            title: "Auto-Gen Engine",
-            desc: "Convert raw source logic into professional API references, READMEs, and technical diagrams."
+            icon: <Code2 size={24} className="text-white/40" />,
+            title: "Cross-Language",
+            desc: "Supports C++, Java, Rust, and TypeScript with native neural decoding."
           },
           {
-            icon: <Shield size={20} className="text-[#34d399]" />,
-            title: "Alpha Security",
-            desc: "AES-256 rotation protocols ensure your proprietary logic remains segmented and secure."
+            icon: <Shield size={24} className="text-white/40" />,
+            title: "Private Core",
+            desc: "AES-256 rotation ensures internal proprietary logic is never surfaced."
           }
         ].map((feature, i) => (
-          <div key={i} className="bg-white/[0.04] border border-white/[0.08] backdrop-blur-xl p-8 rounded-2xl hover:bg-white/[0.07] hover:border-[#7c3aed]/30 hover:-translate-y-1 transition-all duration-300 flex flex-col group cursor-pointer">
-            <div className="w-10 h-10 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+          <div key={i} className="flex flex-col group py-4 transition-opacity">
+            <div className="mb-8 opacity-40 group-hover:opacity-100 transition-opacity">
                {feature.icon}
             </div>
-            <h3 className="text-[17px] font-bold text-white mb-3 tracking-[-0.01em]">{feature.title}</h3>
-            <p className="text-[14px] text-white/45 leading-relaxed font-medium">{feature.desc}</p>
+            <h3 className="text-[20px] font-bold text-white mb-4 tracking-tight">{feature.title}</h3>
+            <p className="text-[15px] text-white/40 leading-[1.6] font-medium">{feature.desc}</p>
           </div>
         ))}
       </div>
 
-      {/* FOOTER STATS — FUSIONAI MINIMAL FOOTER */}
-      <div className="mt-32 w-full max-w-[1200px] flex flex-col md:flex-row items-center justify-between border-t border-white/[0.05] pt-12 gap-8 opacity-40 grayscale hover:grayscale-0 transition-all relative z-10">
-         <div className="flex items-center gap-7">
+      {/* 🍏 APPLE SIMPLE FOOTER SYNC */}
+      <div className="mt-48 w-full flex flex-col md:flex-row items-center justify-between border-t border-white/[0.05] pt-12 gap-8 opacity-40 grayscale hover:grayscale-0 transition-opacity">
+         <div className="flex items-center gap-8">
             <Layers size={18} />
             <Activity size={18} />
             <Shield size={18} />
             <Zap size={18} />
          </div>
-         <div className="text-[11px] font-bold tracking-[0.12em] uppercase text-white/50">
-            © 2026 HGM-06 NEURAL HUB / POWERED BY VERCEL & GROQ
+         <div className="text-[11px] font-bold tracking-[0.1em] text-white/50 uppercase">
+            © 2026 HGM-06 LABS — MINIMALIST ARCHIVE ENGINE
          </div>
       </div>
       
