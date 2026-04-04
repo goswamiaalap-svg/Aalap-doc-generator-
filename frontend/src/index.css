@@ -94,11 +94,12 @@
 
   .radiant-arc {
     position: absolute;
-    width: 600px;
-    height: 600px;
+    width: 900px;
+    height: 900px;
     border-radius: 50%;
-    border: 1px solid rgba(245, 158, 11, 0.1);
-    background: radial-gradient(circle at 50% 50%, rgba(245, 158, 11, 0.05) 0%, transparent 70%);
+    border: 1px solid rgba(255, 255, 255, 0.08); /* Sharper white arc */
+    background: radial-gradient(circle at 0% 50%, rgba(245, 158, 11, 0.1) 0%, transparent 100%);
+    box-shadow: -20px 0 80px rgba(0, 0, 0, 0.5);
   }
 
   .neon-border {

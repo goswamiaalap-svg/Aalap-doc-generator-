@@ -27,11 +27,12 @@ export default function Layout() {
   return (
     <div className="min-h-screen bg-[#020617] text-white flex flex-col font-sans selection:bg-blue-500/30">
       
-      {/* RADIANT BACKGROUND EFFECTS */}
-      <div className="fixed top-0 left-0 w-full h-full pointer-events-none z-0">
-        <div className="absolute top-[-10%] left-[-10%] w-[800px] h-[800px] bg-amber-600/10 blur-[140px] rounded-full animate-pulse-slow" />
-        <div className="radiant-arc top-[10%] left-[-5%] ring-1 ring-amber-500/10" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-yellow-600/5 blur-[120px] rounded-full" />
+      {/* DUAL-TONE RADIANT BACKGROUND (Canva Inspired) */}
+      <div className="fixed inset-0 pointer-events-none z-0 overflow-hidden">
+        {/* GLOBAL NEON OVERLAYS: Dual-Tone Gold & Blue */}
+      <div className="absolute top-[-10%] left-[-20%] w-[1200px] h-[1200px] bg-amber-600/15 blur-[180px] rounded-full animate-pulse-slow pointer-events-none" />
+      <div className="radiant-arc top-[5%] left-[-15%] opacity-40 pointer-events-none rotate-6" />
+      <div className="absolute bottom-[-20%] right-[-15%] w-[1000px] h-[1000px] bg-blue-600/10 blur-[160px] rounded-full animate-pulse delay-700 pointer-events-none" />
       </div>
 
       {/* TOP NAVIGATION: ULTIMATE GLASSMORPHY */}

@@ -156,9 +156,9 @@ export default function DocumentationViewer() {
   return (
     <div className="flex h-[calc(100vh-5rem)] bg-[#020617] text-white flex-col md:flex-row relative overflow-hidden transition-all duration-700">
       
-      {/* Subtle Background Glow */}
-      <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-amber-600/5 blur-[120px] rounded-full pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-[400px] h-[400px] bg-yellow-600/5 blur-[120px] rounded-full pointer-events-none" />
+      {/* Dual-Tone Background Glow: Gold (Top Left) & Blue (Bottom Right) */}
+      <div className="absolute top-[-10%] left-[-10%] w-[600px] h-[600px] bg-amber-600/10 blur-[130px] rounded-full pointer-events-none animate-pulse-slow" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[500px] h-[500px] bg-blue-600/10 blur-[120px] rounded-full pointer-events-none animate-pulse delay-700" />
 
       {/* LEFT SIDEBAR: NAV STACK */}
       <aside className="w-full md:w-80 flex flex-col border-r border-white/5 bg-black/20 backdrop-blur-xl z-20 overflow-hidden pt-4">

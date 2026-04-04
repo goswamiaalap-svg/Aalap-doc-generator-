@@ -255,10 +255,10 @@ const CodeGenerator: React.FC = () => {
   return (
     <div className="min-h-full pb-12 px-4 sm:px-6 lg:px-8 bg-[#020617] relative overflow-hidden">
       
-      {/* Visual Ambiance */}
-      <div className="absolute top-[-15%] left-[-10%] w-[600px] h-[600px] bg-amber-600/10 blur-[140px] rounded-full animate-pulse-slow" />
-      <div className="radiant-arc top-[20%] left-[-5%] rotate-[-15deg] opacity-20" />
-      <div className="absolute bottom-10 right-[-5%] w-[500px] h-[500px] bg-yellow-600/10 blur-[130px] rounded-full" />
+      {/* Visual Ambiance: Dual-Tone Gold & Blue */}
+      <div className="absolute top-[-10%] left-[-15%] w-[800px] h-[800px] bg-amber-600/10 blur-[150px] rounded-full animate-pulse-slow pointer-events-none" />
+      <div className="radiant-arc top-[10%] left-[-10%] opacity-20 pointer-events-none rotate-[-15deg]" />
+      <div className="absolute bottom-[-15%] right-[-10%] w-[700px] h-[700px] bg-blue-600/10 blur-[130px] rounded-full animate-pulse delay-1000 pointer-events-none" />
 
       <div className="max-w-[1600px] mx-auto relative z-10">
         

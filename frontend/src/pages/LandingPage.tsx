@@ -12,10 +12,10 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#020617] text-white flex flex-col relative overflow-hidden selection:bg-blue-500/30">
       
-      {/* GLOBAL NEON OVERLAYS */}
-      <div className="absolute top-[-10%] left-[-15%] w-[800px] h-[800px] bg-amber-600/10 blur-[150px] rounded-full animate-pulse-slow pointer-events-none" />
-      <div className="radiant-arc top-[10%] left-[-10%] opacity-20 pointer-events-none rotate-12" />
-      <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-orange-600/5 blur-[140px] rounded-full animate-pulse delay-700 pointer-events-none" />
+      {/* GLOBAL NEON OVERLAYS: Dual-Tone Gold (Left) & Blue (Right) */}
+      <div className="absolute top-[-10%] left-[-20%] w-[1200px] h-[1200px] bg-amber-600/15 blur-[180px] rounded-full animate-pulse-slow pointer-events-none" />
+      <div className="radiant-arc top-[5%] left-[-15%] opacity-30 pointer-events-none rotate-6" />
+      <div className="absolute bottom-[-15%] right-[-10%] w-[1000px] h-[1000px] bg-blue-600/10 blur-[150px] rounded-full animate-pulse delay-1000 pointer-events-none" />
 
       {/* FLOATING HEADER */}
       <nav className="fixed top-0 inset-x-0 z-50 h-20 backdrop-blur-md bg-black/20 border-b border-white/5 px-8 flex items-center justify-between">
