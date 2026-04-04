@@ -8,12 +8,19 @@ import {
   Layers,
   Activity
 } from 'lucide-react';
+import VantaBackground from '../components/VantaBackground';
 
 export default function LandingPage() {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center pt-32 pb-20 px-8 relative z-10 animate-fade-up">
+    <div className="flex-1 flex flex-col items-center justify-center pt-32 pb-20 px-8 relative animate-fade-up">
       
-      <div className="max-w-[1000px] w-full text-center mb-28">
+      {/* ═══════════════════════════════════════════════════════════════
+         3D VANTA.HALO BACKGROUND LAYER (FRONT-PAGE ONLY)
+         This layer is fixed behind the content on THIS page only.
+         ═══════════════════════════════════════════════════════════════ */}
+      <VantaBackground />
+
+      <div className="max-w-[1000px] w-full text-center mb-28 relative z-10">
         {/* STATUS BADGE — FUSIONAI STYLE */}
         <div className="flex items-center justify-center gap-2 mb-10 animate-fade-up [animation-delay:100ms]">
            <div className="px-3.5 py-1 rounded-full bg-[#7c3aed]/10 border border-[#7c3aed]/25 text-[11px] font-bold text-[#a78bfa] tracking-[0.08em] uppercase">
@@ -44,7 +51,7 @@ export default function LandingPage() {
       </div>
 
       {/* FEATURE GRID — FUSIONAI HIGH-GLOSS FROSTED CARDS */}
-      <div className="max-w-[1200px] w-full grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-up [animation-delay:500ms]">
+      <div className="max-w-[1200px] w-full grid grid-cols-1 md:grid-cols-3 gap-6 animate-fade-up [animation-delay:500ms] relative z-10">
         {[
           {
             icon: <Search size={20} className="text-[#60a5fa]" />,
@@ -73,7 +80,7 @@ export default function LandingPage() {
       </div>
 
       {/* FOOTER STATS — FUSIONAI MINIMAL FOOTER */}
-      <div className="mt-32 w-full max-w-[1200px] flex flex-col md:flex-row items-center justify-between border-t border-white/[0.05] pt-12 gap-8 opacity-40 grayscale hover:grayscale-0 transition-all">
+      <div className="mt-32 w-full max-w-[1200px] flex flex-col md:flex-row items-center justify-between border-t border-white/[0.05] pt-12 gap-8 opacity-40 grayscale hover:grayscale-0 transition-all relative z-10">
          <div className="flex items-center gap-7">
             <Layers size={18} />
             <Activity size={18} />
@@ -81,7 +88,7 @@ export default function LandingPage() {
             <Zap size={18} />
          </div>
          <div className="text-[11px] font-bold tracking-[0.12em] uppercase text-white/50">
-            © 2026 HGM-06 NEURO HUB / POWERED BY VERCEL & GROQ
+            © 2026 HGM-06 NEURAL HUB / POWERED BY VERCEL & GROQ
          </div>
       </div>
       

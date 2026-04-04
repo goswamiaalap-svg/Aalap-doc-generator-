@@ -12,7 +12,6 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { useState, useEffect } from 'react';
-import VantaBackground from './VantaBackground';
 
 export default function Layout() {
   const [scrolled, setScrolled] = useState(false);
@@ -29,9 +28,14 @@ export default function Layout() {
     <div className="min-h-screen text-white flex flex-col font-sans selection:bg-indigo-500/20 overflow-x-hidden relative">
       
       {/* ═══════════════════════════════════════════════════════════════
-         3D VANTA.HALO BACKGROUND LAYER (GLOBAL)
+         GLOBAL BASE BACKGROUND (STATIONARY BLOBS SOURCE: FUSIONAI)
+         Note: 3D Vanta moved specifically to LandingPage.tsx
          ═══════════════════════════════════════════════════════════════ */}
-      <VantaBackground />
+      <div className="fusion-bg-layer">
+        <div className="fusion-blob-top"></div>
+        <div className="fusion-blob-mid"></div>
+        <div className="fusion-blob-bottom"></div>
+      </div>
 
       {/* WRAP CONTENT IN RELATIVE Z-10 CONTAINER */}
       <div className="relative z-10 flex flex-col min-h-screen">
@@ -147,7 +151,7 @@ export default function Layout() {
             </aside>
 
             {/* MAIN VIEWER AREA */}
-            <main className="flex-1 min-w-0 overflow-y-auto animate-fade-up bg-transparent">
+            <main className="flex-1 min-w-0 overflow-y-auto animate-fade-up bg-transparent relative">
                <Outlet />
             </main>
 
