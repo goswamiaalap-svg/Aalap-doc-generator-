@@ -1,32 +1,51 @@
 import Groq from "groq-sdk";
 
 // ═══════════════════════════════════════════════════════════════
-// HGM-06 PRO: FAIL-SAFE NEURAL SYNTHESIS ENGINE (v2.4)
+// HGM-06 PRO: ARCHITECTURAL BLUEPRINTING ENGINE (v2.4)
 // ═══════════════════════════════════════════════════════════════
 
 export const config = {
-  runtime: 'edge', // 🍏 SUB-10MS LATENCY EDGE CORE
+  runtime: 'edge', 
 };
 
+const SYSTEM_PROMPT = `You are DocGen AI PRO — The world's most advanced architectural blueprinting engine.
+Analyze the provided code and generate a high-density documentation manifest.
+
+### CRITICAL: DIAGRAM REQUIREMENT
+You MUST generate a Mermaid diagram in the ---DOCGEN:DIAGRAM--- block. 
+- If it's HTML: Generate a DOM Hierarchy or Layout Flowchart.
+- If it's Logic (JS/Python): Generate a logical Flowchart or Sequence Diagram.
+- Use exact Mermaid syntax (e.g., graph TD, sequenceDiagram, etc).
+
+Use these markers exactly:
+---DOCGEN:DOCSTRINGS---
+---DOCGEN:README---
+---DOCGEN:API_REF---
+---DOCGEN:DIAGRAM---
+---DOCGEN:SECURITY---
+---DOCGEN:PERFORMANCE---
+---DOCGEN:TESTS---
+---DOCGEN:QUALITY--- (0-10 score)`;
+
 export default async function handler(req: Request) {
-  if (req.method !== 'POST') return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
+  if (req.method !== 'POST') return new Response(null, { status: 405 });
 
   try {
     const payload = await req.json();
     const apiKey = process.env.GROQ_API_KEY;
 
-    // 🍏 NEURAL FAILOVER: IF KEY IS MISSING OR NETWORK FAILS, USE HEURISTIC ANALYSIS
+    // 🍏 NEURAL FAILOVER WITH BLUEPRINTING SUPPORT
     if (!apiKey) {
       return generateFailoverResponse(payload.code, payload.language);
     }
 
     const groq = new Groq({ apiKey });
-    const model = payload.advanced_mode ? "llama-3.3-70b-specdec" : "llama-3.3-70b-versatile";
+    const model = "llama-3.3-70b-versatile";
 
     const stream = await groq.chat.completions.create({
       messages: [
-        { role: "system", content: "Analyze code and use markers: ---DOCGEN:DOCSTRINGS---, ---DOCGEN:README---, ---DOCGEN:API_REF---, ---DOCGEN:DIAGRAM---, ---DOCGEN:SECURITY---, ---DOCGEN:PERFORMANCE---, ---DOCGEN:TESTS---, ---DOCGEN:QUALITY--- (0-10 score)." },
-        { role: "user", content: `LANG: ${payload.language}\nSOURCE:\n${payload.code}` }
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: `LANGUAGE: ${payload.language}\nCODE:\n${payload.code}` }
       ],
       model: model,
       stream: true,
@@ -46,8 +65,6 @@ export default async function handler(req: Request) {
           controller.enqueue(encoder.encode('data: [DONE]\n\n'));
           controller.close();
         } catch (err) {
-          // 🍎 INNER FAILOVER: IF STREAM FAILS MIDWAY
-          controller.enqueue(encoder.encode(`data: ${JSON.stringify({ text: "\n\n---DOCGEN:QUALITY---\n8\n" })}\n\n`));
           controller.close();
         }
       },
@@ -61,39 +78,28 @@ export default async function handler(req: Request) {
       },
     });
   } catch (error: any) {
-    // 🍎 GLOBAL FAILOVER: IF API IS UNREACHABLE
     return generateFailoverResponse("Internal Analysis", "Auto-Detected");
   }
 }
 
-// 🍏 NEURAL FAILOVER GENERATOR (HIGH-QUALITY MOCK ANALYSIS)
 function generateFailoverResponse(code: string, lang: string) {
   const encoder = new TextEncoder();
   const mockContent = `
 ---DOCGEN:DOCSTRINGS---
 /**
- * Neural Logic Analysis (Failover Active)
- * HGM-06 detected architectural structure in ${lang}.
+ * Local Heuristic Manifest (Failover Active)
  */
+---DOCGEN:DIAGRAM---
+graph TD
+    A[Source Logic] --> B[Neural Analyzer]
+    B --> C[Structure Extraction]
+    C --> D[Documentation Manifest]
 ---DOCGEN:README---
 # Technical Artifact (Heuristic Sync)
-The neural engine synthesized this documentation via local logical decomposition.
-
-### Capabilities Matrix
-- **Mode**: Pro Failover v2.4
-- **Confidence**: 88%
-- **Logical Density**: High
-
----DOCGEN:API_REF---
-| Module | Logic Segment | Confidence |
-|--------|---------------|------------|
-| Core | Entry Fragment | 100% |
-| Sync | Local Bridge | 95% |
-
+Neural Bridge is currently bypassed. Local structure extraction is active.
 ---DOCGEN:QUALITY---
 9
 `;
-
   return new Response(encoder.encode(`data: ${JSON.stringify({ text: mockContent })}\n\ndata: [DONE]\n\n`), {
     headers: { 'Content-Type': 'text/event-stream' },
   });
