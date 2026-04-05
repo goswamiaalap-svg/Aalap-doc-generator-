@@ -1,73 +1,76 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
 import Groq from "groq-sdk";
+
+// ═══════════════════════════════════════════════════════════════
+// HGM-06 PRO: EDGE-RUNTIME NEURAL SYNTHESIS ENGINE
+// ═══════════════════════════════════════════════════════════════
+
+export const config = {
+  runtime: 'edge', // 🍏 FORCE EDGE RUNTIME FOR STREAMING RELIABILITY
+};
 
 const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
 
-const SYSTEM_PROMPT = `You are DocGen AI — the ultimate cognitive Documentation Laboratory. 
-
-GOAL: Transform raw code into enterprise-grade documentation with specialized analytical modules.
-
-OUTPUT FORMAT — use these exact markers:
+const SYSTEM_PROMPT = `You are DocGen AI PRO — the ultimate documentation engine.
+Analyze the code and output blocks using these exact markers:
 ---DOCGEN:DOCSTRINGS---
+(content)
 ---DOCGEN:README---
----DOCGEN:API_REF---
----DOCGEN:DIAGRAM---
----DOCGEN:SECURITY---
----DOCGEN:PERFORMANCE---
----DOCGEN:TESTS---
----DOCGEN:QUALITY---
+(content)
+...etc
 
-MODULES:
-- DOCSTRINGS: Produce professional docstrings (google/numpy/jsdoc).
-- README: Full Project README including tech stack & installation.
-- API_REF: Detailed function/method signatures, param tables, return types.
-- DIAGRAM: Valid Mermaid flowchart. START([Start]) -> Logic -> END([End]). Use CSS styles for nodes.
-- SECURITY: If audit_mode is true, list potential vulnerabilities, sanitization issues, and OWASP risks.
-- PERFORMANCE: If performance_mode is true, analyze Big-O, memory footprint, and suggest optimizations.
-- TESTS: Generate 3 unit test cases (Jest/PyTest) for the core logic.
-- QUALITY: Pure JSON { overall, clarity, accuracy, risk_level }.
+Markers to include: DOCSTRINGS, README, API_REF, DIAGRAM, SECURITY, PERFORMANCE, TESTS, QUALITY.
+QUALITY should be an integer score 0-10.`;
 
-RULES:
-1. NO PLACEHOLDERS.
-2. Always use valid Markdown.
-3. Use Llama 3.3 high-reasoning for security/performance analysis.
-4. If project_context is provided, use it to tailor the tone.
-5. Audience: junior | dev | senior | non-technical.`;
-
-export default async function handler(req: VercelRequest, res: VercelResponse) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-  if (!process.env.GROQ_API_KEY) return res.status(500).json({ error: 'GROQ_API_KEY not configured.' });
+export default async function handler(req: Request) {
+  if (req.method !== 'POST') return new Response(JSON.stringify({ error: 'Method not allowed' }), { status: 405 });
+  if (!process.env.GROQ_API_KEY) return new Response(JSON.stringify({ error: 'AUTHENTICATION_KEY_MISSING' }), { status: 500 });
 
   try {
-    const payload = req.body;
-    const model = payload.advanced_mode ? "llama-3.3-70b-versatile" : "llama3-70b-8192";
-    
-    res.setHeader('Content-Type', 'text/event-stream');
-    res.setHeader('Cache-Control', 'no-cache');
-    res.setHeader('Connection', 'keep-alive');
-    res.setHeader('Access-Control-Allow-Origin', '*');
+    const payload = await req.json();
+    const model = payload.advanced_mode ? "llama-3.3-70b-specdec" : "llama-3.3-70b-versatile";
 
     const stream = await groq.chat.completions.create({
       messages: [
         { role: "system", content: SYSTEM_PROMPT },
-        { role: "user", content: JSON.stringify(payload) }
+        { role: "user", content: `LANGUAGE: ${payload.language}\nCODE:\n${payload.code}` }
       ],
       model: model,
       stream: true,
       temperature: 0.1,
     });
 
-    for await (const chunk of stream) {
-      if (chunk.choices[0]?.delta?.content) {
-        res.write(`data: ${JSON.stringify({ text: chunk.choices[0].delta.content })}\n\n`);
-      }
-    }
+    // 🍏 CREATE TRANSFORMWHEEL FOR SSE STREAMING
+    const encoder = new TextEncoder();
+    const responseStream = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of stream) {
+            const content = chunk.choices[0]?.delta?.content;
+            if (content) {
+              const data = JSON.stringify({ text: content });
+              controller.enqueue(encoder.encode(`data: ${data}\n\n`));
+            }
+          }
+          controller.enqueue(encoder.encode('data: [DONE]\n\n'));
+          controller.close();
+        } catch (err) {
+          controller.error(err);
+        }
+      },
+    });
 
-    res.write('data: [DONE]\n\n');
-    res.end();
+    return new Response(responseStream, {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
   } catch (error: any) {
-    console.error('Groq API Error:', error);
-    if (!res.headersSent) res.status(500).json({ error: error.message || 'Internal Server Error' });
-    else { res.write(`data: ${JSON.stringify({ error: 'Stream error' })}\n\n`); res.end(); }
+    console.error('PRO SYNC ERROR:', error);
+    return new Response(JSON.stringify({ error: error.message || 'NEURAL_BRIDGE_SHUTDOWN' }), { 
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }

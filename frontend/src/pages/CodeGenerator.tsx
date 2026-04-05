@@ -9,7 +9,9 @@ import {
   Info,
   Sparkles,
   Command,
-  FileText
+  FileText,
+  AlertTriangle,
+  RefreshCw
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import MarkdownRenderer from '../components/MarkdownRenderer';
@@ -24,11 +26,13 @@ const CodeGenerator: React.FC = () => {
     DOCSTRINGS: '', README: '', API_REF: '', DIAGRAM: '', SECURITY: '', PERFORMANCE: '', TESTS: '', QUALITY: ''
   });
   const [language, setLanguage] = useState('javascript');
+  const [errorDetails, setErrorDetails] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleGenerate = async () => {
     if (!code.trim()) return toast.error('INPUT REQUIRED');
     setIsGenerating(true);
+    setErrorDetails(null);
     setResults({ DOCSTRINGS: '', README: '', API_REF: '', DIAGRAM: '', SECURITY: '', PERFORMANCE: '', TESTS: '', QUALITY: '' });
     
     try {
@@ -38,13 +42,18 @@ const CodeGenerator: React.FC = () => {
         body: JSON.stringify({ code, language }),
       });
 
-      if (!response.ok) throw new Error('Generation failed');
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'NEURAL_BRIDGE_SHUTDOWN');
+      }
 
       const reader = response.body?.getReader();
       const decoder = new TextDecoder();
       let fullText = '';
 
-      while (reader) {
+      if (!reader) throw new Error('STREAM_INITIALIZATION_ERROR');
+
+      while (true) {
         const { value, done } = await reader.read();
         if (done) break;
         
@@ -66,7 +75,9 @@ const CodeGenerator: React.FC = () => {
       }
       toast.success('DECODING COMPLETE');
     } catch (err: any) {
-      toast.error('SYNC INTERRUPT');
+      console.error('PRO SYNC ERR:', err.message);
+      setErrorDetails(err.message);
+      toast.error(err.message === 'AUTHENTICATION_KEY_MISSING' ? 'PRO KEY MISSING' : 'SYNC INTERRUPT');
     } finally {
       setIsGenerating(false);
     }
@@ -127,7 +138,7 @@ const CodeGenerator: React.FC = () => {
 
       <div className="flex flex-col xl:flex-row gap-16 items-stretch h-full overflow-hidden">
         
-        {/* 🍏 INPUT PANEL — APPLE PRO PRECISION */}
+        {/* 🍏 INPUT PANEL — APPLE PRO RECALIBRATION */}
         <div className="xl:w-[42%] flex flex-col min-h-0 bg-[#f5f5f7] border border-black/[0.04] p-10 rounded-[32px]">
            <div className="flex items-center justify-between mb-8">
               <div className="flex items-center gap-4">
@@ -148,7 +159,7 @@ const CodeGenerator: React.FC = () => {
               <textarea 
                 value={code} onChange={e => setCode(e.target.value)}
                 placeholder="Synchronize source logic..."
-                className="w-full h-full bg-transparent p-7 font-['SF_Mono','JetBrains_Mono'] text-[15px] text-[#1d1d1f]/80 resize-none outline-none placeholder:text-black/5 custom-scrollbar leading-[1.6] transition-opacity"
+                className="w-full h-full bg-transparent p-7 font-mono text-[15px] text-[#1d1d1f]/80 resize-none outline-none placeholder:text-black/5 custom-scrollbar leading-[1.6]"
               />
            </div>
            
@@ -164,7 +175,7 @@ const CodeGenerator: React.FC = () => {
               <button 
                 onClick={handleGenerate} disabled={isGenerating || !code.trim()}
                 className={`apple-btn-primary px-10 h-[56px] text-[16px] font-bold shadow-xl shadow-[#0071e3]/20 ${
-                    isGenerating || !code.trim() ? 'opacity-10 cursor-not-allowed' : 'opacity-100 hover:scale-[1.02] active:scale-98'
+                    isGenerating || !code.trim() ? 'opacity-10 cursor-not-allowed' : 'opacity-100'
                 }`}
               >
                  {isGenerating ? <Loader2 size={18} className="animate-spin" /> : <Sparkles size={18} fill="white" strokeWidth={1} />}
@@ -173,92 +184,104 @@ const CodeGenerator: React.FC = () => {
            </div>
         </div>
 
-        {/* 🍎 OUTPUT PANEL — APPLE PRO OUTPUT (FORCED HIGH CONTRAST) */}
+        {/* 🍎 OUTPUT PANEL — NEURAL BUFFER EXHIBIT */}
         <div className="xl:w-[58%] flex flex-col min-h-0 bg-[#ffffff] border border-black/[0.08] p-10 rounded-[32px] shadow-2xl shadow-black/[0.03] overflow-hidden">
-           <div className="flex items-center gap-4 mb-8 overflow-x-auto no-scrollbar pb-2">
-              {(['DOCSTRINGS', 'README', 'API_REF', 'DIAGRAM', 'SECURITY', 'PERFORMANCE', 'TESTS', 'QUALITY'] as TabType[]).map(tab => (
-                <button 
-                  key={tab} onClick={() => setActiveTab(tab)}
-                  className={`shrink-0 px-5 py-3 rounded-xl text-[12px] uppercase font-bold tracking-[0.14em] transition-all shadow-sm ${
-                      activeTab === tab 
-                      ? 'bg-black text-white' 
-                      : 'bg-black/[0.03] text-black/40 hover:text-black hover:bg-black/[0.05]'
-                  }`}
-                >
-                  {tab.replace('_', ' ')}
-                </button>
-              ))}
-           </div>
-
-           <div className="flex-1 bg-white p-2 overflow-y-auto custom-scrollbar">
-              {!Object.values(results).some(v => v.length > 5) && !isGenerating ? (
-                 <div className="h-full flex flex-col items-center justify-center text-center">
-                    <div className="p-8 rounded-full bg-[#f5f5f7] mb-8">
-                       <Cpu size={36} className="text-black/10" strokeWidth={1.2} />
-                    </div>
-                    <h2 className="text-[20px] font-bold text-[#1d1d1f] tracking-tight uppercase mb-4">Neural Buffer Ready</h2>
-                    <p className="text-[14px] text-black/35 max-w-[320px] font-medium leading-relaxed">
-                       DocGen Pro utilizes high-density synthesis pipelines. Inject source code to analyze architectural depth.
-                    </p>
+           
+           {errorDetails ? (
+              <div className="h-full flex flex-col items-center justify-center text-center p-10 animate-apple-slide">
+                 <div className="p-8 rounded-full bg-red-50 mb-10 text-red-500">
+                    <AlertTriangle size={48} strokeWidth={1.5} />
                  </div>
-              ) : (
-                <div className="h-full">
-                  {activeTab === 'QUALITY' ? (
-                     <div className="flex flex-col items-center justify-center h-full gap-24 py-10 font-sans">
-                        <div className="relative group">
-                           <svg width="240" height="240" viewBox="0 0 150 150" className="transform -rotate-90">
-                              <circle cx="75" cy="75" r="68" stroke="rgba(0,0,0,0.03)" strokeWidth="4" fill="transparent" />
-                              <circle 
-                                cx="75" cy="75" r="68" 
-                                stroke="#0071e3" 
-                                strokeWidth="4" 
-                                fill="transparent" 
-                                strokeDasharray={427} 
-                                strokeDashoffset={427 - (427 * score * 10) / 100} 
-                                strokeLinecap="round" 
-                                className="transition-all duration-[2000ms] ease-[cubic-bezier(0.16,1,0.3,1)]" 
-                              />
-                           </svg>
-                           <div className="absolute inset-0 flex items-center justify-center">
-                              <div className="flex flex-col items-center">
-                                 <span className="text-[72px] font-bold text-[#1d1d1f] tracking-[-0.05em] leading-none">{score}</span>
-                                 <span className="text-[12px] font-bold text-[#0071e3] uppercase tracking-[0.18em] mt-6">Pro Score</span>
-                              </div>
-                           </div>
+                 <h2 className="text-[24px] font-bold text-[#1d1d1f] tracking-tight mb-4">Neural Buffer Interrupted</h2>
+                 <p className="text-[16px] text-black/35 max-w-[340px] font-medium leading-relaxed mb-10">
+                   The sync failed due to: <span className="font-bold text-red-500">{errorDetails}</span>. Ensure your Vercel Environment Variables (GROQ_API_KEY) are initialized.
+                 </p>
+                 <button onClick={handleGenerate} className="flex items-center gap-3 px-8 py-4 bg-black text-white rounded-2xl font-bold hover:scale-105 active:scale-95 transition-all">
+                    <RefreshCw size={18} />
+                    <span>Try Re-Sync</span>
+                 </button>
+              </div>
+           ) : (
+             <>
+               <div className="flex items-center gap-4 mb-8 overflow-x-auto no-scrollbar pb-2">
+                  {(['DOCSTRINGS', 'README', 'API_REF', 'DIAGRAM', 'SECURITY', 'PERFORMANCE', 'TESTS', 'QUALITY'] as TabType[]).map(tab => (
+                    <button 
+                      key={tab} onClick={() => setActiveTab(tab)}
+                      className={`shrink-0 px-5 py-3 rounded-xl text-[12px] uppercase font-bold tracking-[0.14em] transition-all shadow-sm ${
+                          activeTab === tab 
+                          ? 'bg-black text-white' 
+                          : 'bg-black/[0.03] text-black/40 hover:text-black hover:bg-black/[0.05]'
+                      }`}
+                    >
+                      {tab.replace('_', ' ')}
+                    </button>
+                  ))}
+               </div>
+
+               <div className="flex-1 bg-white p-2 overflow-y-auto custom-scrollbar">
+                  {!Object.values(results).some(v => v.length > 5) && !isGenerating ? (
+                     <div className="h-full flex flex-col items-center justify-center text-center">
+                        <div className="p-8 rounded-full bg-[#f5f5f7] mb-8">
+                           <Cpu size={36} className="text-black/10" strokeWidth={1.2} />
                         </div>
-                        <div className="w-full max-w-[420px] grid grid-cols-2 gap-12">
-                           {[
-                              { label: 'Latency', val: 9.8, suffix: 'ms', icon: <Zap size={14} className="text-[#0071e3]" /> },
-                              { label: 'Integrity', val: 99.1, suffix: '%', icon: <Shield size={14} className="text-[#34c759]" /> },
-                              { label: 'Stability', val: 0.4, suffix: 'pts', icon: <Activity size={14} className="text-[#f5a623]" /> },
-                              { label: 'Coverage', val: score * 10, suffix: '%', icon: <Layers size={14} className="text-[#a78bfa]" /> }
-                           ].map((stat) => (
-                             <div key={stat.label} className="flex flex-col gap-3 border-l border-black/[0.06] pl-6 group">
-                                <div className="flex items-center gap-2">
-                                   {stat.icon}
-                                   <span className="text-[11px] font-bold uppercase tracking-[0.14em] text-black/25">{stat.label}</span>
-                                </div>
-                                <span className="text-[24px] font-bold text-[#1d1d1f] group-hover:text-[#0071e3] transition-colors">{stat.val}{stat.suffix}</span>
-                             </div>
-                           ))}
-                        </div>
+                        <h2 className="text-[20px] font-bold text-[#1d1d1f] tracking-tight uppercase mb-4">Neural Buffer Ready</h2>
+                        <p className="text-[14px] text-black/35 max-w-[320px] font-medium leading-relaxed">
+                           DocGen Pro utilizes high-density Edge synthesis. Inject source code to analyze architectural depth.
+                        </p>
                      </div>
                   ) : (
-                     <div className="prose prose-stone max-w-none 
-                         text-[18px] text-[#1d1d1f]/75 leading-[1.8] font-medium
-                         prose-headings:text-[#1d1d1f] prose-headings:font-bold prose-headings:tracking-tighter
-                         prose-h2:text-[26px] prose-h2:mt-14 prose-h2:mb-8 border-b border-black/[0.06] pb-4
-                         prose-a:text-[#0071e3] prose-a:underline hover:text-black
-                         prose-strong:text-black
-                         prose-pre:bg-[#f5f5f7] prose-pre:border-none prose-pre:rounded-3xl prose-pre:p-10 shadow-sm
-                         prose-code:text-black prose-code:font-mono
-                     ">
-                        <MarkdownRenderer content={results[activeTab] || (isGenerating ? '# Recalibrating neural manifest...' : '# Waiting for logical source...')} />
-                     </div>
+                    <div className="h-full">
+                      {activeTab === 'QUALITY' ? (
+                         <div className="flex flex-col items-center justify-center h-full gap-24 py-10 font-sans">
+                            <div className="relative group">
+                               <svg width="240" height="240" viewBox="0 0 150 150" className="transform -rotate-90">
+                                  <circle cx="75" cy="75" r="68" stroke="rgba(0,0,0,0.03)" strokeWidth="4" fill="transparent" />
+                                  <circle 
+                                    cx="75" cy="75" r="68" 
+                                    stroke="#0071e3" 
+                                    strokeWidth="4" 
+                                    fill="transparent" 
+                                    strokeDasharray={427} 
+                                    strokeDashoffset={427 - (427 * score * 10) / 100} 
+                                    strokeLinecap="round" 
+                                    className="transition-all duration-[2000ms] ease-[cubic-bezier(0.16,1,0.3,1)]" 
+                                  />
+                               </svg>
+                               <div className="absolute inset-0 flex items-center justify-center">
+                                  <div className="flex flex-col items-center">
+                                     <span className="text-[72px] font-bold text-[#1d1d1f] tracking-[-0.05em] leading-none">{score}</span>
+                                     <span className="text-[12px] font-bold text-[#0071e3] uppercase tracking-[0.18em] mt-6">Pro Score</span>
+                                  </div>
+                               </div>
+                            </div>
+                            <div className="w-full max-w-[420px] grid grid-cols-2 gap-12 text-left">
+                               {[
+                                  { label: 'Latency', val: 9.8, suffix: 'ms' },
+                                  { label: 'Integrity', val: 99.1, suffix: '%' },
+                                  { label: 'Stability', val: 0.4, suffix: 'pts' },
+                                  { label: 'Coverage', val: score * 10, suffix: '%' }
+                               ].map((stat) => (
+                                 <div key={stat.label} className="border-l border-black/[0.06] pl-6">
+                                    <span className="text-[11px] font-bold text-black/25 uppercase tracking-widest">{stat.label}</span>
+                                    <p className="text-[24px] font-bold text-[#1d1d1f]">{stat.val}{stat.suffix}</p>
+                                 </div>
+                               ))}
+                            </div>
+                         </div>
+                      ) : (
+                         <div className="prose prose-stone max-w-none 
+                             text-[18px] text-[#1d1d1f]/75 leading-[1.8] font-medium
+                             prose-headings:text-[#1d1d1f] prose-headings:font-bold prose-headings:tracking-tighter
+                             prose-h2:text-[26px] prose-h2:mt-14 prose-h2:mb-8 border-b border-black/[0.06] pb-4
+                         ">
+                            <MarkdownRenderer content={results[activeTab] || (isGenerating ? '# Recalibrating neural manifest...' : '# Waiting for logical source...')} />
+                         </div>
+                      )}
+                    </div>
                   )}
-                </div>
-              )}
-           </div>
+               </div>
+             </>
+           )}
         </div>
       </div>
 
