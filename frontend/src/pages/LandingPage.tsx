@@ -9,135 +9,109 @@ import {
   Zap,
   MessageSquare,
   Cpu,
-  Zap as Power,
   CloudLightning,
   Sparkles,
-  Search,
-  Command,
-  Plus
+  Command
 } from 'lucide-react';
 
 export default function LandingPage() {
   return (
-    <div className="flex-1 flex flex-col items-center justify-center pt-40 pb-48 px-8 relative z-10 animate-apple-in max-w-[1400px] mx-auto bg-[#ffffff]">
+    <div className="flex-1 flex flex-col items-center justify-start pt-[140px] pb-60 px-8 relative z-10 animate-apple-fade max-w-[1500px] mx-auto bg-[#ffffff]">
       
-      {/* 🍏 APPLE LIGHT HERO — PRO TRANSFORMATION */}
-      <div className="w-full text-center mb-56 relative group">
+      {/* 🍏 APPLE HOME PAGE HERO — PURE CRYSTAL DESIGN */}
+      <div className="w-full text-center mb-80 relative group">
         
-        {/* PRO BADGE — 🍏 APPLE SOPRIETY */}
-        <div className="flex items-center justify-center gap-2.5 mb-10 group-hover:scale-105 transition-transform">
-           <div className="px-4 py-1.5 rounded-full bg-black text-white text-[11px] font-black tracking-[0.2em] uppercase shadow-xl shadow-black/10">
+        {/* ALPHA BADGE — 🍏 APPLE PRO BADGING */}
+        <div className="flex items-center justify-center gap-3 mb-16">
+           <div className="px-5 py-2 rounded-full bg-black/[0.04] border border-black/[0.03] text-[12px] font-bold text-black/40 tracking-[0.18em] uppercase">
              HGM-06 PRO v2.4
            </div>
         </div>
 
-        <h1 className="text-6xl md:text-9xl font-bold tracking-[-0.055em] leading-[0.98] text-[#1d1d1f] selection:bg-blue-500 mb-14 transition-all">
-          Documentation. <br/>
-          <span className="text-black/15">Re-Engineered.</span>
+        <h1 className="text-6xl md:text-[120px] font-bold tracking-[-0.05em] leading-[0.94] text-[#1d1d1f] selection:bg-[#0071e3]/10 mb-16 animate-apple-slide">
+          Analyze Code. <br/>
+          <span className="text-black/15">Understand Meaning.</span>
         </h1>
 
-        <p className="text-lg md:text-2xl text-[#1d1d1f]/45 max-w-2xl mx-auto mb-16 leading-[1.4] font-medium tracking-tight">
-          The ultimate pro engine for technical artifacts. Analyze, generate, and synchronize your documentation at the speed of thought.
+        <p className="text-xl md:text-[28px] text-[#1d1d1f]/45 max-w-2xl mx-auto mb-20 leading-[1.3] font-medium tracking-tight animate-apple-slide [animation-delay:100ms]">
+          A world-class documentation engine. Effortlessly generate technical artifacts and architectural insights.
         </p>
 
-        {/* PRO BUTTONS — APPLE BLACK PILLS */}
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-6">
-           <Link to="/docs" className="apple-btn-black min-w-[240px] h-[64px] flex items-center justify-center text-[17px] shadow-2xl shadow-black/20 hover:scale-105 active:scale-95 transition-all">
-              Initialize Platform
+        {/* PRO CALL TO ACTION — APPLE PRIMARY PILL */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-8 animate-apple-slide [animation-delay:200ms]">
+           <Link to="/docs" className="apple-btn-primary min-w-[260px] h-[72px] flex items-center justify-center text-[19px] shadow-[0_20px_40px_-8px_rgba(0,113,227,0.3)]">
+              Initialize Suite
            </Link>
-           <Link to="/codegen" className="apple-btn-outline min-w-[240px] h-[64px] flex items-center justify-center text-[17px] group border-black/10 hover:border-black/30">
+           <Link to="/codegen" className="apple-btn-secondary text-[19px] font-medium group">
               Neural Studio Pro
-              <ArrowRight size={18} className="ml-2 group-hover:translate-x-0.5 transition-transform text-black/20" />
+              <ArrowRight size={20} className="ml-2 group-hover:translate-x-1.5 transition-transform text-[#0071e3]" strokeWidth={1.5} />
            </Link>
         </div>
       </div>
 
-      {/* 🍏 CONTENT EXTENSION: PRO CORE EXHIBIT */}
-      <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 border-t border-black/[0.06] pt-32 pb-32">
+      {/* 🍏 APPLE PRO CORE EXHIBIT — HIGH-CONTRAST FEATURE COLUMNS */}
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-16 border-t border-black/[0.04] pt-40 pb-60 mb-20 group">
         {[
           {
-            icon: <MessageSquare size={26} className="text-blue-500" />,
-            title: "Neural Chat Interop",
-            desc: "The only documentation platform with a built-in neural assistant that understands your architectural drift in real-time."
+            icon: <MessageSquare size={30} className="text-[#0071e3]" />,
+            title: "Neural Assistant",
+            desc: "The world's first documentation bridge. Query your structural drift in real-time with zero-latency responses."
           },
           {
-            icon: <Search size={26} className="text-purple-500" />,
-            title: "Latent Search Engine",
-            desc: "Global fuzzy-search enabled with CMD+K. Find any code block, docstring, or API reference in sub-10ms."
+            icon: <Command size={30} className="text-black/30" />,
+            title: "Latent Search",
+            desc: "Press CMD+K to scan any architectural detail or documentation node across your entire project manifest."
           },
           {
-            icon: <CloudLightning size={26} className="text-orange-500" />,
-            title: "Edge Delivery Pro",
-            desc: "DocGen artifacts are synchronized to 32+ global edge nodes for instant worldwide technical access."
+            icon: <CloudLightning size={30} className="text-[#f5a623]" />,
+            title: "Global Edge",
+            desc: "Sub-10ms delivery of documentation artifacts across 32+ neural-cached edge nodes worldwide."
           },
           {
-            icon: <Shield size={26} className="text-emerald-500" />,
+            icon: <Shield size={30} className="text-[#34c759]" />,
             title: "Sovereign Rotation",
-            desc: "AES-256 rotating key protocols ensure that your proprietary logic buffers are segmented and cryptographically isolated."
-          },
-          {
-            icon: <Power size={26} className="text-amber-500" />,
-            title: "Universal Synthesis",
-            desc: "Support for C++, Java, Rust, Swift, and Go. One-click export to MDX, PDF, and Open-API standard artifacts."
-          },
-          {
-            icon: <Activity size={26} className="text-rose-500" />,
-            title: "Neural Rank Scoring",
-            desc: "Professional health metrics for your code comments and READMEs. Assesses risk, density, and maintenance cost."
-          },
-          {
-            icon: <Layers size={26} className="text-indigo-500" />,
-            title: "Mermaid Autopilot",
-            desc: "Visualizing logical flow has never been faster. Automatic Mermaid diagram generation from raw code paths."
-          },
-          {
-            icon: <Sparkles size={26} className="text-cyan-500" />,
-            title: "Pro Voice Briefing",
-            desc: "Natural human-sync audio summaries of your documentation. Listen to code audits on the go."
+            desc: "Proprietary code buffers are segmented using AES-256 rotating keys, ensuring logic is never stored."
           }
         ].map((feature, i) => (
-          <div key={i} className="flex flex-col group p-10 rounded-[2.5rem] bg-[#f5f5f7]/40 border border-black/[0.03] hover:bg-white hover:shadow-2xl hover:shadow-black/5 hover:border-black/5 transition-all duration-500">
-            <div className="mb-10 p-4 rounded-2xl bg-white shadow-sm inline-block self-start group-hover:scale-110 transition-transform">
+          <div key={i} className="flex flex-col group p-2 hover:opacity-100 opacity-65 transition-all duration-500 cursor-default">
+            <div className="mb-10 group-hover:scale-110 transition-transform">
                {feature.icon}
             </div>
-            <h3 className="text-[20px] font-bold text-[#1d1d1f] mb-4 tracking-tight leading-tight">{feature.title}</h3>
-            <p className="text-[14px] text-[#1d1d1f]/40 leading-relaxed font-medium">{feature.desc}</p>
+            <h3 className="text-[22px] font-bold text-[#1d1d1f] mb-6 tracking-tight leading-tight">{feature.title}</h3>
+            <p className="text-[16px] text-[#1d1d1f]/45 leading-[1.6] font-medium">{feature.desc}</p>
           </div>
         ))}
       </div>
 
-      {/* 🍏 SEARCH-EXPERIENCE PRO SHOWCASE */}
-      <div className="w-full mt-24 p-16 md:p-32 bg-black rounded-[5rem] flex flex-col md:flex-row items-center justify-between gap-16 overflow-hidden relative shadow-2xl shadow-black/20">
-         <div className="flex flex-col gap-10 max-w-2xl relative z-10 text-center md:text-left">
-            <div className="flex items-center gap-3 justify-center md:justify-start">
-               <div className="w-12 h-[2px] bg-white opacity-20" />
-               <span className="text-white/40 text-[13px] font-bold tracking-[0.3em] uppercase">Intelligence Discovery</span>
-            </div>
-            <h2 className="text-5xl md:text-7xl font-bold text-white tracking-tighter leading-[0.95]">
-               Search your <br/> logic. <span className="text-white/40 underline decoration-white/20 underline-offset-8">Instantly.</span>
+      {/* 🍏 HIGH-IMPACT "MAC-STYLE" ADVERTISEMENT SECTION */}
+      <div className="w-full p-20 md:p-32 bg-[#f5f5f7] border border-black/[0.03] rounded-[48px] flex flex-col items-center text-center overflow-hidden mb-60 relative">
+         <div className="max-w-[700px] mb-20 relative z-10">
+            <span className="text-[11px] font-bold text-black/30 tracking-[0.3em] uppercase mb-10 block">PRO PERFORMANCE</span>
+            <h2 className="text-4xl md:text-7xl font-bold text-[#1d1d1f] tracking-tight leading-[0.98] mb-12">
+               Analyze. Synthesis. <br/> Done in milliseconds.
             </h2>
-            <p className="text-xl text-white/45 font-medium leading-relaxed max-w-xl mx-auto md:mx-0">
-               Experience the power of Neural Search. Find any architectural detail or documentation node across your entire project with a simple shortcut.
+            <p className="text-xl text-[#1d1d1f]/35 font-medium leading-[1.5] max-w-xl mx-auto mb-16">
+               Experience the sub-second speed of Groq-L3 synthesis. From raw code to professional README in the blink of an eye.
             </p>
-            <div className="flex pt-6 justify-center md:justify-start">
-               <div className="flex items-center gap-3 px-6 py-3 bg-white/10 rounded-full border border-white/10 text-white/70 font-bold text-[14px] shadow-inner">
-                  <Command size={18} fill="white" className="opacity-40" />
-                  <span>Press <kbd className="text-white font-black ml-1">K</kbd> to Begin Experience</span>
-               </div>
+            <div className="flex justify-center">
+               <Link to="/codegen" className="apple-btn-primary h-14 p-8 text-[16px]">
+                  Open Studio Pro
+               </Link>
             </div>
          </div>
       </div>
 
-      {/* 🍏 APPLE SIMPLE PRO LIGHT FOOTER */}
-      <div className="mt-56 w-full flex flex-col md:flex-row items-center justify-between border-t border-black/[0.06] pt-16 gap-8 opacity-40 grayscale hover:grayscale-0 transition-opacity">
+      {/* 🍏 APPLE SIMPLE PIXEL FOOTER */}
+      <div className="w-full flex flex-col md:flex-row items-center justify-between border-t border-black/[0.06] pt-20 gap-8 opacity-45 grayscale hover:grayscale-0 transition-opacity">
          <div className="flex items-center gap-12">
-            <Layers size={18} />
-            <Search size={18} />
-            <Shield size={18} />
-            <Globe size={18} />
+            <Layers size={20} />
+            <Activity size={20} />
+            <Shield size={20} />
+            <Globe size={20} />
+            <Cpu size={20} />
          </div>
-         <div className="text-[11px] font-bold tracking-[0.15em] text-[#1d1d1f]/50 uppercase">
-            © 2026 HGM-06 NEURAL HUB PRO — GLOBAL ARCHITECTURAL STANDARDS
+         <div className="text-[12px] font-bold tracking-[0.15em] text-black/40 uppercase">
+            © 2026 HGM-06 TECHNOLOGIES LAB — ARCHITECTURAL STANDARDS
          </div>
       </div>
       
