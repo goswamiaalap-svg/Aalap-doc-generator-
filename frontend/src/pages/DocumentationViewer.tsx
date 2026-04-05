@@ -7,24 +7,12 @@ import {
   Share2, 
   Download, 
   Printer, 
-  MoreVertical, 
   Volume2, 
-  Copy, 
-  Check,
-  Search,
   BookOpen,
   Activity,
-  Layers,
   Shield,
   Zap,
-  Cpu,
-  Binary,
-  Maximize2,
-  Menu,
-  Terminal,
-  Globe,
-  Database,
-  Command
+  Search
 } from 'lucide-react';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import { docs } from '../api/docs';
@@ -36,7 +24,7 @@ const DocumentationViewer: React.FC = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [readingProgress, setReadingProgress] = useState(0);
 
-  const doc = docs.find(d => d.id === id) || docs[0];
+  const doc = docs.find((d: any) => d.id === id) || docs[0];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -84,7 +72,7 @@ const DocumentationViewer: React.FC = () => {
                <div>
                   <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.3em] mb-6 block">Foundations</span>
                   <div className="flex flex-col gap-2">
-                     {docs.filter(d => d.section === 'FOUNDATIONS').map(item => (
+                     {docs.filter((d: any) => d.section === 'FOUNDATIONS').map((item: any) => (
                         <Link 
                            key={item.id} 
                            to={`/docs/${item.id}`}
@@ -104,7 +92,7 @@ const DocumentationViewer: React.FC = () => {
                <div>
                   <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.3em] mb-6 block">Protocols</span>
                   <div className="flex flex-col gap-2">
-                     {docs.filter(d => d.section === 'PROTOCOLS').map(item => (
+                     {docs.filter((d: any) => d.section === 'PROTOCOLS').map((item: any) => (
                         <Link 
                            key={item.id} 
                            to={`/docs/${item.id}`}
@@ -188,8 +176,8 @@ const DocumentationViewer: React.FC = () => {
             <div>
                <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.3em] mb-6 block">In this Synthesis</span>
                <div className="flex flex-col gap-5 border-l border-black/[0.03] pl-6">
-                  {doc.content.match(/^## .+/gm)?.map((header, i) => (
-                     <a key={i} href={`#${header.replace('## ', '').toLowerCase().replace(/\s+/g, '-')}`} className="text-[13px] font-bold text-black/30 hover:text-[#0071e3] transition-colors leading-tight">
+                  {doc.content.match(/^## .+/gm)?.map((header: string, i: number) => (
+                     <a key={header} href={`#${header.replace('## ', '').toLowerCase().replace(/\s+/g, '-')}`} className="text-[13px] font-bold text-black/30 hover:text-[#0071e3] transition-colors leading-tight">
                         {header.replace('## ', '')}
                      </a>
                   ))}
@@ -204,7 +192,7 @@ const DocumentationViewer: React.FC = () => {
                     {icon: Download, action: () => {}, label: 'PDF'},
                     {icon: Share2, action: handleCopy, label: copied ? 'URL COPIED' : 'Share'}
                   ].map((util, i) => (
-                    <button key={i} onClick={util.action} className="flex items-center gap-4 px-5 py-3.5 bg-[#f5f5f7] rounded-2xl text-[12px] font-bold text-black group hover:bg-black hover:text-white transition-all shadow-sm">
+                    <button key={util.label} onClick={util.action} className="flex items-center gap-4 px-5 py-3.5 bg-[#f5f5f7] rounded-2xl text-[12px] font-bold text-black group hover:bg-black hover:text-white transition-all shadow-sm">
                        <util.icon size={16} strokeWidth={1.5} />
                        {util.label}
                     </button>

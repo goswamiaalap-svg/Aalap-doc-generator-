@@ -12,7 +12,6 @@ import {
   FileText,
   AlertTriangle,
   RefreshCw,
-  Activity,
   Terminal,
   Layers,
   ChevronRight,
