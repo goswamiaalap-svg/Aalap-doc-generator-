@@ -26,7 +26,8 @@ import {
   Search,
   Eye,
   Settings,
-  History
+  History,
+  Plus
 } from 'lucide-react';
 import toast from 'react-hot-toast';
 import MarkdownRenderer from '../components/MarkdownRenderer';
