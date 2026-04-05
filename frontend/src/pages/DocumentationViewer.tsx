@@ -1,259 +1,236 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
 import { 
+  ChevronRight, 
+  ChevronLeft, 
+  Clock, 
   Share2, 
-  Download,
-  MoreVertical,
+  Download, 
+  Printer, 
+  MoreVertical, 
+  Volume2, 
+  Copy, 
+  Check,
+  Search,
+  BookOpen,
+  Activity,
+  Layers,
+  Shield,
   Zap,
-  ArrowRight,
-  ArrowLeft,
-  ChevronRight,
-  Printer,
-  FileCode,
-  Sparkles,
-  Command,
-  Layout as LayoutIcon,
-  Search
+  Cpu,
+  Binary,
+  Maximize2,
+  Menu,
+  Terminal,
+  Globe,
+  Database,
+  Command
 } from 'lucide-react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
 import MarkdownRenderer from '../components/MarkdownRenderer';
-import toast from 'react-hot-toast';
+import { docs } from '../api/docs';
 
-interface Doc {
-  id: string;
-  title: string;
-  content: string;
-  category: 'core' | 'api' | 'guide';
-}
-
-const DocumentationViewer = () => {
-  const { docId } = useParams();
-  const navigate = useNavigate();
-  const [docs, setDocs] = useState<Doc[]>([]);
-  const [currentDoc, setCurrentDoc] = useState<Doc | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [docLoading, setDocLoading] = useState(false);
+const DocumentationViewer: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
+  const [copied, setCopied] = useState(false);
+  const [scrollDir, setScrollDir] = useState<'up' | 'down'>('up');
+  const [lastScrollY, setLastScrollY] = useState(0);
   const [readingProgress, setReadingProgress] = useState(0);
-  const [toc, setToc] = useState<{id: string, text: string, level: number}[]>([]);
-  
-  const contentRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    const fetchDocs = async () => {
-      try {
-        const response = await fetch('/api/docs');
-        const data = await response.json();
-        setDocs(data);
-        if (!docId && data.length > 0) navigate('/docs/' + data[0].id);
-      } catch (err) {
-        toast.error('MANIFEST FAILURE');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchDocs();
-  }, [docId, navigate]);
+  const doc = docs.find(d => d.id === id) || docs[0];
 
-  useEffect(() => {
-    if (docId) {
-      setDocLoading(true);
-      const timer = setTimeout(() => {
-        const found = docs.find(d => d.id === docId);
-        if (found) {
-          setCurrentDoc(found);
-          // 🍏 GENERATE TABLE OF CONTENTS (PRO FEATURE)
-          const headers = found.content.match(/^#{2,3} (.*$)/gim) || [];
-          setToc(headers.map(h => ({
-            id: h.replace(/^#{2,3} /, '').toLowerCase().replace(/[^\w\s-]/g, '').replace(/\s+/g, '-'),
-            text: h.replace(/^#{2,3} /, ''),
-            level: h.startsWith('###') ? 3 : 2
-          })));
-        }
-        setDocLoading(false);
-      }, 400);
-      return () => clearTimeout(timer);
-    }
-  }, [docId, docs]);
-
-  // 🍏 TRACK READING PROGRESS (PRO FEATURE)
   useEffect(() => {
     const handleScroll = () => {
-      if (!contentRef.current) return;
-      const element = contentRef.current;
-      const totalHeight = element.scrollHeight - element.clientHeight;
-      const progress = (element.scrollTop / totalHeight) * 100;
-      setReadingProgress(progress);
+      const currentScrollY = window.scrollY;
+      setScrollDir(currentScrollY > lastScrollY ? 'down' : 'up');
+      setLastScrollY(currentScrollY);
+      
+      const totalHeight = document.documentElement.scrollHeight - window.innerHeight;
+      setReadingProgress((currentScrollY / totalHeight) * 100);
     };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [lastScrollY]);
 
-    const container = contentRef.current;
-    if (container) container.addEventListener('scroll', handleScroll);
-    return () => { if (container) container.removeEventListener('scroll', handleScroll); };
-  }, [currentDoc]);
+  const handleCopy = () => {
+    navigator.clipboard.writeText(window.location.href);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
-  if (loading) return null;
-
-  const currentIdx = docs.findIndex(d => d.id === docId);
-  const prevDoc = currentIdx > 0 ? docs[currentIdx - 1] : null;
-  const nextDoc = currentIdx < docs.length - 1 ? docs[currentIdx + 1] : null;
+  const handleReadAloud = () => {
+     const speech = new SpeechSynthesisUtterance(doc.content.replace(/[#*`]/g, ''));
+     speech.rate = 0.95;
+     window.speechSynthesis.speak(speech);
+  };
 
   return (
-    <div className="flex-1 flex h-full relative z-10 animate-apple-fade bg-[#ffffff] selection:bg-[#0071e3]/10 overflow-hidden">
+    <div className="flex-1 flex bg-[#ffffff] relative min-h-screen">
       
-      {/* 🍏 PRO TOP PROGRESS BAR (APPLE BLUE) */}
-      <div className="fixed top-12 left-0 lg:left-[260px] right-0 h-[2.5px] bg-black/[0.03] z-[100]">
-         <div className="h-full bg-[#0071e3] transition-all duration-300 ease-out" style={{ width: `${readingProgress}%` }} />
-      </div>
-
-      <div ref={contentRef} className="flex-1 overflow-y-auto w-full no-scrollbar scroll-smooth">
-        <div className="max-w-[1200px] mx-auto px-8 md:px-16 py-16 md:pt-24 md:pb-48 flex flex-col lg:flex-row gap-16 relative">
-          
-          {/* MAIN ARTICLE AREA */}
-          <div className="flex-1 min-w-0 max-w-[800px]">
-            {/* CATEGORY NAV — 🍏 APPLE PRO BREADCRUMBS */}
-            <div className="flex items-center gap-2 mb-12 opacity-35 hover:opacity-100 transition-opacity">
-               <Link to="/" className="text-[11px] font-bold uppercase tracking-[0.12em] hover:text-[#0071e3]">Platform</Link>
-               <ChevronRight size={12} strokeWidth={3} />
-               <Link to="/docs" className="text-[11px] font-bold uppercase tracking-[0.12em] hover:text-[#0071e3]">Guide</Link>
-               <ChevronRight size={12} strokeWidth={3} />
-               <span className="text-[11px] font-bold uppercase tracking-[0.12em] text-black/60 truncate max-w-[120px]">{currentDoc?.title}</span>
+      {/* 🍏 SYSTEMATIC LEFT SIDEBAR — BREAKING THE WHITE SPACE */}
+      <aside className="hidden lg:flex w-[320px] flex-col border-r border-black/[0.04] bg-[#f5f5f7]/60 sticky top-[48px] h-[calc(100vh-48px)] overflow-y-auto no-scrollbar pt-12 pb-20 px-8">
+         <div className="flex flex-col gap-10">
+            
+            {/* NEURAL SEARCH HUD */}
+            <div className="relative group">
+               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20 group-hover:text-black transition-colors" size={16} />
+               <input 
+                  type="text" 
+                  placeholder="Neural Search..." 
+                  className="w-full h-12 bg-white border border-black/5 rounded-2xl pl-12 pr-4 text-[13px] font-medium outline-none shadow-sm focus:border-[#0071e3] transition-all"
+               />
             </div>
 
-            {!currentDoc || docLoading ? (
-               <div className="animate-pulse space-y-16">
-                  <div className="h-20 w-3/4 bg-black/[0.03] rounded-3xl" />
-                  <div className="space-y-8">
-                     <div className="h-5 w-full bg-black/[0.02] rounded-full" />
-                     <div className="h-5 w-5/6 bg-black/[0.02] rounded-full" />
-                     <div className="h-[400px] w-full bg-black/[0.03] rounded-[32px]" />
+            <div className="flex flex-col gap-12">
+               <div>
+                  <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.3em] mb-6 block">Foundations</span>
+                  <div className="flex flex-col gap-2">
+                     {docs.filter(d => d.section === 'FOUNDATIONS').map(item => (
+                        <Link 
+                           key={item.id} 
+                           to={`/docs/${item.id}`}
+                           className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[14px] font-bold transition-all ${
+                              id === item.id 
+                              ? 'bg-black text-white shadow-xl shadow-black/10' 
+                              : 'text-black/40 hover:bg-black/5'
+                           }`}
+                        >
+                           <BookOpen size={16} strokeWidth={1.5} />
+                           {item.title}
+                        </Link>
+                     ))}
                   </div>
                </div>
-            ) : (
-              <article className="animate-apple-slide">
-                
-                {/* 🍏 PAGE TITLE & ACTIONS */}
-                <div className="flex flex-col gap-10 mb-20">
-                   <h1 className="text-[54px] md:text-[84px] font-bold tracking-[-0.055em] leading-[0.96] text-[#1d1d1f]">
-                     {currentDoc.title}.
-                   </h1>
-                   
-                   <div className="flex items-center gap-6 border-b border-black/[0.06] pb-10">
-                      <div className="flex -space-x-2">
-                         {[1,2,3].map(i => (
-                            <div key={i} className="w-8 h-8 rounded-full border-2 border-white bg-[#f5f5f7] flex items-center justify-center text-[10px] font-bold text-black/30">
-                               {String.fromCharCode(64+i)}
-                            </div>
-                         ))}
-                      </div>
-                      <span className="text-[13px] font-medium text-black/35">HGM Neural Labs Sync Active</span>
-                      <div className="flex-1" />
-                      <div className="flex gap-2">
-                        {[Share2, Download, Printer, MoreVertical].map((Icon, i) => (
-                           <button key={i} className="w-10 h-10 flex items-center justify-center rounded-xl bg-black/[0.03] border border-black/[0.04] text-black/25 hover:bg-[#0071e3]/5 hover:text-[#0071e3] transition-all active:scale-95">
-                              <Icon size={16} strokeWidth={1.5} />
-                           </button>
-                        ))}
-                      </div>
-                   </div>
-                </div>
 
-                {/* 🍏 PRO BODY CONTENT (CRISP & LEGIBLE) */}
-                <div className="prose prose-stone max-w-none 
-                      text-[19px] text-[#1d1d1f]/75 leading-[1.8] font-medium
-                      prose-headings:text-[#1d1d1f] prose-headings:font-bold prose-headings:tracking-tighter prose-headings:scroll-mt-32
-                      prose-h2:text-[34px] prose-h2:mt-24 prose-h2:mb-10 prose-h2:border-b prose-h2:border-black/[0.06] prose-h2:pb-4
-                      prose-h3:text-[24px] prose-h3:mt-16 prose-h3:mb-6
-                      prose-a:text-[#0071e3] prose-a:no-underline hover:prose-a:underline
-                      prose-strong:text-black prose-strong:font-bold
-                      prose-pre:bg-[#f5f5f7] prose-pre:border-none prose-pre:rounded-[28px] prose-pre:p-12 prose-pre:mt-16 prose-pre:mb-16 shadow-[inset_0_2px_4px_rgba(0,0,0,0.02)]
-                      prose-code:text-black prose-code:bg-transparent prose-code:font-mono prose-code:text-[16px] prose-code:tracking-tighter
-                      prose-blockquote:border-l-[5px] prose-blockquote:border-[#0071e3]/40 prose-blockquote:bg-[#f5f5f7]/50 prose-blockquote:rounded-r-[24px] prose-blockquote:px-10 prose-blockquote:py-8 prose-blockquote:my-16 prose-blockquote:text-[#1d1d1f]/50 prose-blockquote:italic
-                ">
-                  <MarkdownRenderer content={currentDoc.content} />
-                </div>
+               <div>
+                  <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.3em] mb-6 block">Protocols</span>
+                  <div className="flex flex-col gap-2">
+                     {docs.filter(d => d.section === 'PROTOCOLS').map(item => (
+                        <Link 
+                           key={item.id} 
+                           to={`/docs/${item.id}`}
+                           className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[14px] font-bold transition-all ${
+                              id === item.id 
+                              ? 'bg-black text-white shadow-xl shadow-black/10' 
+                              : 'text-black/40 hover:bg-black/5'
+                           }`}
+                        >
+                           <Shield size={16} strokeWidth={1.5} />
+                           {item.title}
+                        </Link>
+                     ))}
+                  </div>
+               </div>
+            </div>
+         </div>
+         
+         <div className="mt-auto pt-10 border-t border-black/5 flex flex-col gap-4">
+            <div className="flex items-center justify-between px-2">
+               <span className="text-[9px] font-black text-black/20 uppercase tracking-widest">Network Status</span>
+               <div className="w-1.5 h-1.5 rounded-full bg-[#34c759] animate-pulse" />
+            </div>
+            <div className="p-5 bg-white border border-black/5 rounded-2xl flex flex-col gap-1 shadow-sm">
+               <span className="text-[10px] font-bold text-black">HGM Stage 4.2</span>
+               <span className="text-[9px] font-medium text-black/30">Stable Edge Synthesis Active</span>
+            </div>
+         </div>
+      </aside>
 
-                {/* 🍏 PRO NEXT/PREV NAVIGATION (RELATED SYNAPSES) */}
-                <div className="mt-48 pt-16 border-t border-black/[0.08] grid grid-cols-1 md:grid-cols-2 gap-8">
-                   {prevDoc && (
-                     <Link to={`/docs/${prevDoc.id}`} className="group p-8 bg-[#f5f5f7] rounded-[32px] border border-black/[0.02] flex items-center gap-6 hover:bg-white hover:shadow-2xl hover:shadow-black/5 hover:-translate-y-1 transition-all duration-300">
-                        <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-black/20 group-hover:text-black transition-colors">
-                           <ArrowLeft size={20} strokeWidth={1} />
-                        </div>
-                        <div className="flex flex-col">
-                           <span className="text-[11px] font-bold text-black/20 uppercase tracking-[0.14em] mb-1">Previous Node</span>
-                           <span className="text-[17px] font-bold text-[#1d1d1f] tracking-tight">{prevDoc.title}</span>
-                        </div>
-                     </Link>
-                   )}
-                   {nextDoc && (
-                     <Link to={`/docs/${nextDoc.id}`} className="group p-8 bg-[#f5f5f7] rounded-[32px] border border-black/[0.02] flex items-center justify-between hover:bg-white hover:shadow-2xl hover:shadow-black/5 hover:-translate-y-1 transition-all duration-300">
-                        <div className="flex flex-col items-start">
-                           <span className="text-[11px] font-bold text-black/20 uppercase tracking-[0.14em] mb-1 text-left">Up Next</span>
-                           <span className="text-[17px] font-bold text-[#1d1d1f] tracking-tight text-left">{nextDoc.title}</span>
-                        </div>
-                        <div className="w-12 h-12 rounded-full bg-white flex items-center justify-center text-black/20 group-hover:text-[#0071e3] transition-colors">
-                           <ArrowRight size={20} strokeWidth={1} />
-                        </div>
-                     </Link>
-                   )}
-                </div>
-              </article>
-            )}
+      {/* 🍏 MAIN CONTENT CORE */}
+      <div className="flex-1 flex flex-col min-w-0">
+        
+        {/* PROGRESS BAR HUD */}
+        <div className="fixed top-[48px] left-0 right-0 h-[1.5px] bg-black/[0.03] z-[60]">
+           <div className="h-full bg-[#0071e3] transition-all duration-300" style={{ width: `${readingProgress}%` }} />
+        </div>
+
+        <div className="max-w-[1000px] w-full mx-auto pt-32 pb-60 px-8 md:px-20 animate-apple-fade">
+          
+          {/* HEADER METADATA OVERLAY */}
+          <div className="flex flex-wrap items-center gap-6 mb-16 opacity-40">
+            <span className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.2em]"><Zap size={14} fill="currentColor" /> Neural Verified</span>
+            <div className="h-1 w-1 bg-black rounded-full" />
+            <span className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.2em]"><Clock size={14} /> 4 Min Sync</span>
+            <div className="h-1 w-1 bg-black rounded-full" />
+            <span className="text-[11px] font-black uppercase tracking-[0.2em]">HGM-06 LABS</span>
           </div>
 
-          {/* 🍏 PRO ON-THIS-PAGE NAVIGATION (RIGHT SIDEBAR) */}
-          <aside className="hidden xl:block w-[240px] sticky top-24 self-start animate-apple-fade">
-             <div className="flex flex-col gap-10">
-                <div className="flex flex-col gap-6">
-                   <h3 className="text-[11px] font-bold tracking-[0.18em] text-black/25 uppercase">On This Page</h3>
-                   <nav className="flex flex-col gap-[2px]">
-                      {toc.length > 0 ? toc.map(item => (
-                        <button 
-                          key={item.id} 
-                          onClick={() => {
-                            const el = document.getElementById(item.id);
-                            if (el) el.scrollIntoView({ behavior: 'smooth' });
-                          }}
-                          className={`text-left py-2 text-[13.5px] font-medium transition-all border-l-[2px] border-transparent pl-4 hover:text-[#0071e3] hover:border-[#0071e3]/20 ${
-                            item.level === 3 ? 'ml-4 opacity-50 text-[12.5px]' : 'opacity-70'
-                          }`}
-                        >
-                           {item.text}
-                        </button>
-                      )) : (
-                        <span className="text-[12px] font-medium text-black/15 italic">Neural scan active...</span>
-                      )}
-                   </nav>
-                </div>
-                
-                {/* 🍏 ADDITIONAL PRO UTILITIES (APPLE STYLE) */}
-                <div className="pt-10 border-t border-black/[0.04] space-y-8">
-                   <div className="flex flex-col gap-5">
-                      <span className="text-[11px] font-bold tracking-[0.18em] text-black/25 uppercase">Pro Utilities</span>
-                      {[
-                        { icon: <FileCode size={16} />, label: 'View Source Logic' },
-                        { icon: <Sparkles size={16} />, label: 'AI Documentation Audit' },
-                        { icon: <Search size={16} />, label: 'Deep Manifest Scan' }
-                      ].map(util => (
-                        <button key={util.label} className="flex items-center gap-4 text-[13px] font-bold text-black/35 hover:text-[#0071e3] transition-colors group">
-                           <span className="opacity-40 group-hover:opacity-100">{util.icon}</span>
-                           <span>{util.label}</span>
-                        </button>
-                      ))}
-                   </div>
-                   
-                   <div className="p-6 bg-[#f5f5f7] rounded-[24px] border border-black/[0.02]">
-                      <h4 className="text-[14px] font-bold text-black tracking-tight mb-2">Neural Status</h4>
-                      <p className="text-[11px] font-medium text-black/30 leading-relaxed">Stage 4 Decryption active. Global Edge Sync is 100% stable.</p>
-                      <div className="mt-4 flex items-center gap-2">
-                         <div className="w-1.5 h-1.5 rounded-full bg-[#34c759] animate-pulse" />
-                         <span className="text-[10px] font-bold text-[#34c759] uppercase tracking-widest">Connected</span>
-                      </div>
-                   </div>
-                </div>
-             </div>
-          </aside>
+          <h1 className="text-6xl md:text-[100px] font-bold tracking-[-0.07em] leading-[0.92] text-[#1d1d1f] mb-32 selection:bg-[#0071e3]/10">
+            {doc.title}
+          </h1>
 
+          <div className="flex flex-col gap-32">
+             <MarkdownRenderer content={doc.content} />
+          </div>
+
+          {/* RELATED SYNAPSES — ADVANCED NAVIGATION */}
+          <div className="mt-60 pt-20 border-t border-black/[0.06] grid grid-cols-1 md:grid-cols-2 gap-10">
+             <Link to="/docs/intro" className="group p-10 bg-[#f5f5f7] border border-black/[0.02] rounded-[48px] hover:bg-white hover:shadow-2xl transition-all">
+                <span className="text-[10px] font-black text-[#0071e3] uppercase tracking-widest mb-4 block">PREVIOUS NODES</span>
+                <h4 className="text-[24px] font-bold text-black tracking-tight">Neural Introduction</h4>
+                <div className="mt-8 flex items-center text-[10px] font-black text-black/30 uppercase tracking-widest group-hover:text-black">
+                   <ChevronLeft size={16} /> Backto Foundations
+                </div>
+             </Link>
+             <Link to="/docs/adv-core" className="group p-10 bg-[#f5f5f7] border border-black/[0.02] rounded-[48px] hover:bg-white hover:shadow-2xl transition-all text-right items-end flex flex-col">
+                <span className="text-[10px] font-black text-[#ff375f] uppercase tracking-widest mb-4 block">NEXT SEQUENCE</span>
+                <h4 className="text-[24px] font-bold text-black tracking-tight text-right">Advanced Core Sync</h4>
+                <div className="mt-8 flex items-center text-[10px] font-black text-black/30 uppercase tracking-widest group-hover:text-black">
+                   Proceed to Protocols <ChevronRight size={16} />
+                </div>
+             </Link>
+          </div>
         </div>
       </div>
+
+      {/* 🍏 SYSTEMATIC RIGHT TOC — FILLING THE WHITE SPACE */}
+      <aside className="hidden xl:flex w-[320px] flex-col border-l border-black/[0.04] sticky top-[48px] h-[calc(100vh-48px)] pt-32 pb-20 px-8">
+         <div className="flex flex-col gap-12">
+            <div>
+               <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.3em] mb-6 block">In this Synthesis</span>
+               <div className="flex flex-col gap-5 border-l border-black/[0.03] pl-6">
+                  {doc.content.match(/^## .+/gm)?.map((header, i) => (
+                     <a key={i} href={`#${header.replace('## ', '').toLowerCase().replace(/\s+/g, '-')}`} className="text-[13px] font-bold text-black/30 hover:text-[#0071e3] transition-colors leading-tight">
+                        {header.replace('## ', '')}
+                     </a>
+                  ))}
+               </div>
+            </div>
+            
+            <div className="flex flex-col gap-8">
+               <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.3em] block">Sovereign Utilities</span>
+               <div className="flex flex-wrap gap-3">
+                  {[ 
+                    {icon: Volume2, action: handleReadAloud, label: 'Voice Brief'},
+                    {icon: Download, action: () => {}, label: 'PDF'},
+                    {icon: Share2, action: handleCopy, label: copied ? 'URL COPIED' : 'Share'}
+                  ].map((util, i) => (
+                    <button key={i} onClick={util.action} className="flex items-center gap-4 px-5 py-3.5 bg-[#f5f5f7] rounded-2xl text-[12px] font-bold text-black group hover:bg-black hover:text-white transition-all shadow-sm">
+                       <util.icon size={16} strokeWidth={1.5} />
+                       {util.label}
+                    </button>
+                  ))}
+               </div>
+            </div>
+
+            <div className="p-8 rounded-[40px] bg-black text-white flex flex-col gap-6 shadow-2xl relative overflow-hidden group">
+               <div className="absolute top-0 right-0 p-8 opacity-10 group-hover:opacity-30 transition-opacity">
+                  <Activity size={80} strokeWidth={1} />
+               </div>
+               <span className="text-[10px] font-black text-white/40 uppercase tracking-widest relative z-10">Neural Rank</span>
+               <p className="text-[42px] font-bold tracking-tight relative z-10">9.8</p>
+               <div className="h-[1px] w-full bg-white/10 relative z-10" />
+               <button className="text-[10px] font-black uppercase tracking-widest text-[#0071e3] hover:text-white transition-colors relative z-10 flex items-center gap-3">Run Full Audit <ChevronRight size={14} /></button>
+            </div>
+         </div>
+      </aside>
+
+      {/* FLOATING ACTION TRAY */}
+      <div className={`fixed bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-4 p-3 bg-white/80 backdrop-blur-2xl border border-black/5 rounded-[32px] shadow-2xl z-[100] transition-all duration-700 ${scrollDir === 'down' ? 'translate-y-24 opacity-0' : 'translate-y-0 opacity-100'}`}>
+         <button onClick={handleReadAloud} className="w-14 h-14 flex items-center justify-center bg-black text-white rounded-full hover:scale-110 active:scale-95 transition-all"><Volume2 size={20} /></button>
+         <button onClick={handleCopy} className="px-8 h-14 bg-[#f5f5f7] rounded-full text-[14px] font-bold hover:bg-black hover:text-white transition-all">{copied ? 'LINK COPIED' : 'Share Synthesis'}</button>
+         <button onClick={() => window.print()} className="w-14 h-14 flex items-center justify-center bg-[#f5f5f7] rounded-full hover:bg-black hover:text-white transition-all"><Printer size={20} /></button>
+      </div>
+
     </div>
   );
 };
