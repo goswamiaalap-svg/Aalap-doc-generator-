@@ -10,8 +10,8 @@ function App() {
     <>
       <Toaster position="top-right" toastOptions={{ className: 'dark:bg-gray-800 dark:text-gray-100' }} />
       <Routes>
-        <Route path="/" element={<LandingPage />} />
         <Route element={<Layout />}>
+          <Route path="/" element={<LandingPage />} />
           <Route path="docs" element={<DocumentationViewer />} />
           <Route path="docs/:docId" element={<DocumentationViewer />} />
           <Route path="codegen" element={<CodeGenerator />} />
