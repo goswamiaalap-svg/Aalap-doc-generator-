@@ -8,11 +8,8 @@ import {
   Download, 
   Printer, 
   Volume2, 
-  BookOpen,
   Activity,
-  Shield,
-  Zap,
-  Search
+  Zap
 } from 'lucide-react';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 import { docs } from '../api/docs';
@@ -54,75 +51,6 @@ const DocumentationViewer: React.FC = () => {
   return (
     <div className="flex-1 flex bg-[#ffffff] relative min-h-screen">
       
-      {/* 🍏 SYSTEMATIC LEFT SIDEBAR — BREAKING THE WHITE SPACE */}
-      <aside className="hidden lg:flex w-[320px] flex-col border-r border-black/[0.04] bg-[#f5f5f7]/60 sticky top-[48px] h-[calc(100vh-48px)] overflow-y-auto no-scrollbar pt-12 pb-20 px-8">
-         <div className="flex flex-col gap-10">
-            
-            {/* NEURAL SEARCH HUD */}
-            <div className="relative group">
-               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20 group-hover:text-black transition-colors" size={16} />
-               <input 
-                  type="text" 
-                  placeholder="Neural Search..." 
-                  className="w-full h-12 bg-white border border-black/5 rounded-2xl pl-12 pr-4 text-[13px] font-medium outline-none shadow-sm focus:border-[#0071e3] transition-all"
-               />
-            </div>
-
-            <div className="flex flex-col gap-12">
-               <div>
-                  <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.3em] mb-6 block">Foundations</span>
-                  <div className="flex flex-col gap-2">
-                     {docs.filter((d: any) => d.section === 'FOUNDATIONS').map((item: any) => (
-                        <Link 
-                           key={item.id} 
-                           to={`/docs/${item.id}`}
-                           className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[14px] font-bold transition-all ${
-                              id === item.id 
-                              ? 'bg-black text-white shadow-xl shadow-black/10' 
-                              : 'text-black/40 hover:bg-black/5'
-                           }`}
-                        >
-                           <BookOpen size={16} strokeWidth={1.5} />
-                           {item.title}
-                        </Link>
-                     ))}
-                  </div>
-               </div>
-
-               <div>
-                  <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.3em] mb-6 block">Protocols</span>
-                  <div className="flex flex-col gap-2">
-                     {docs.filter((d: any) => d.section === 'PROTOCOLS').map((item: any) => (
-                        <Link 
-                           key={item.id} 
-                           to={`/docs/${item.id}`}
-                           className={`flex items-center gap-4 px-4 py-3.5 rounded-2xl text-[14px] font-bold transition-all ${
-                              id === item.id 
-                              ? 'bg-black text-white shadow-xl shadow-black/10' 
-                              : 'text-black/40 hover:bg-black/5'
-                           }`}
-                        >
-                           <Shield size={16} strokeWidth={1.5} />
-                           {item.title}
-                        </Link>
-                     ))}
-                  </div>
-               </div>
-            </div>
-         </div>
-         
-         <div className="mt-auto pt-10 border-t border-black/5 flex flex-col gap-4">
-            <div className="flex items-center justify-between px-2">
-               <span className="text-[9px] font-black text-black/20 uppercase tracking-widest">Network Status</span>
-               <div className="w-1.5 h-1.5 rounded-full bg-[#34c759] animate-pulse" />
-            </div>
-            <div className="p-5 bg-white border border-black/5 rounded-2xl flex flex-col gap-1 shadow-sm">
-               <span className="text-[10px] font-bold text-black">HGM Stage 4.2</span>
-               <span className="text-[9px] font-medium text-black/30">Stable Edge Synthesis Active</span>
-            </div>
-         </div>
-      </aside>
-
       {/* 🍏 MAIN CONTENT CORE */}
       <div className="flex-1 flex flex-col min-w-0">
         
@@ -142,7 +70,7 @@ const DocumentationViewer: React.FC = () => {
             <span className="text-[11px] font-black uppercase tracking-[0.2em]">HGM-06 LABS</span>
           </div>
 
-          <h1 className="text-6xl md:text-[100px] font-bold tracking-[-0.07em] leading-[0.92] text-[#1d1d1f] mb-32 selection:bg-[#0071e3]/10">
+          <h1 className="text-5xl md:text-[80px] font-bold tracking-tight leading-[1] text-[#1d1d1f] mb-32 selection:bg-[#0071e3]/10 break-words">
             {doc.title}
           </h1>
 
