@@ -92,26 +92,31 @@ const CodeGenerator: React.FC = () => {
   };
 
   const extractMarkers = (text: string) => {
-    const markers: Record<string, string> = {
-      DOCSTRINGS: '---DOCGEN:DOCSTRINGS---', README: '---DOCGEN:README---', API_REF: '---DOCGEN:API_REF---',
-      DIAGRAM: '---DOCGEN:DIAGRAM---', SECURITY: '---DOCGEN:SECURITY---', PERFORMANCE: '---DOCGEN:PERFORMANCE---',
-      TESTS: '---DOCGEN:TESTS---', QUALITY: '---DOCGEN:QUALITY---'
+    const markers: Record<TabType, string> = {
+      DOCSTRINGS: '---DOCGEN:DOCSTRINGS---',
+      README: '---DOCGEN:README---',
+      API_REF: '---DOCGEN:API_REF---',
+      DIAGRAM: '---DOCGEN:DIAGRAM---',
+      SECURITY: '---DOCGEN:SECURITY---',
+      PERFORMANCE: '---DOCGEN:PERFORMANCE---',
+      TESTS: '---DOCGEN:TESTS---',
+      QUALITY: '---DOCGEN:QUALITY---'
     };
+
     const newResults: Record<string, string> = {};
-    const markerKeys = Object.keys(markers);
-    for (let i = 0; i < markerKeys.length; i++) {
-        const currentKey = markerKeys[i] as TabType;
-        const currentMarker = markers[currentKey];
-        const nextMarker = markerKeys[i+1] ? markers[markerKeys[i+1]] : null;
-        const startIdx = text.indexOf(currentMarker);
-        if (startIdx !== -1) {
-            const contentStart = startIdx + currentMarker.length;
-            const contentEnd = nextMarker ? text.indexOf(nextMarker, contentStart) : text.length;
-            const content = text.slice(contentStart, contentEnd === -1 ? text.length : contentEnd).trim();
-            newResults[currentKey] = content;
-        }
+    const markerPositions = (Object.keys(markers) as TabType[])
+      .map(key => ({ key, index: text.indexOf(markers[key]) }))
+      .filter(m => m.index !== -1)
+      .sort((a, b) => a.index - b.index);
+
+    for (let i = 0; i < markerPositions.length; i++) {
+        const current = markerPositions[i];
+        const next = markerPositions[i+1];
+        const start = current.index + markers[current.key].length;
+        const end = next ? next.index : text.length;
+        newResults[current.key] = text.slice(start, end).trim();
     }
-    setResults((prev: Record<string, string>) => ({ ...prev, ...newResults }));
+    setResults(prev => ({ ...prev, ...newResults }));
   };
 
   return (
