@@ -83,50 +83,49 @@ export default function Layout() {
         </div>
       )}
 
-      {/* 🍏 APPLE GLOBAL NAVIGATION (CONSISTENT H-16) */}
-      <header className={`fixed top-0 inset-x-0 h-16 z-50 flex items-center justify-between px-8 md:px-[120px] transition-all duration-300 ${
-        scrolled 
-        ? 'apple-nav' 
-        : 'bg-transparent border-transparent'
+      {/* 🍏 APPLE GLOBAL NAVIGATION (Structural Fix) */}
+      <header className={`fixed top-0 inset-x-0 h-16 z-[100] transition-all duration-300 ${
+        scrolled ? 'apple-nav shadow-sm' : 'bg-transparent border-transparent'
       }`}>
-        {/* LOGO */}
-        <Link to="/" className="flex items-center h-full transition-opacity hover:opacity-75">
-           <Zap size={18} className="text-black/90 rotate-12" fill="black" />
-           <span className="ml-3 text-[14px] font-bold tracking-tight text-black tracking-[-0.015em]">HGM-06</span>
-        </Link>
+        <div className="max-w-[1240px] mx-auto px-6 md:px-10 h-full flex items-center justify-between gap-8">
+          
+          {/* LEFT: LOGO AREA (Locked Structure) */}
+          <Link to="/" className="flex items-center group shrink-0">
+             <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+                <Zap size={16} fill="white" className="text-white rotate-12" />
+             </div>
+             <span className="ml-4 text-[15px] font-bold tracking-tight text-black">HGM-06</span>
+          </Link>
 
-        {/* NAVIGATION LINKS (CENTERED APPLE PIXEL SYNC) */}
-        <nav className="hidden md:flex items-center h-full gap-10">
-          {[
-            { to: '/docs', label: 'Guide' },
-            { to: '/codegen', label: 'Studio' }
-          ].map(link => (
-            <Link 
-              key={link.to} to={link.to} 
-              className={`text-[12px] font-semibold transition-all duration-200 tracking-[-0.01em] ${
-                location.pathname.startsWith(link.to) ? 'text-black/100' : 'text-black/45 hover:text-black/85'
-              }`}
-            >
-              {link.label}
-            </Link>
-          ))}
-          <div className="h-4 w-[1px] bg-black/[0.08] mx-2" />
-          <button 
-            onClick={() => setSearchOpen(true)}
-            className="flex items-center gap-1.5 text-black/45 hover:text-black transition-colors"
-          >
-             <Search size={14} strokeWidth={2} />
-          </button>
-        </nav>
+          {/* CENTER: PRIMARY NAV (Strict Flex) */}
+          <nav className="hidden md:flex items-center gap-10">
+             {[
+               { to: '/docs', label: 'Guide', sub: 'Manifest' },
+               { to: '/codegen', label: 'Studio', sub: 'Architecture' }
+             ].map(link => (
+               <Link 
+                 key={link.to} to={link.to} 
+                 className={`flex flex-col group ${location.pathname.startsWith(link.to) ? 'opacity-100' : 'opacity-40 hover:opacity-100'} transition-opacity`}
+               >
+                  <span className="text-[12px] font-bold tracking-tight">{link.label}</span>
+                  <span className="text-[8px] font-black uppercase tracking-[0.15em] text-[#0071e3] opacity-0 group-hover:opacity-100 transition-opacity">{link.sub}</span>
+               </Link>
+             ))}
+          </nav>
 
-        {/* ACTION AREA */}
-        <div className="flex items-center gap-8 h-full">
-           <Link to="/docs" className="text-[12px] font-semibold text-black/55 hover:text-black transition-colors">
-              Support
-           </Link>
-           <Link to="/codegen" className="apple-btn-primary h-7 px-4 text-[11px] font-bold tracking-tight shadow-md">
-              Try Pro
-           </Link>
+          {/* RIGHT: ACTION AREA (Standardized) */}
+          <div className="flex items-center gap-6 shrink-0">
+             <button onClick={() => setSearchOpen(true)} className="p-2 opacity-30 hover:opacity-100 transition-opacity">
+                <Search size={18} strokeWidth={2} />
+             </button>
+             <Link to="/codegen" className="hidden sm:block text-[12px] font-bold text-black/40 hover:text-black transition-colors">
+                Support
+             </Link>
+             <Link to="/codegen" className="apple-btn-primary h-9 px-6 text-[12px] font-bold shadow-xl">
+                Try Pro
+             </Link>
+          </div>
+
         </div>
       </header>
 
