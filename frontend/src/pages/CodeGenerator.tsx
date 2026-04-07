@@ -114,9 +114,8 @@ const CodeGenerator: React.FC = () => {
     setResults((prev: Record<string, string>) => ({ ...prev, ...newResults }));
   };
 
-  // Neural Fidelity HUD Logic
   return (
-    <div className="flex-1 flex flex-col h-[calc(100vh-48px)] bg-[#ffffff] relative overflow-hidden selection:bg-[#0071e3]/10 font-sans">
+    <div className="flex-1 flex flex-col min-h-0 bg-[#ffffff] relative selection:bg-[#0071e3]/10 font-sans">
       
       {/* 🍏 HIGH-DENSITY HEADER HUD */}
       <header className="h-[72px] border-b border-black/[0.06] flex items-center justify-between px-10 relative z-20 bg-white/80 backdrop-blur-xl">
@@ -160,8 +159,8 @@ const CodeGenerator: React.FC = () => {
       {/* 🍏 MAIN TRIPLE-PANEL HUD ARCHITECTURE */}
       <main className="flex-1 flex overflow-hidden relative z-10 w-full">
         
-        {/* 🍏 PANEL A: THE LOGIC DOCK */}
-        <aside className="w-[320px] flex flex-col border-r border-black/[0.06] bg-[#f5f5f7]/40 p-10 gap-10 shrink-0">
+        {/* 🍏 PANEL A: THE LOGIC DOCK — SCROLLABLE SIDEBAR FIXED */}
+        <aside className="w-[320px] flex flex-col border-r border-black/[0.06] bg-[#f5f5f7]/40 p-10 gap-10 shrink-0 overflow-y-auto custom-scrollbar">
            
            {/* PROMINENT UPLOAD BUTTON — NEW ADVANCED FEATURE */}
            <div className="flex flex-col gap-6">
@@ -288,8 +287,8 @@ const CodeGenerator: React.FC = () => {
            </div>
         </section>
 
-        {/* 🍏 PANEL C: THE ARCHITECTURE HUD */}
-        <aside className="hidden lg:flex w-[340px] border-l border-black/[0.06] flex-col overflow-hidden bg-white">
+        {/* 🍏 PANEL C: THE ARCHITECTURE HUD — SCROLLABLE FIXED */}
+        <aside className="hidden lg:flex w-[340px] border-l border-black/[0.06] flex-col bg-white overflow-y-auto custom-scrollbar">
            <div className="h-[60px] border-b border-black/[0.04] flex items-center px-8 justify-between">
               <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.25em]">Intelligence HUD</span>
               <Maximize2 size={14} className="text-black/10 hover:text-black cursor-pointer" />

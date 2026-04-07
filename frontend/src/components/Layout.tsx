@@ -189,7 +189,7 @@ export default function Layout() {
           </aside>
         )}
 
-        <main className={`flex-1 min-w-0 overflow-y-auto bg-transparent relative no-scrollbar ${location.pathname === '/' ? '' : 'px-0'}`}>
+        <main className={`flex-1 min-w-0 overflow-y-auto bg-transparent relative custom-scrollbar ${location.pathname === '/' ? '' : 'px-0'}`}>
            <Outlet />
         </main>
       </div>
