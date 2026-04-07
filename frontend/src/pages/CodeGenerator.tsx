@@ -45,6 +45,16 @@ const CodeGenerator: React.FC = () => {
     setTokenCount(code.split(/\s+/).filter((x: string) => x.length > 0).length);
   }, [code]);
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+        if (!isGenerating && code.trim()) handleGenerate();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isGenerating, code]);
+
   const handleGenerate = async () => {
     if (!code.trim()) return toast.error('INPUT REQUIRED');
     setIsGenerating(true);
@@ -165,66 +175,76 @@ const CodeGenerator: React.FC = () => {
       <main className="flex-1 flex overflow-hidden relative z-10 w-full">
         
         {/* 🍏 PANEL A: THE LOGIC DOCK — SCROLLABLE SIDEBAR FIXED */}
-        <aside className="w-[320px] flex flex-col border-r border-black/[0.06] bg-[#f5f5f7]/40 p-10 gap-10 shrink-0 overflow-y-auto custom-scrollbar">
-           
-           {/* PROMINENT UPLOAD BUTTON — NEW ADVANCED FEATURE */}
-           <div className="flex flex-col gap-6">
-              <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.25em]">Sovereign Batch</span>
-              <button 
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full flex items-center justify-between p-6 bg-black text-white rounded-[28px] shadow-2xl hover:scale-105 active:scale-95 transition-all group"
-              >
-                 <div className="flex items-center gap-4">
-                    <Upload size={18} className="text-[#0071e3] group-hover:rotate-12 transition-transform" />
-                    <span className="text-[13px] font-bold">Inject File</span>
-                 </div>
-                 <Plus size={16} />
-              </button>
-           </div>
-
-           <div className="flex flex-col gap-6">
-              <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.25em]">Logic Injection</span>
-              <div className="flex flex-col gap-3">
-                 <select 
-                    value={language} onChange={e => setLanguage(e.target.value)}
-                    className="w-full bg-white border border-black/[0.08] shadow-sm rounded-2xl px-5 py-3.5 text-[14px] text-[#1d1d1f] font-bold outline-none"
+        <aside className="w-[320px] flex flex-col border-r border-black/[0.06] bg-[#f5f5f7]/40 relative shrink-0">
+           <div className="flex-1 overflow-y-auto custom-scrollbar p-10 flex flex-col gap-10 pb-[100px]">
+              {/* PROMINENT UPLOAD BUTTON — NEW ADVANCED FEATURE */}
+              <div className="flex flex-col gap-6">
+                 <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.25em]">Sovereign Batch</span>
+                 <button 
+                   onClick={() => fileInputRef.current?.click()}
+                   className="w-full flex items-center justify-between p-6 bg-black text-white rounded-[28px] shadow-2xl hover:scale-105 active:scale-95 transition-all group"
                  >
-                    {[ 'typescript', 'javascript', 'python', 'rust', 'cpp', 'java', 'go', 'swift' ].map(l => (
-                        <option key={l} value={l}>{l.toUpperCase()}</option>
-                    ))}
-                 </select>
-                 <div className="bg-white border border-black/[0.04] rounded-[28px] h-[280px] relative shadow-lg shadow-black/[0.01] p-1">
-                    <textarea 
-                      value={code} onChange={e => setCode(e.target.value)}
-                      placeholder="// Inject logic..."
-                      className="w-full h-full bg-transparent p-7 font-mono text-[14px] text-[#1d1d1f]/75 resize-none outline-none custom-scrollbar leading-[1.7]"
-                    />
-                    <button onClick={handleFormat} className="absolute bottom-5 right-5 p-2 bg-[#f5f5f7] rounded-lg text-black/20 hover:text-black transition-colors"><Binary size={14} /></button>
+                    <div className="flex items-center gap-4">
+                       <Upload size={18} className="text-[#0071e3] group-hover:rotate-12 transition-transform" />
+                       <span className="text-[13px] font-bold">Inject File</span>
+                    </div>
+                    <Plus size={16} />
+                 </button>
+              </div>
+
+              <div className="flex flex-col gap-6">
+                 <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.25em]">Logic Injection</span>
+                 <div className="flex flex-col gap-3">
+                    <select 
+                       value={language} onChange={e => setLanguage(e.target.value)}
+                       className="w-full bg-white border border-black/[0.08] shadow-sm rounded-2xl px-5 py-3.5 text-[14px] text-[#1d1d1f] font-bold outline-none"
+                    >
+                       {[ 'typescript', 'javascript', 'python', 'rust', 'cpp', 'java', 'go', 'swift' ].map(l => (
+                           <option key={l} value={l}>{l.toUpperCase()}</option>
+                       ))}
+                    </select>
+                    <div className="bg-white border border-black/[0.04] rounded-[28px] h-[280px] relative shadow-lg shadow-black/[0.01] p-1">
+                       <textarea 
+                         value={code} onChange={e => setCode(e.target.value)}
+                         placeholder="// Inject logic..."
+                         className="w-full h-full bg-transparent p-7 font-mono text-[14px] text-[#1d1d1f]/75 resize-none outline-none custom-scrollbar leading-[1.7]"
+                       />
+                       <button onClick={handleFormat} className="absolute bottom-5 right-5 p-2 bg-[#f5f5f7] rounded-lg text-black/20 hover:text-black transition-colors"><Binary size={14} /></button>
+                    </div>
                  </div>
+              </div>
+
+              <div className="flex flex-col gap-4">
+                 <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.25em]">Sync Protocols</span>
+                 {[ {label: 'Deep Sync', icon: Sparkles, color: 'text-[#0071e3]'}, {label: 'Logic Map', icon: Layers, color: 'text-[#af52de]'} ].map(p => (
+                    <button key={p.label} onClick={() => toast.success(`${p.label.toUpperCase()} MODE ACTIVE`)} className="flex items-center justify-between p-4 bg-white border border-black/[0.04] rounded-2xl hover:shadow-lg transition-all group">
+                       <div className="flex items-center gap-4">
+                          <span className={p.color}><p.icon size={14} /></span>
+                          <span className="text-[12px] font-bold text-black/50">{p.label}</span>
+                       </div>
+                       <ChevronRight size={14} className="opacity-10 group-hover:opacity-100 transition-opacity" />
+                    </button>
+                 ))}
               </div>
            </div>
 
-           <div className="flex-1 flex flex-col gap-4">
-              <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.25em]">Sync Protocols</span>
-              {[ {label: 'Deep Sync', icon: Sparkles, color: 'text-[#0071e3]'}, {label: 'Logic Map', icon: Layers, color: 'text-[#af52de]'} ].map(p => (
-                 <button key={p.label} onClick={() => toast.success(`${p.label.toUpperCase()} MODE ACTIVE`)} className="flex items-center justify-between p-4 bg-white border border-black/[0.04] rounded-2xl hover:shadow-lg transition-all group">
-                    <div className="flex items-center gap-4">
-                       <span className={p.color}><p.icon size={14} /></span>
-                       <span className="text-[12px] font-bold text-black/50">{p.label}</span>
-                    </div>
-                    <ChevronRight size={14} className="opacity-10 group-hover:opacity-100 transition-opacity" />
-                 </button>
-              ))}
+           {/* 🍏 STICKY ACTION BUTTON */}
+           <div className="absolute bottom-0 left-0 right-0 p-6 bg-[#f5f5f7]/80 backdrop-blur-md border-t border-black/[0.04] z-30">
+              <button 
+                onClick={handleGenerate} disabled={isGenerating || !code.trim()}
+                className={`apple-btn-primary w-full h-[64px] text-[16px] font-bold shadow-2xl relative overflow-hidden flex items-center justify-center gap-3 ${
+                    isGenerating || !code.trim() ? 'opacity-10 scale-[0.98]' : 'hover:scale-[1.02]'
+                }`}
+              >
+                 {isGenerating ? <Loader2 size={24} className="animate-spin" /> : (
+                   <>
+                     <Zap size={18} fill="currentColor" />
+                     Run Neural Sync
+                     <span className="text-[10px] opacity-40 ml-2">⌘↵</span>
+                   </>
+                 )}
+              </button>
            </div>
-
-           <button 
-             onClick={handleGenerate} disabled={isGenerating || !code.trim()}
-             className={`apple-btn-primary w-full h-[72px] text-[18px] font-bold shadow-2xl relative overflow-hidden ${
-                 isGenerating || !code.trim() ? 'opacity-10 scale-[0.98]' : 'hover:scale-[1.02]'
-             }`}
-           >
-              {isGenerating ? <Loader2 size={24} className="animate-spin" /> : 'Run Neural Sync'}
-           </button>
         </aside>
 
         {/* 🍏 PANEL B: THE ANALYTICAL CORE — ALIGNMENT FIXED */}
