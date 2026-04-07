@@ -174,8 +174,8 @@ const CodeGenerator: React.FC = () => {
       {/* 🍏 MAIN TRIPLE-PANEL HUD ARCHITECTURE */}
       <main className="flex-1 flex overflow-hidden relative z-10 w-full">
         
-        {/* 🍏 PANEL A: THE LOGIC DOCK — SCROLLABLE SIDEBAR FIXED */}
-        <aside className="w-[320px] flex flex-col border-r border-black/[0.06] bg-[#f5f5f7]/40 relative shrink-0">
+        {/* 🍏 PANEL A: THE LOGIC DOCK — STICKY FIX */}
+        <aside className="w-[320px] h-full flex flex-col border-r border-black/[0.06] bg-[#f5f5f7]/40 relative shrink-0 overflow-hidden">
            <div className="flex-1 overflow-y-auto custom-scrollbar p-10 flex flex-col gap-10 pb-[100px]">
               {/* PROMINENT UPLOAD BUTTON — NEW ADVANCED FEATURE */}
               <div className="flex flex-col gap-6">
