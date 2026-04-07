@@ -83,70 +83,76 @@ export default function Layout() {
         </div>
       )}
 
-      {/* 🍏 TRIPLE-SECTION NAVIGATION ARCHITECTURE (Stage 4 Fix) */}
-      <header className={`fixed top-0 inset-x-0 h-20 z-[100] transition-all duration-300 ${
-        scrolled ? 'bg-white/90 backdrop-blur-2xl border-b border-black/[0.06] shadow-sm' : 'bg-transparent'
+      {/* 🍏 HEADER 1: PRIMARY GLOBAL NAVIGATION (H-16, TOP-0, Z-50) */}
+      <header className={`fixed top-0 inset-x-0 h-16 z-[100] transition-colors duration-300 ${
+        scrolled ? 'bg-white/95 backdrop-blur-3xl border-b border-black/[0.06] shadow-sm' : 'bg-transparent'
       }`}>
         <div className="max-w-[1440px] mx-auto px-8 h-full flex items-center justify-between gap-12 whitespace-nowrap">
           
-          {/* LEFT: IDENTITY (Locked) */}
-          <div className="flex items-center gap-4 shrink-0">
-             <Link to="/" className="flex items-center group">
-                <div className="w-10 h-10 bg-black rounded-xl flex items-center justify-center shadow-xl group-hover:scale-105 transition-transform">
-                   <Zap size={20} fill="white" className="text-white rotate-12" />
-                </div>
-                <div className="ml-4 flex flex-col">
-                   <span className="text-[17px] font-bold tracking-tight text-black leading-none">HGM-06</span>
-                   <span className="text-[10px] font-black uppercase tracking-[0.2em] text-black/25 mt-1">Infrastructure</span>
-                </div>
-             </Link>
-          </div>
-
-          {/* CENTER: NAV + HUB BADGE (Fluid & Responsive) */}
-          <div className="hidden lg:flex flex-1 items-center justify-center gap-12">
-             <nav className="flex items-center gap-10">
-                {[
-                  { to: '/docs', label: 'Guide' },
-                  { to: '/codegen', label: 'Studio' },
-                  { to: '/codegen', label: 'Metrics' }
-                ].map(link => (
-                  <Link 
-                    key={link.label} to={link.to} 
-                    className={`text-[13px] font-bold tracking-tight transition-all ${
-                      location.pathname.startsWith(link.to) ? 'text-[#0071e3]' : 'text-black/40 hover:text-black'
-                    }`}
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-             </nav>
-             
-             {/* STAGE 4 HUB BADGE (Integrated) */}
-             <div className="h-6 w-[1px] bg-black/[0.1] mx-2" />
-             <div className="flex items-center gap-3 bg-black/[0.03] border border-black/[0.05] px-4 py-2 rounded-full">
-                <div className="w-2 h-2 rounded-full bg-[#32d74b] animate-pulse" />
-                <span className="text-[11px] font-black uppercase tracking-widest text-black/60">Stage 4 Synthesis Hub</span>
+          {/* Identity */}
+          <Link to="/" className="flex items-center group shrink-0">
+             <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
+                <Zap size={16} fill="white" className="text-white rotate-12" />
              </div>
-          </div>
+             <span className="ml-3 text-[15px] font-bold tracking-tight text-black">HGM-06</span>
+          </Link>
 
-          {/* RIGHT: CONTROLS (Standardized) */}
+          {/* Primary Links */}
+          <nav className="hidden lg:flex items-center gap-10">
+             {['Guide', 'Studio', 'Resources'].map(item => (
+               <Link 
+                 key={item} to="/codegen" 
+                 className={`text-[12px] font-bold tracking-tight transition-opacity ${item === 'Guide' ? 'opacity-100 text-[#0071e3]' : 'opacity-40 hover:opacity-100'}`}
+               >
+                  {item}
+               </Link>
+             ))}
+          </nav>
+
+          {/* Actions */}
           <div className="flex items-center gap-6 shrink-0">
-             <button onClick={() => setSearchOpen(true)} className="p-2.5 bg-black/[0.03] rounded-full hover:bg-black/[0.06] transition-colors">
-                <Search size={18} strokeWidth={2.5} className="text-black/60" />
+             <button onClick={() => setSearchOpen(true)} className="p-2 opacity-30 hover:opacity-100 transition-opacity">
+                <Search size={18} strokeWidth={2} />
              </button>
-             <Link to="/codegen" className="hidden md:block text-[13px] font-bold text-black/40 hover:text-black transition-colors">
+             <Link to="/codegen" className="hidden sm:block text-[12px] font-bold text-black/40 hover:text-black transition-colors">
                 Support
              </Link>
-             <Link to="/codegen" className="apple-btn-primary h-11 px-8 text-[13px] font-bold shadow-2xl">
+             <Link to="/codegen" className="apple-btn-primary h-9 px-6 text-[12px] font-bold shadow-xl">
                 Try Pro
              </Link>
           </div>
-
         </div>
       </header>
 
-      {/* MAIN CONTAINER — SYNCED WITH H-20 HEADER */}
-      <div className="flex-1 flex pt-20 w-full relative min-h-0 bg-white">
+      {/* 🍏 HEADER 2: SECONDARY HUB TOOLBAR (H-14, TOP-16, Z-40) */}
+      <div className={`fixed top-16 inset-x-0 h-14 z-[90] transition-all duration-300 ${
+        scrolled ? 'bg-white/80 backdrop-blur-xl' : 'bg-white/40 backdrop-blur-md'
+      } border-b border-black/[0.04]`}>
+         <div className="max-w-[1440px] mx-auto px-8 h-full flex items-center justify-between gap-8 whitespace-nowrap overflow-x-auto no-scrollbar">
+            
+            <div className="flex items-center gap-4">
+               <div className="flex items-center gap-2.5 bg-black/[0.03] border border-black/[0.05] px-4 py-1.5 rounded-full">
+                  <div className="w-2 h-2 rounded-full bg-[#32d74b] animate-pulse" />
+                  <span className="text-[10px] font-black uppercase tracking-widest text-black/60">Stage 4 Synthesis Hub</span>
+               </div>
+               <div className="h-4 w-[1px] bg-black/[0.1]" />
+               <span className="text-[11px] font-bold text-black/40 uppercase tracking-wider">Project: Neural_Manifest_v2.4</span>
+            </div>
+
+            <div className="flex items-center gap-8">
+               {['Metrics', 'Latency', 'Security', 'Uptime'].map(item => (
+                  <div key={item} className="flex items-center gap-2 opacity-40 hover:opacity-100 transition-opacity cursor-pointer">
+                     <div className="w-1.5 h-1.5 border border-black/40 rounded-full" />
+                     <span className="text-[11px] font-bold tracking-wide">{item}</span>
+                  </div>
+               ))}
+            </div>
+
+         </div>
+      </div>
+
+      {/* MAIN CONTAINER — SYNCED WITH H-16 + H-14 HEADERS */}
+      <div className="flex-1 flex pt-[7.5rem] w-full relative min-h-0 bg-white">
         
         {/* 🍏 MINIMALIST SIDEBAR (APPLE SETTINGS STYLE) */}
         {location.pathname !== '/' && (
