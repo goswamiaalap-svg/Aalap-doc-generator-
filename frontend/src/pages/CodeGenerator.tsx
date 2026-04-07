@@ -293,14 +293,27 @@ const CodeGenerator: React.FC = () => {
                           <p className="text-[15px] text-[#1d1d1f]/40 max-w-[400px] font-medium leading-[1.6]">
                              Neural Manifest Extraction Mode v4.2 is prepared. Input source code logic to begin Stage 4 deep synthesis.
                           </p>
-                          <div className="flex gap-4 mt-8">
-                             <div className="flex items-center gap-2 px-4 py-2 bg-[#f5f5f7] rounded-full text-[11px] font-bold text-black/50">
-                                <Activity size={14} /> 0.4ms Latency
+                          
+                          {/* PROACTIVE ACTION TRIGGER IF CODE EXISTS */}
+                          {code.trim() ? (
+                             <button 
+                               onClick={handleGenerate}
+                               className="mt-10 px-10 py-5 bg-[#0071e3] text-white rounded-full font-bold shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-4 group"
+                             >
+                                <Zap size={20} fill="currentColor" className="group-hover:animate-pulse" />
+                                START NEURAL SYNC
+                                <span className="text-[11px] opacity-40 ml-2">⌘↵</span>
+                             </button>
+                          ) : (
+                             <div className="flex gap-4 mt-8">
+                                <div className="flex items-center gap-2 px-4 py-2 bg-[#f5f5f7] rounded-full text-[11px] font-bold text-black/50">
+                                   <Activity size={14} /> 0.4ms Latency
+                                </div>
+                                <div className="flex items-center gap-2 px-4 py-2 bg-[#f5f5f7] rounded-full text-[11px] font-bold text-black/50">
+                                   <Shield size={14} /> AES-256 Lock
+                                </div>
                              </div>
-                             <div className="flex items-center gap-2 px-4 py-2 bg-[#f5f5f7] rounded-full text-[11px] font-bold text-black/50">
-                                <Shield size={14} /> AES-256 Lock
-                             </div>
-                          </div>
+                          )}
                        </div>
                     </div>
                  ) : (
