@@ -14,7 +14,8 @@ import {
   Workflow,
   Network,
   Command,
-  Braces
+  Braces,
+  ArrowRight
 } from 'lucide-react';
 
 export default function LandingPage() {
@@ -27,7 +28,7 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-start bg-[#ffffff] relative overflow-hidden font-sans pb-40">
+    <div className="flex-1 flex flex-col items-center justify-start bg-white relative overflow-x-hidden font-sans pb-40">
       
       {/* 🍏 DYNAMIC GRID AND GLOW BACKGROUND */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 flex items-center justify-center">
@@ -56,10 +57,11 @@ export default function LandingPage() {
          </div>
       </nav>
 
-      {/* 🍏 ADVANCED HERO ENCLOSURE */}
-      <div className="w-full max-w-[1200px] mx-auto px-6 md:px-10 pt-[220px] relative z-10 flex flex-col items-center text-center">
+      {/* 🍏 HERO SECTION — CONSOLIDATED & FIXED BUG 1, 2, 3 */}
+      <div className="w-full max-w-[900px] mx-auto px-6 py-20 relative z-10 flex flex-col items-center text-center overflow-hidden">
          
-         <div className="flex items-center gap-3 mb-12 animate-apple-fade bg-white/50 backdrop-blur-md px-5 py-2.5 rounded-full border border-black/[0.08] shadow-sm hover:scale-105 transition-transform cursor-pointer">
+         {/* PILL VERSION BADGE (centered, display: inline-flex) */}
+         <div className="inline-flex items-center gap-3 mb-8 animate-apple-fade bg-white/50 backdrop-blur-md px-5 py-2.5 rounded-full border border-black/[0.08] shadow-sm hover:scale-105 transition-transform cursor-pointer">
             <div className="flex items-center gap-1.5 bg-[#0071e3]/10 text-[#0071e3] px-2 py-0.5 rounded-full">
                <SparkleIcon />
                <span className="text-[10px] font-bold uppercase tracking-wider">v4.2</span>
@@ -68,12 +70,18 @@ export default function LandingPage() {
             <ChevronRight size={14} strokeWidth={3} className="text-black/40" />
          </div>
 
-         <h1 className="text-[72px] md:text-[130px] lg:text-[150px] font-bold tracking-[-0.05em] leading-[0.9] text-[#1d1d1f] mb-8 animate-apple-slide select-none relative">
+         {/* MAIN HEADLINE (Fixed BUG 2) */}
+         <h1 
+           className="font-extrabold tracking-[-0.03em] leading-[1.05] text-[#1d1d1f] mb-6 animate-apple-slide select-none relative w-full break-words overflow-wrap-anywhere"
+           style={{ fontSize: 'clamp(56px, 9vw, 110px)' }}
+         >
             Logic.<br/>
-            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#0071e3] via-[#af52de] to-[#ff2d55]">
+            <span className="bg-clip-text text-transparent bg-gradient-to-r from-[#0071e3] via-[#af52de] to-[#ff2d55] inline-block max-w-full">
                Synthesized.
             </span>
-            <div className="hidden lg:block absolute bottom-10 -right-20 animate-bounce transition-all opacity-50">
+            
+            {/* BUG 3 FIX: AST PARSER Pill (Positioned Relative to Hero, Option B) */}
+            <div className="hidden lg:block absolute right-[1%] -bottom-10 animate-vertical-float transition-all opacity-40 hover:opacity-100 z-2">
                <div className="bg-white border border-black/10 rounded-2xl p-4 shadow-xl flex items-center gap-3">
                   <Terminal size={24} className="text-[#0071e3]" />
                   <div className="flex flex-col text-left">
@@ -84,18 +92,16 @@ export default function LandingPage() {
             </div>
          </h1>
 
-         <p className="text-[20px] md:text-[26px] text-[#1d1d1f]/40 font-medium tracking-tight mb-16 leading-[1.4] max-w-[700px] mx-auto animate-apple-fade" style={{ animationDelay: '200ms' }}>
+         <p className="text-[18px] text-[#1d1d1f]/55 font-medium tracking-tight mt-6 mb-10 leading-[1.6] max-w-[560px] mx-auto animate-apple-fade" style={{ animationDelay: '200ms' }}>
             The deepest technical archive ever built. Sub-millisecond logical decomposition, perfectly structured architecture.
          </p>
 
-         <div className="flex flex-col sm:flex-row items-center justify-center gap-6 animate-apple-fade" style={{ animationDelay: '300ms' }}>
-            <Link to="/codegen" className="apple-btn-primary h-[64px] px-12 flex items-center justify-center text-[18px] font-semibold tracking-wide shadow-[0_20px_40px_-15px_rgba(0,113,227,0.4)] hover:scale-105 transition-all w-full sm:w-auto overflow-hidden relative group">
-               <div className="absolute inset-0 bg-white/20 translate-y-[100%] group-hover:translate-y-[0%] transition-transform duration-300" />
-               <span className="relative z-10 flex items-center">Open Neural Studio <Terminal size={20} className="ml-3" /></span>
+         <div className="flex items-center justify-center gap-3 mt-10 animate-apple-fade" style={{ animationDelay: '300ms' }}>
+            <Link to="/codegen" className="apple-btn-primary h-[54px] px-8 text-[15px] font-bold shadow-2xl hover:scale-105 active:scale-95 transition-all">
+               Try Pro
             </Link>
-            <Link to="/docs/intro" className="group flex items-center justify-center gap-3 h-[64px] px-12 rounded-full bg-white border border-black/10 text-[18px] font-semibold text-[#1d1d1f] hover:bg-black hover:text-white transition-all shadow-sm w-full sm:w-auto">
-               <Database size={20} className="text-black/40 group-hover:text-white/80 transition-colors" />
-               View Archive
+            <Link to="/codegen" className="group flex items-center justify-center gap-3 h-[54px] px-8 rounded-full border border-black/10 font-bold hover:bg-black hover:text-white transition-all">
+               Studio <ArrowRight size={18} />
             </Link>
          </div>
       </div>

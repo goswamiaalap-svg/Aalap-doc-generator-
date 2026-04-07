@@ -130,8 +130,8 @@ export default function Layout() {
         </div>
       </header>
 
-      {/* MAIN CONTAINER */}
-      <div className="flex-1 flex pt-12 w-full relative min-h-0 bg-[#ffffff]">
+      {/* MAIN CONTAINER — FIXED SPACING GAPS */}
+      <div className="flex-1 flex w-full relative min-h-0 bg-white">
         
         {/* 🍏 MINIMALIST SIDEBAR (APPLE SETTINGS STYLE) */}
         {location.pathname !== '/' && (

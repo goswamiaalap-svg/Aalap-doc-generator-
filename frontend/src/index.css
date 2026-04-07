@@ -12,6 +12,10 @@
   --font-mono: "SF Mono", "JetBrains Mono", Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 html, body, #root {
   background-color: #ffffff !important;
   color: #1d1d1f;
@@ -22,6 +26,10 @@ html, body, #root {
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+img, video, svg {
+  max-width: 100%;
 }
 
 /* ═══════════════════════════════════════════════════════════════
@@ -124,12 +132,21 @@ html, body, #root {
   to { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes verticalFloat {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
 .animate-apple-fade {
   animation: appleFadeIn 1s ease-out forwards;
 }
 
 .animate-apple-slide {
   animation: appleSlideUp 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-vertical-float {
+  animation: verticalFloat 3s ease-in-out infinite;
 }
 
 /* CUSTOM SCROLLBARS (APPLE STYLE) */
