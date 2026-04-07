@@ -83,8 +83,8 @@ export default function Layout() {
         </div>
       )}
 
-      {/* 🍏 APPLE GLOBAL NAVIGATION (PIXEL PERFECT SAFARI STYLE) */}
-      <header className={`fixed top-0 inset-x-0 h-12 z-50 flex items-center justify-between px-8 md:px-[120px] transition-all duration-300 ${
+      {/* 🍏 APPLE GLOBAL NAVIGATION (CONSISTENT H-16) */}
+      <header className={`fixed top-0 inset-x-0 h-16 z-50 flex items-center justify-between px-8 md:px-[120px] transition-all duration-300 ${
         scrolled 
         ? 'apple-nav' 
         : 'bg-transparent border-transparent'

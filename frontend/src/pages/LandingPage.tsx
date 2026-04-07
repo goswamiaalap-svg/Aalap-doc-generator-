@@ -28,7 +28,7 @@ export default function LandingPage() {
   }, []);
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-start bg-white relative overflow-x-hidden font-sans pb-40">
+    <div className="flex-1 flex flex-col items-center justify-center min-h-screen bg-white relative overflow-x-hidden font-sans">
       
       {/* 🍏 DYNAMIC GRID AND GLOW BACKGROUND */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 flex items-center justify-center">
@@ -37,8 +37,8 @@ export default function LandingPage() {
          <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMCwgMCwgMCwgMC4wNSkiLz48L3N2Zz4=')] opacity-[0.4]" />
       </div>
 
-      {/* 🍏 HIGH-DENSITY NAVIGATION BAR */}
-      <nav className={`fixed top-0 inset-x-0 h-[72px] z-50 transition-all duration-500 ${scrolled ? 'bg-white/80 backdrop-blur-xl border-b border-black/[0.06] shadow-sm' : 'bg-transparent'}`}>
+      {/* 🍏 APPLE GLOBAL NAVIGATION (CONSISTENT H-16) */}
+      <header className={`fixed top-0 inset-x-0 h-16 z-50 flex items-center justify-between px-8 md:px-[120px] transition-all duration-300 ${scrolled ? 'bg-white/80 backdrop-blur-xl border-b border-black/[0.06] shadow-sm' : 'bg-transparent'}`}>
          <div className="max-w-[1200px] mx-auto h-full px-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
                <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center shadow-lg">
@@ -55,10 +55,13 @@ export default function LandingPage() {
                Studio <ChevronRight size={14} />
             </Link>
          </div>
-      </nav>
+      </header>
 
-      {/* 🍏 HERO SECTION — CONSOLIDATED & FIXED BUG 1, 2, 3 */}
-      <div className="w-full max-w-[900px] mx-auto px-6 py-20 relative z-10 flex flex-col items-center text-center overflow-hidden">
+      {/* MAIN CONTAINER — SYNCED WITH H-16 HEADER */}
+      <div className="flex-1 flex flex-col w-full relative min-h-0 bg-white">
+
+      {/* 🍏 HERO SECTION — VERTICALLY CENTERED ARCHITECTURE */}
+      <div className="w-full max-w-[1000px] mx-auto px-6 py-[120px] md:py-[160px] relative z-10 flex flex-col items-center text-center">
          
          {/* PILL VERSION BADGE (centered, display: inline-flex) */}
          <div className="inline-flex items-center gap-3 mb-8 animate-apple-fade bg-white/50 backdrop-blur-md px-5 py-2.5 rounded-full border border-black/[0.08] shadow-sm hover:scale-105 transition-transform cursor-pointer">
@@ -81,7 +84,7 @@ export default function LandingPage() {
             </span>
             
             {/* BUG 3 FIX: AST PARSER Pill (Positioned Relative to Hero, Option B) */}
-            <div className="hidden lg:block absolute right-[1%] -bottom-10 animate-vertical-float transition-all opacity-40 hover:opacity-100 z-2">
+            <div className="hidden lg:block absolute -right-4 -bottom-10 animate-vertical-float transition-all opacity-40 hover:opacity-100 z-2">
                <div className="bg-white border border-black/10 rounded-2xl p-4 shadow-xl flex items-center gap-3">
                   <Terminal size={24} className="text-[#0071e3]" />
                   <div className="flex flex-col text-left">
@@ -107,7 +110,7 @@ export default function LandingPage() {
       </div>
 
       {/* 🍏 MEGA BENTO BOX SHOWCASE (6 CARDS TO FILL SPACE) */}
-      <div className="w-full max-w-[1200px] mx-auto px-6 md:px-10 mt-[200px] relative z-10 animate-apple-fade" style={{ animationDelay: '500ms' }}>
+      <div className="w-full max-w-[1200px] mx-auto px-6 md:px-10 mt-[120px] relative z-10 animate-apple-fade" style={{ animationDelay: '500ms' }}>
          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-6">
             
             {/* CARD 1: LARGE HERO FEATURE */}
@@ -175,7 +178,7 @@ export default function LandingPage() {
                      <div className="w-16 h-16 bg-black rounded-[20px] shadow-lg flex items-center justify-center">
                         <Network size={32} className="text-white" />
                      </div>
-                     <span className="text-[12px] font-black uppercase tracking-[0.2em] text-[#0071e3] bg-[#0071e3]/10 px-4 py-2 rounded-full">Automated Diagrams</span>
+                     <span className="text-[12px] font-black uppercase tracking-[0.16em] text-[#0071e3] bg-[#0071e3]/10 px-4 py-2 rounded-full">Automated Diagrams</span>
                   </div>
                   <h3 className="text-[40px] md:text-[52px] font-bold text-[#1d1d1f] tracking-tight leading-[1.05] mb-6">
                      Deep Architectural Maps.
@@ -251,6 +254,7 @@ export default function LandingPage() {
          </div>
       </footer>
 
+      </div>
     </div>
   );
 }
