@@ -3,23 +3,16 @@ import {
   Zap,
   Loader2,
   Cpu,
-  Share2,
-  Trash2,
-  Download,
-  Info,
   Sparkles,
   Command,
   FileText,
-  AlertTriangle,
-  RefreshCw,
-  Terminal,
   Layers,
   ChevronRight,
   Maximize2,
   Binary,
   Shield,
-  Activity as Pulse,
-  Save,
+  Activity,
+  Network,
   Globe,
   Database,
   Search,
@@ -27,11 +20,10 @@ import {
   Settings,
   History,
   Plus,
-  Rocket,
   Upload,
-  Clock,
-  Eye as ViewIcon
+  Clock
 } from 'lucide-react';
+const Pulse = Activity;
 import toast from 'react-hot-toast';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 
@@ -45,19 +37,17 @@ const CodeGenerator: React.FC = () => {
     DOCSTRINGS: '', README: '', API_REF: '', DIAGRAM: '', SECURITY: '', PERFORMANCE: '', TESTS: '', QUALITY: ''
   });
   const [language, setLanguage] = useState('typescript');
-  const [errorDetails, setErrorDetails] = useState<string | null>(null);
   const [tokenCount, setTokenCount] = useState(0);
   const [showHistory, setShowHistory] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
-    setTokenCount(code.split(/\s+/).filter(x => x.length).length);
+    setTokenCount(code.split(/\s+/).filter((x: string) => x.length > 0).length);
   }, [code]);
 
   const handleGenerate = async () => {
     if (!code.trim()) return toast.error('INPUT REQUIRED');
     setIsGenerating(true);
-    setErrorDetails(null);
     setResults({ DOCSTRINGS: '', README: '', API_REF: '', DIAGRAM: '', SECURITY: '', PERFORMANCE: '', TESTS: '', QUALITY: '' });
     
     try {
@@ -88,7 +78,6 @@ const CodeGenerator: React.FC = () => {
       }
       toast.success('NEURAL SYNC COMPLETE');
     } catch (err: any) {
-      setErrorDetails(err.message);
       toast.error('BRIDGE FAILURE');
     } finally {
       setIsGenerating(false);
@@ -99,7 +88,7 @@ const CodeGenerator: React.FC = () => {
      if(!code.trim()) return;
      toast.success('LAB FORMATTING APPLIED');
      // Simulated formatting for visual richness
-     setCode(prev => prev.trim());
+     setCode((prev: string) => prev.trim());
   };
 
   const extractMarkers = (text: string) => {
@@ -122,11 +111,10 @@ const CodeGenerator: React.FC = () => {
             newResults[currentKey] = content;
         }
     }
-    setResults(prev => ({ ...prev, ...newResults }));
+    setResults((prev: Record<string, string>) => ({ ...prev, ...newResults }));
   };
 
-  const score = results.QUALITY ? parseInt(results.QUALITY) : 0;
-
+  // Neural Fidelity HUD Logic
   return (
     <div className="flex-1 flex flex-col h-[calc(100vh-48px)] bg-[#ffffff] relative overflow-hidden selection:bg-[#0071e3]/10 font-sans">
       
@@ -253,13 +241,43 @@ const CodeGenerator: React.FC = () => {
            
            <div className="flex-1 overflow-y-auto w-full custom-scrollbar selection:bg-[#0071e3]/10">
               <div className="max-w-full mx-auto p-12 md:p-24">
-                 {!Object.values(results).some(v => v.length > 5) && !isGenerating ? (
-                    <div className="h-full flex flex-col items-center justify-center text-center py-40 animate-apple-fade">
-                       <div className="p-16 rounded-full bg-[#f5f5f7] mb-12 relative scale-125">
-                          <Eye size={48} className="text-black/5" strokeWidth={1} />
+                 {!Object.values(results).some((v: any) => v?.length > 5) && !isGenerating ? (
+                    <div className="h-full flex flex-col items-center justify-center text-center py-20 lg:py-40 animate-apple-fade relative w-full max-w-[800px] mx-auto">
+                       {/* Advanced Background Grid Elements */}
+                       <div className="absolute inset-0 pointer-events-none opacity-[0.03] bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9IiMwMDAiLz48L3N2Zz4=')]" />
+                       
+                       <div className="relative mb-16 scale-[1.2]">
+                          <div className="absolute inset-0 bg-[#0071e3]/5 rounded-[40px] blur-[40px] animate-pulse" />
+                          <div className="absolute inset-0 bg-[#af52de]/5 rounded-[40px] blur-[60px] animate-pulse animation-delay-500" />
+                          <div className="p-12 rounded-[40px] bg-white border border-black/[0.04] shadow-3xl relative z-10 flex flex-col items-center justify-center overflow-hidden group">
+                             <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#0071e3] to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
+                             
+                             {/* Central Scanning Eye */}
+                             <div className="w-24 h-24 rounded-full border-[2px] border-black/5 flex items-center justify-center mb-6 relative">
+                                <div className="absolute inset-2 border-[1px] border-black/10 rounded-full animate-spin-slow" />
+                                <div className="absolute inset-4 border-[1px] border-dashed border-[#0071e3]/30 rounded-full animate-spin-reverse-slow" />
+                                <Eye size={36} className="text-[#0071e3]" strokeWidth={1.5} />
+                             </div>
+                             
+                             <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-black/10 to-transparent mt-4 mb-4" />
+                             <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black/30">AWAITING LOGIC STREAM</span>
+                          </div>
                        </div>
-                       <h2 className="text-[20px] font-bold text-black tracking-tight mb-4 uppercase tracking-[0.2em]">Ready for Injection</h2>
-                       <p className="text-[14px] text-black/20 max-w-[320px] font-medium leading-relaxed uppercase">Neural Manifest Extraction Mode v4.2</p>
+                       
+                       <div className="flex flex-col items-center z-10 bg-white/50 backdrop-blur-sm p-8 rounded-[32px] border border-black/5">
+                          <h2 className="text-[28px] font-bold text-[#1d1d1f] tracking-tight mb-4 leading-none">Ready for Injection</h2>
+                          <p className="text-[15px] text-[#1d1d1f]/40 max-w-[400px] font-medium leading-[1.6]">
+                             Neural Manifest Extraction Mode v4.2 is prepared. Input source code logic to begin Stage 4 deep synthesis.
+                          </p>
+                          <div className="flex gap-4 mt-8">
+                             <div className="flex items-center gap-2 px-4 py-2 bg-[#f5f5f7] rounded-full text-[11px] font-bold text-black/50">
+                                <Activity size={14} /> 0.4ms Latency
+                             </div>
+                             <div className="flex items-center gap-2 px-4 py-2 bg-[#f5f5f7] rounded-full text-[11px] font-bold text-black/50">
+                                <Shield size={14} /> AES-256 Lock
+                             </div>
+                          </div>
+                       </div>
                     </div>
                  ) : (
                     <div className="animate-apple-fade w-full transition-all duration-700">
@@ -276,46 +294,83 @@ const CodeGenerator: React.FC = () => {
               <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.25em]">Intelligence HUD</span>
               <Maximize2 size={14} className="text-black/10 hover:text-black cursor-pointer" />
            </div>
-           
-           <div className="flex-1 p-8 flex flex-col gap-10 overflow-y-auto no-scrollbar">
-              {/* DIAGNOSTIC PULSE CARD */}
-              <div className="p-10 bg-black rounded-[48px] text-white flex flex-col gap-10 shadow-3xl relative overflow-hidden group">
-                 <div className="absolute top-0 right-0 p-10 opacity-10 group-hover:opacity-30 transition-opacity">
-                    <Rocket size={100} strokeWidth={1} />
-                 </div>
-                 <div className="flex items-center gap-4">
-                    <div className="w-2.5 h-2.5 rounded-full bg-[#34c759] animate-pulse shadow-[0_0_8px_rgba(52,199,89,1)]" />
-                    <span className="text-[10px] font-bold uppercase tracking-[0.2em]">Neural Engine v4.2</span>
-                 </div>
-                 <div className="flex flex-col">
-                    <span className="text-[48px] font-bold tracking-tighter leading-none">9.8</span>
-                    <span className="text-[11px] font-medium text-[#0071e3] mt-3 uppercase tracking-widest">Logic Fidelity Rank</span>
-                 </div>
-                 <div className="h-[1px] w-full bg-white/10" />
-                 <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.2em] opacity-40">
-                    <span className="flex items-center gap-2"><Cpu size={12} /> Cluster-01</span>
-                    <span className="flex items-center gap-2"><Clock size={12} /> 0.94ms</span>
-                 </div>
-              </div>
+           <div className="flex-1 p-8 flex flex-col gap-8 overflow-y-auto custom-scrollbar">
+               
+               {/* DIAGNOSTIC PULSE CARD */}
+               <div className="p-10 bg-[#1d1d1f] rounded-[40px] text-white flex flex-col gap-8 shadow-3xl relative overflow-hidden group">
+                  <div className="absolute -top-10 -right-10 p-10 opacity-[0.03] group-hover:opacity-10 transition-opacity">
+                     <Cpu size={180} strokeWidth={1} />
+                  </div>
+                  <div className="flex items-center justify-between w-full relative z-10">
+                     <div className="flex items-center gap-3">
+                        <div className="w-2.5 h-2.5 rounded-full bg-[#32d74b] animate-pulse shadow-[0_0_12px_rgba(50,215,75,0.6)]" />
+                        <span className="text-[10px] font-black uppercase tracking-[0.25em]">Neural Core Active</span>
+                     </div>
+                  </div>
+                  <div className="flex flex-col relative z-10">
+                     <span className="text-[56px] font-bold tracking-tighter leading-none mb-1">9.8</span>
+                     <span className="text-[11px] font-medium text-[#0071e3] uppercase tracking-[0.2em]">Logic Fidelity Rank</span>
+                  </div>
+                  <div className="h-[1px] w-full bg-white/10 relative z-10" />
+                  <div className="flex flex-col gap-3 relative z-10">
+                     <div className="flex items-center justify-between text-[11px] font-bold text-white/50">
+                        <span>CPU Thread Load</span>
+                        <span className="text-white">14%</span>
+                     </div>
+                     <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+                        <div className="h-full bg-gradient-to-r from-[#0071e3] to-[#af52de] w-[14%]" />
+                     </div>
+                  </div>
+                  <div className="flex items-center justify-between text-[10px] font-black uppercase tracking-[0.2em] opacity-40 mt-2 relative z-10">
+                     <span className="flex items-center gap-1.5"><Cpu size={12} /> Cluster-01</span>
+                     <span className="flex items-center gap-1.5"><Clock size={12} /> 0.94ms</span>
+                  </div>
+               </div>
 
-              {/* RECENT SYNPASES LIST */}
-              <div className="flex flex-col gap-8">
-                 <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.25em]">Historical Nodes</span>
-                 <div className="flex flex-col gap-4">
-                    {[ 'Core_Layout_v2.tsx', 'Neural_Bridge_Node.go' ].map(file => (
-                      <div key={file} className="flex items-center justify-between p-6 bg-[#f5f5f7] rounded-[28px] hover:bg-black transition-all group cursor-pointer border border-black/5">
-                         <div className="flex items-center gap-4">
-                            <div className="w-10 h-10 rounded-2xl bg-white flex items-center justify-center text-black/20 group-hover:text-black transition-all">
-                               <FileText size={16} strokeWidth={1.5} />
-                            </div>
-                            <span className="text-[13px] font-bold text-black/40 group-hover:text-white/60 transition-all">{file}</span>
-                         </div>
-                         <ViewIcon size={16} className="text-black/10 group-hover:text-white" />
-                      </div>
-                    ))}
-                 </div>
-              </div>
-           </div>
+               {/* REAL-TIME OPERATIONS (NEW SECTION) */}
+               <div className="flex flex-col gap-6">
+                  <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.25em]">Live Network Traffic</span>
+                  <div className="bg-[#f5f5f7] border border-black/[0.04] p-6 rounded-[32px] flex flex-col gap-4">
+                     <div className="flex items-center justify-between">
+                        <span className="text-[13px] font-bold text-[#1d1d1f]">Inference Latency</span>
+                        <span className="text-[13px] font-black text-[#0071e3]">~42ms</span>
+                     </div>
+                     <div className="h-[40px] flex items-end gap-1">
+                        {[40, 25, 60, 30, 80, 50, 20, 90, 45, 65, 30, 50].map((h, i) => (
+                           <div key={i} className="flex-1 bg-black/5 rounded-t-sm" style={{ height: '100%' }}>
+                              <div className="bg-[#0071e3]/40 w-full rounded-t-sm transition-all duration-300" style={{ height: `${h}%` }} />
+                           </div>
+                        ))}
+                     </div>
+                     <div className="flex items-center gap-2 mt-2">
+                        <Network size={12} className="text-black/30" />
+                        <span className="text-[10px] font-bold uppercase tracking-widest text-black/30">TCP Port 443 Secured</span>
+                     </div>
+                  </div>
+               </div>
+
+               {/* RECENT SYNPASES LIST */}
+               <div className="flex flex-col gap-6 flex-1">
+                  <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.25em]">Historical Nodes</span>
+                  <div className="flex flex-col gap-3">
+                     {[ { name: 'Core_Layout_v2.tsx', lang: 'TSX' }, { name: 'Neural_Bridge_Node.go', lang: 'GO' }, { name: 'api_router.py', lang: 'PY' } ].map((file, idx) => (
+                       <div key={idx} className="flex items-center justify-between p-5 bg-white border border-black/[0.06] rounded-[24px] hover:shadow-lg transition-all group cursor-pointer hover:border-black/20">
+                          <div className="flex items-center gap-4">
+                             <div className="w-10 h-10 rounded-xl bg-[#f5f5f7] flex items-center justify-center text-black/40 group-hover:text-[#0071e3] transition-colors relative">
+                                <FileText size={16} strokeWidth={2} />
+                                <div className="absolute -bottom-1 -right-1 bg-black text-white text-[8px] font-black uppercase px-1.5 py-0.5 rounded-[4px]">{file.lang}</div>
+                             </div>
+                             <div className="flex flex-col">
+                               <span className="text-[13px] font-bold text-[#1d1d1f] group-hover:text-[#0071e3] transition-colors">{file.name}</span>
+                               <span className="text-[10px] font-medium text-black/40">{12 + idx * 4} min ago</span>
+                             </div>
+                          </div>
+                          <ChevronRight size={14} className="text-black/10 group-hover:text-[#0071e3] group-hover:translate-x-1 transition-all" />
+                       </div>
+                     ))}
+                  </div>
+               </div>
+            </div>
         </aside>
       </main>
 
@@ -355,7 +410,7 @@ const CodeGenerator: React.FC = () => {
       <footer className="h-[40px] border-t border-black/[0.06] flex items-center justify-between px-10 relative z-20 bg-white">
          <div className="flex items-center gap-6">
             <div className="flex items-center gap-2">
-               <div className="w-1.5 h-1.5 rounded-full bg-[#34c759]" strokeWidth={1} />
+               <div className="w-1.5 h-1.5 rounded-full bg-[#34c759]" />
                <span className="text-[9px] font-black text-black/40 uppercase tracking-[0.2em]">System Protocols Stable</span>
             </div>
             <span className="text-[9px] font-medium text-black/20 uppercase tracking-[0.1em]">Edge Node: G-Lab-Cluster-01</span>
