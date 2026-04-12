@@ -2,6 +2,8 @@
   "version": 2,
   "outputDirectory": "frontend/dist",
   "rewrites": [
+    { "source": "/api/parse", "destination": "/api/parse" },
+    { "source": "/api/chunk", "destination": "/api/chunk" },
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
