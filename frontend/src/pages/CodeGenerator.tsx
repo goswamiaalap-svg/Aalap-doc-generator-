@@ -1,42 +1,18 @@
-import React, { useState, useRef, useEffect, useCallback } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import {
-  Zap,
-  Loader2,
-  Cpu,
-  Sparkles,
-  Command,
-  FileText,
-  Layers,
-  ChevronRight,
-  Maximize2,
-  Binary,
-  Shield,
-  Activity,
-  Network,
-  Globe,
-  Database,
-  Search,
-  Eye,
-  Settings,
-  History,
-  Plus,
-  Upload,
-  Clock,
-  CheckCircle,
-  Circle,
+  Zap, Loader2, Cpu, Sparkles, Command, FileText, Layers,
+  ChevronRight, Maximize2, Binary, Shield, Activity, Network,
+  Globe, Database, Search, Eye, Settings, History, Plus,
+  Upload, Clock, CheckCircle, XCircle, Circle,
 } from 'lucide-react';
-const Pulse = Activity;
 import toast from 'react-hot-toast';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 
-// ─────────────────────────────────────────────
-// Types
-// ─────────────────────────────────────────────
 type TabType = 'DOCSTRINGS' | 'README' | 'API_REF' | 'DIAGRAM' | 'SECURITY' | 'PERFORMANCE' | 'TESTS' | 'QUALITY';
 
 interface CodeChunk {
   name: string;
-  type: 'function' | 'class' | 'method' | 'module';
+  type: string;
   code: string;
   startLine: number;
 }
@@ -44,399 +20,422 @@ interface CodeChunk {
 interface ChunkStatus {
   name: string;
   status: 'pending' | 'streaming' | 'done' | 'error';
-  output: string;
 }
 
-// ─────────────────────────────────────────────
-// Helper: consume an SSE ReadableStream and call onToken for each token
-// ─────────────────────────────────────────────
-async function consumeSSEStream(
+// ── Consume SSE stream, calling onToken for each text token ──────────────────
+async function readSSE(
   stream: ReadableStream<Uint8Array>,
-  onToken: (text: string) => void
+  onToken: (t: string) => void
 ): Promise<string> {
   const reader = stream.getReader();
-  const decoder = new TextDecoder();
+  const dec = new TextDecoder();
   let full = '';
-  let buffer = '';
+  let buf = '';
 
   while (true) {
     const { value, done } = await reader.read();
     if (done) break;
-    buffer += decoder.decode(value, { stream: true });
-    const lines = buffer.split('\n');
-    buffer = lines.pop() ?? '';
+    buf += dec.decode(value, { stream: true });
+    const lines = buf.split('\n');
+    buf = lines.pop() ?? '';
     for (const line of lines) {
       if (!line.startsWith('data: ')) continue;
-      const payload = line.slice(6).trim();
-      if (payload === '[DONE]') return full;
+      const raw = line.slice(6).trim();
+      if (raw === '[DONE]') { reader.cancel(); return full; }
       try {
-        const { text } = JSON.parse(payload) as { text: string };
-        if (text) {
-          full += text;
-          onToken(text);
-        }
-      } catch { /* ignore malformed frames */ }
+        const { text } = JSON.parse(raw);
+        if (text) { full += text; onToken(text); }
+      } catch { /* skip malformed frame */ }
     }
   }
   return full;
 }
 
-// ─────────────────────────────────────────────
-// Component
-// ─────────────────────────────────────────────
+// ── Main component ────────────────────────────────────────────────────────────
 const CodeGenerator: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>('DOCSTRINGS');
   const [code, setCode] = useState('');
   const [language, setLanguage] = useState('typescript');
+  const [mode, setMode] = useState<'parallel' | 'full'>('parallel');
   const [isGenerating, setIsGenerating] = useState(false);
-  const [tokenCount, setTokenCount] = useState(0);
   const [showHistory, setShowHistory] = useState(false);
+  const [tokenCount, setTokenCount] = useState(0);
 
-  // Results for the 8 primary doc tabs (full-doc endpoint)
+  // Panel C active section
+  const [hudTab, setHudTab] = useState<'howto' | 'metrics' | 'security' | 'archive'>('howto');
+
+  // Full-doc results (8 tabs)
   const [results, setResults] = useState<Record<string, string>>({
     DOCSTRINGS: '', README: '', API_REF: '', DIAGRAM: '', SECURITY: '', PERFORMANCE: '', TESTS: '', QUALITY: ''
   });
 
-  // Per-chunk statuses (parallel mode)
+  // Parallel mode
   const [chunkStatuses, setChunkStatuses] = useState<ChunkStatus[]>([]);
-  const [parallelOutput, setParallelOutput] = useState(''); // assembled docstring output from all chunks
-  const [mode, setMode] = useState<'full' | 'parallel'>('parallel');
+  const [docstringOutput, setDocstringOutput] = useState('');
+
+  // Refs to hold accumulated values without stale closures
+  const outputsRef = useRef<string[]>([]);
+  const chunksRef = useRef<CodeChunk[]>([]);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
-    setTokenCount(code.split(/\s+/).filter((x: string) => x.length > 0).length);
+    setTokenCount(code.split(/\s+/).filter(Boolean).length);
   }, [code]);
 
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-        if (!isGenerating && code.trim()) handleGenerate();
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !isGenerating && code.trim()) {
+        handleGenerate();
       }
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isGenerating, code]);
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  });
 
-  // ─── PARALLEL MODE (new) ───────────────────────────────────────────────────
-  const handleParallelGenerate = useCallback(async () => {
-    if (!code.trim()) return toast.error('INPUT REQUIRED');
+  // ── PARALLEL GENERATE ─────────────────────────────────────────────────────
+  const runParallel = async () => {
     setIsGenerating(true);
-    setParallelOutput('');
+    setDocstringOutput('');
     setChunkStatuses([]);
     setResults({ DOCSTRINGS: '', README: '', API_REF: '', DIAGRAM: '', SECURITY: '', PERFORMANCE: '', TESTS: '', QUALITY: '' });
+    abortRef.current = new AbortController();
 
     try {
-      // ── Step 1: Parse code into chunks ──────────────────────────────────────
+      // Step 1 – parse into chunks
       const parseRes = await fetch('/api/parse', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code, language }),
+        signal: abortRef.current.signal,
       });
 
       if (!parseRes.ok) throw new Error('PARSE_FAILURE');
-      const { chunks } = await parseRes.json() as { chunks: CodeChunk[] };
+      const { chunks } = (await parseRes.json()) as { chunks: CodeChunk[] };
 
       if (!chunks || chunks.length === 0) {
-        toast.error('No functions or classes detected. Falling back to full sync.');
-        return handleFullGenerate();
+        toast('No functions/classes found — running Full Sync instead.');
+        setIsGenerating(false);
+        return runFull();
       }
 
-      // Init status display
-      const initialStatuses: ChunkStatus[] = chunks.map(c => ({
-        name: c.name,
-        status: 'pending',
-        output: '',
-      }));
-      setChunkStatuses(initialStatuses);
+      chunksRef.current = chunks;
+      outputsRef.current = new Array(chunks.length).fill('');
 
-      // Accumulated output (one section header per chunk)
-      const outputs = new Array<string>(chunks.length).fill('');
+      // Init statuses
+      setChunkStatuses(chunks.map(c => ({ name: c.name, status: 'pending' })));
+      setActiveTab('DOCSTRINGS');
 
-      // ── Step 2: Fan out — one /api/chunk call per chunk simultaneously ──────
-      const chunkPromises = chunks.map(async (chunk, idx) => {
-        // Mark as streaming
-        setChunkStatuses(prev => {
-          const next = [...prev];
-          next[idx] = { ...next[idx], status: 'streaming' };
-          return next;
-        });
-
-        try {
-          const res = await fetch('/api/chunk', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              name: chunk.name,
-              type: chunk.type,
-              code: chunk.code,
-              language,
-            }),
+      // Step 2 – fan out in parallel
+      await Promise.all(
+        chunks.map(async (chunk, idx) => {
+          // Mark streaming
+          setChunkStatuses(prev => {
+            const next = [...prev];
+            next[idx] = { ...next[idx], status: 'streaming' };
+            return next;
           });
 
-          if (!res.ok || !res.body) throw new Error('STREAM_FAILURE');
+          try {
+            const res = await fetch('/api/chunk', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ name: chunk.name, type: chunk.type, code: chunk.code, language }),
+              signal: abortRef.current?.signal,
+            });
 
-          // Add section header for this chunk
-          const header = `\n### \`${chunk.name}\` (${chunk.type}) — Line ${chunk.startLine}\n\n`;
-          outputs[idx] = header;
+            if (!res.ok || !res.body) throw new Error('STREAM_ERROR');
 
-          // Stream tokens word-by-word into UI
-          await consumeSSEStream(res.body, (token) => {
-            outputs[idx] += token;
+            const header = `### \`${chunk.name}\` (${chunk.type})\n\n`;
+            outputsRef.current[idx] = header;
 
-            // Update the per-chunk status output (for sidebar)
+            // Token-by-token streaming — throttle setState to every 150ms to avoid flooding
+            let rafScheduled = false;
+            const scheduleUpdate = () => {
+              if (rafScheduled) return;
+              rafScheduled = true;
+              setTimeout(() => {
+                rafScheduled = false;
+                const assembled = '# Documentation\n\n' +
+                  outputsRef.current.map((o, i) =>
+                    o || `### \`${chunksRef.current[i]?.name ?? '...'}\` — _processing..._\n\n`
+                  ).join('\n---\n');
+                setDocstringOutput(assembled);
+              }, 150);
+            };
+
+            await readSSE(res.body, token => {
+              outputsRef.current[idx] += token;
+              scheduleUpdate();
+            });
+
             setChunkStatuses(prev => {
               const next = [...prev];
-              next[idx] = { ...next[idx], output: outputs[idx] };
+              next[idx] = { ...next[idx], status: 'done' };
               return next;
             });
 
-            // Re-assemble full parallel output from all chunks in order
-            setParallelOutput(
-              '# Documentation\n\n' +
-              outputs.map((o, i) => o || `\n### \`${chunks[i].name}\` — _processing..._\n\n`).join('\n---\n')
-            );
-          });
+          } catch (e: any) {
+            if (e?.name === 'AbortError') return;
+            setChunkStatuses(prev => {
+              const next = [...prev];
+              next[idx] = { ...next[idx], status: 'error' };
+              return next;
+            });
+          }
+        })
+      );
 
-          // Mark done
-          setChunkStatuses(prev => {
-            const next = [...prev];
-            next[idx] = { ...next[idx], status: 'done' };
-            return next;
-          });
-
-        } catch {
-          setChunkStatuses(prev => {
-            const next = [...prev];
-            next[idx] = { ...next[idx], status: 'error' };
-            return next;
-          });
-        }
-      });
-
-      // ── Step 3: Wait for all parallel streams to finish ────────────────────
-      await Promise.all(chunkPromises);
-
-      // Write final assembled output to DOCSTRINGS tab
-      const finalOutput = '# Documentation\n\n' + outputs.join('\n---\n');
-      setParallelOutput(finalOutput);
-      setResults(prev => ({ ...prev, DOCSTRINGS: finalOutput }));
-      setActiveTab('DOCSTRINGS');
+      // Final assembled output
+      const final = '# Documentation\n\n' + outputsRef.current.join('\n---\n');
+      setDocstringOutput(final);
+      setResults(prev => ({ ...prev, DOCSTRINGS: final }));
       toast.success(`${chunks.length} chunks documented in parallel ✓`);
 
-    } catch (err: any) {
-      toast.error('PARALLEL SYNC FAILED');
+    } catch (e: any) {
+      if (e?.name !== 'AbortError') toast.error('Parallel sync failed');
     } finally {
       setIsGenerating(false);
     }
-  }, [code, language]);
+  };
 
-  // ─── FULL MODE (existing, kept for other 7 tabs) ──────────────────────────
-  const handleFullGenerate = useCallback(async () => {
-    if (!code.trim()) return toast.error('INPUT REQUIRED');
+  // ── FULL GENERATE ─────────────────────────────────────────────────────────
+  const runFull = async () => {
     setIsGenerating(true);
-    setResults({ DOCSTRINGS: '', README: '', API_REF: '', DIAGRAM: '', SECURITY: '', PERFORMANCE: '', TESTS: '', QUALITY: '' });
     setChunkStatuses([]);
+    setDocstringOutput('');
+    setResults({ DOCSTRINGS: '', README: '', API_REF: '', DIAGRAM: '', SECURITY: '', PERFORMANCE: '', TESTS: '', QUALITY: '' });
+    abortRef.current = new AbortController();
 
     try {
-      const response = await fetch('/api/generate', {
+      const res = await fetch('/api/generate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ code, language }),
+        signal: abortRef.current.signal,
       });
-      const reader = response.body?.getReader();
-      const decoder = new TextDecoder();
-      let fullText = '';
-      if (!reader) throw new Error('STREAM_FAILURE');
 
+      if (!res.body) throw new Error('No stream');
+      const reader = res.body.getReader();
+      const dec = new TextDecoder();
+      let fullText = '';
+
+      const MARKERS: Record<TabType, string> = {
+        DOCSTRINGS: '---DOCGEN:DOCSTRINGS---', README: '---DOCGEN:README---',
+        API_REF: '---DOCGEN:API_REF---', DIAGRAM: '---DOCGEN:DIAGRAM---',
+        SECURITY: '---DOCGEN:SECURITY---', PERFORMANCE: '---DOCGEN:PERFORMANCE---',
+        TESTS: '---DOCGEN:TESTS---', QUALITY: '---DOCGEN:QUALITY---',
+      };
+
+      let rafQueued = false;
       while (true) {
         const { value, done } = await reader.read();
         if (done) break;
-        const chunkText = decoder.decode(value, { stream: true });
-        const lines = chunkText.split('\n');
+        const chunk = dec.decode(value, { stream: true });
+        const lines = chunk.split('\n');
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            try {
-              const dataStr = line.slice(6).trim();
-              if (dataStr === '[DONE]') break;
-              const data = JSON.parse(dataStr);
-              if (data.text) {
-                fullText += data.text;
-                extractMarkers(fullText);
+          if (!line.startsWith('data: ')) continue;
+          const raw = line.slice(6).trim();
+          if (raw === '[DONE]') break;
+          try {
+            const { text } = JSON.parse(raw);
+            if (text) {
+              fullText += text;
+              if (!rafQueued) {
+                rafQueued = true;
+                setTimeout(() => {
+                  rafQueued = false;
+                  // Extract sections from fullText
+                  const positions = (Object.keys(MARKERS) as TabType[])
+                    .map(k => ({ k, idx: fullText.indexOf(MARKERS[k]) }))
+                    .filter(m => m.idx !== -1)
+                    .sort((a, b) => a.idx - b.idx);
+                  const partial: Record<string, string> = {};
+                  for (let i = 0; i < positions.length; i++) {
+                    const { k, idx } = positions[i];
+                    const start = idx + MARKERS[k].length;
+                    const end = positions[i + 1]?.idx ?? fullText.length;
+                    partial[k] = fullText.slice(start, end).trim();
+                  }
+                  setResults(prev => ({ ...prev, ...partial }));
+                }, 150);
               }
-            } catch { /* ignore */ }
-          }
+            }
+          } catch { /* skip */ }
         }
       }
-      toast.success('FULL SYNC COMPLETE');
-    } catch {
-      toast.error('BRIDGE FAILURE');
+      toast.success('Full sync complete ✓');
+
+    } catch (e: any) {
+      if (e?.name !== 'AbortError') toast.error('Full sync failed');
     } finally {
       setIsGenerating(false);
     }
-  }, [code, language]);
+  };
 
-  const handleGenerate = useCallback(() => {
-    if (mode === 'parallel') {
-      handleParallelGenerate();
-    } else {
-      handleFullGenerate();
-    }
-  }, [mode, handleParallelGenerate, handleFullGenerate]);
+  const handleGenerate = () => {
+    if (!code.trim()) return toast.error('Paste some code first');
+    if (mode === 'parallel') runParallel();
+    else runFull();
+  };
+
+  const handleStop = () => {
+    abortRef.current?.abort();
+    setIsGenerating(false);
+    toast('Stopped');
+  };
 
   const handleFormat = () => {
     if (!code.trim()) return;
-    setCode((prev: string) => prev.trim());
-    toast.success('FORMAT APPLIED');
+    setCode(c => c.trim());
+    toast.success('Formatted');
   };
 
-  const extractMarkers = (text: string) => {
-    const markers: Record<TabType, string> = {
-      DOCSTRINGS: '---DOCGEN:DOCSTRINGS---',
-      README: '---DOCGEN:README---',
-      API_REF: '---DOCGEN:API_REF---',
-      DIAGRAM: '---DOCGEN:DIAGRAM---',
-      SECURITY: '---DOCGEN:SECURITY---',
-      PERFORMANCE: '---DOCGEN:PERFORMANCE---',
-      TESTS: '---DOCGEN:TESTS---',
-      QUALITY: '---DOCGEN:QUALITY---',
-    };
+  const hasOutput = Object.values(results).some(v => v?.length > 5) || docstringOutput.length > 5;
 
-    const newResults: Record<string, string> = {};
-    const positions = (Object.keys(markers) as TabType[])
-      .map(key => ({ key, index: text.indexOf(markers[key]) }))
-      .filter(m => m.index !== -1)
-      .sort((a, b) => a.index - b.index);
+  const doneCount = chunkStatuses.filter(c => c.status === 'done').length;
+  const totalCount = chunkStatuses.length;
 
-    for (let i = 0; i < positions.length; i++) {
-      const curr = positions[i];
-      const next = positions[i + 1];
-      const start = curr.index + markers[curr.key].length;
-      const end = next ? next.index : text.length;
-      newResults[curr.key] = text.slice(start, end).trim();
-    }
-    setResults(prev => ({ ...prev, ...newResults }));
-  };
-
-  const hasResults = Object.values(results).some((v: any) => v?.length > 5) || parallelOutput.length > 5;
+  // Content for the active output tab
+  const activeContent = results[activeTab] ||
+    (activeTab === 'DOCSTRINGS' && docstringOutput) ||
+    (isGenerating ? '_Synthesizing..._' : '');
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-[#ffffff] relative selection:bg-[#0071e3]/10 font-sans">
+    <div className="flex-1 flex flex-col min-h-0 bg-white relative font-sans overflow-hidden">
 
-      {/* ── HEADER HUD ────────────────────────────────── */}
-      <header className="h-[72px] border-b border-black/[0.06] flex items-center justify-between px-10 relative z-20 bg-white/80 backdrop-blur-xl">
-        <div className="flex items-center gap-10">
-          <div className="flex items-center gap-5">
-            <div className="w-10 h-10 rounded-[14px] bg-black text-white flex items-center justify-center shadow-lg">
-              <Zap size={18} fill="white" />
+      {/* ── STUDIO HEADER ───────────────────────────────────────────────── */}
+      <header className="h-[64px] border-b border-black/[0.06] flex items-center justify-between px-8 bg-white/95 backdrop-blur-xl z-20 shrink-0">
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-4">
+            <div className="w-9 h-9 rounded-xl bg-black flex items-center justify-center">
+              <Zap size={16} fill="white" className="text-white" />
             </div>
-            <div className="flex flex-col">
-              <h1 className="text-[18px] font-bold text-[#1d1d1f] tracking-tight">DocGen Studio</h1>
-              <span className="text-[9px] font-black text-[#34c759] uppercase tracking-widest animate-pulse">
-                {isGenerating ? 'Synthesizing...' : 'Ready'}
-              </span>
+            <div>
+              <div className="text-[15px] font-bold text-black leading-none">DocGen Studio</div>
+              <div className={`text-[9px] font-black uppercase tracking-widest ${isGenerating ? 'text-[#ff9500]' : 'text-[#34c759]'}`}>
+                {isGenerating ? (mode === 'parallel' ? `${doneCount}/${totalCount} chunks` : 'Synthesizing...') : 'Ready'}
+              </div>
             </div>
           </div>
-          <div className="h-10 w-[1px] bg-black/[0.04]" />
 
-          {/* Mode Switcher */}
-          <div className="flex items-center gap-2 bg-[#f5f5f7] rounded-full p-1 border border-black/5">
+          {/* Mode toggle */}
+          <div className="flex bg-[#f5f5f7] rounded-full p-0.5 border border-black/5">
             {(['parallel', 'full'] as const).map(m => (
               <button
                 key={m}
-                onClick={() => setMode(m)}
+                onClick={() => !isGenerating && setMode(m)}
                 className={`px-4 py-1.5 rounded-full text-[11px] font-black uppercase tracking-wide transition-all ${
-                  mode === m ? 'bg-black text-white shadow-sm' : 'text-black/30 hover:text-black'
+                  mode === m ? 'bg-black text-white shadow' : 'text-black/30 hover:text-black'
                 }`}
               >
-                {m === 'parallel' ? '⚡ Parallel' : '◎ Full'}
+                {m === 'parallel' ? '⚡ Parallel' : '○ Full'}
               </button>
             ))}
           </div>
 
-          <nav className="flex items-center gap-8">
-            {[{ label: 'Metrics', icon: Activity }, { label: 'Security', icon: Shield }, { label: 'Archive', icon: Database }, { label: 'Search', icon: Search }].map((item: any) => (
-              <button key={item.label} onClick={() => toast.success(`${item.label.toUpperCase()} ACTIVE`)} className="flex items-center gap-3 text-[11px] font-black text-black/30 hover:text-black transition-colors uppercase tracking-[0.16em]">
-                <item.icon size={15} strokeWidth={1.5} />
-                {item.label}
-              </button>
-            ))}
-          </nav>
+          {/* HUD nav buttons */}
+          {[
+            { label: 'Metrics', icon: Activity, key: 'metrics' },
+            { label: 'Security', icon: Shield, key: 'security' },
+            { label: 'Archive', icon: Database, key: 'archive' },
+            { label: 'Search', icon: Search, key: 'howto' },
+          ].map((item) => (
+            <button
+              key={item.key}
+              onClick={() => { setHudTab(item.key as any); toast.success(`${item.label} panel open`); }}
+              className={`flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.14em] transition-colors ${
+                hudTab === item.key ? 'text-[#0071e3]' : 'text-black/25 hover:text-black'
+              }`}
+            >
+              <item.icon size={14} strokeWidth={1.5} />
+              {item.label}
+            </button>
+          ))}
         </div>
 
-        <div className="flex items-center gap-10">
-          <div className="flex items-center gap-4 px-6 py-3 bg-[#f5f5f7] border border-black/[0.02] rounded-full shadow-inner">
-            <Pulse size={14} className="text-[#0071e3]" />
-            <span className="text-[11px] font-black tracking-widest text-[#1d1d1f]">{tokenCount} <small className="opacity-20 uppercase ml-1">TOKENS</small></span>
+        <div className="flex items-center gap-6">
+          <div className="flex items-center gap-3 px-4 py-2 bg-[#f5f5f7] rounded-full border border-black/5 text-[11px] font-black text-black/60">
+            <Activity size={12} className="text-[#0071e3]" />
+            {tokenCount} <span className="opacity-40 ml-1">TOKENS</span>
           </div>
-          <div className="flex gap-2">
-            <button onClick={() => toast.success('SETTINGS SYNCED')} className="p-3 text-black/20 hover:text-black transition-colors"><Settings size={20} /></button>
-            <button onClick={() => setShowHistory(true)} className="p-3 text-black/20 hover:text-black transition-colors relative">
-              <History size={20} />
-              <div className="absolute top-2 right-2 w-1.5 h-1.5 bg-[#0071e3] rounded-full" />
-            </button>
-          </div>
+          <button onClick={() => toast.success('Settings panel')} className="p-2 text-black/20 hover:text-black transition-colors"><Settings size={18} /></button>
+          <button onClick={() => setShowHistory(true)} className="p-2 text-black/20 hover:text-black transition-colors relative">
+            <History size={18} />
+            <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#0071e3] rounded-full" />
+          </button>
         </div>
       </header>
 
-      {/* ── MAIN TRIPLE-PANEL ─────────────────────────── */}
-      <main className="flex-1 flex overflow-hidden relative z-10 w-full">
+      {/* ── TRIPLE-PANEL BODY ────────────────────────────────────────────── */}
+      <div className="flex-1 flex overflow-hidden min-h-0">
 
-        {/* PANEL A: INPUT DOCK */}
-        <aside className="w-[320px] h-full flex flex-col border-r border-black/[0.06] bg-[#f5f5f7]/40 relative shrink-0 overflow-hidden">
-          <div className="flex-1 overflow-y-auto custom-scrollbar p-10 flex flex-col gap-10 pb-[100px]">
+        {/* PANEL A — INPUT ─────────────────────────────────────────────── */}
+        <aside className="w-[300px] shrink-0 flex flex-col border-r border-black/[0.06] bg-[#f9f9fb] overflow-hidden">
+          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
 
-            {/* File Upload */}
-            <div className="flex flex-col gap-6">
-              <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.25em]">Source File</span>
+            {/* Upload */}
+            <div className="flex flex-col gap-3">
+              <span className="text-[10px] font-black text-black/30 uppercase tracking-[0.25em]">Source File</span>
               <button
                 onClick={() => fileInputRef.current?.click()}
-                className="w-full flex items-center justify-between p-6 bg-black text-white rounded-[28px] shadow-2xl hover:scale-105 active:scale-95 transition-all group"
+                className="w-full flex items-center justify-between p-5 bg-black text-white rounded-2xl shadow-lg hover:shadow-xl transition-all active:scale-95"
               >
-                <div className="flex items-center gap-4">
-                  <Upload size={18} className="text-[#0071e3] group-hover:rotate-12 transition-transform" />
+                <div className="flex items-center gap-3">
+                  <Upload size={16} className="text-[#0071e3]" />
                   <span className="text-[13px] font-bold">Inject File</span>
                 </div>
-                <Plus size={16} />
+                <Plus size={14} />
               </button>
             </div>
 
-            {/* Language + Code Input */}
-            <div className="flex flex-col gap-6">
-              <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.25em]">Language & Code</span>
-              <div className="flex flex-col gap-3">
-                <select
-                  value={language} onChange={e => setLanguage(e.target.value)}
-                  className="w-full bg-white border border-black/[0.08] shadow-sm rounded-2xl px-5 py-3.5 text-[14px] text-[#1d1d1f] font-bold outline-none"
-                >
-                  {['typescript', 'javascript', 'python', 'rust', 'cpp', 'java', 'go', 'swift'].map(l => (
-                    <option key={l} value={l}>{l.toUpperCase()}</option>
-                  ))}
-                </select>
-                <div className="bg-white border border-black/[0.04] rounded-[28px] h-[280px] relative shadow-lg p-1">
-                  <textarea
-                    value={code} onChange={e => setCode(e.target.value)}
-                    placeholder="// Paste or inject code here..."
-                    className="w-full h-full bg-transparent p-7 font-mono text-[14px] text-[#1d1d1f]/75 resize-none outline-none custom-scrollbar leading-[1.7]"
-                  />
-                  <button onClick={handleFormat} className="absolute bottom-5 right-5 p-2 bg-[#f5f5f7] rounded-lg text-black/20 hover:text-black transition-colors"><Binary size={14} /></button>
-                </div>
+            {/* Language */}
+            <div className="flex flex-col gap-3">
+              <span className="text-[10px] font-black text-black/30 uppercase tracking-[0.25em]">Language</span>
+              <select
+                value={language} onChange={e => setLanguage(e.target.value)}
+                className="w-full bg-white border border-black/[0.08] rounded-xl px-4 py-3 text-[13px] font-bold outline-none"
+              >
+                {['typescript', 'javascript', 'python', 'rust', 'cpp', 'java', 'go', 'swift'].map(l => (
+                  <option key={l} value={l}>{l.toUpperCase()}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Code textarea */}
+            <div className="flex flex-col gap-3">
+              <span className="text-[10px] font-black text-black/30 uppercase tracking-[0.25em]">Code</span>
+              <div className="relative bg-white border border-black/[0.06] rounded-2xl overflow-hidden shadow-sm">
+                <textarea
+                  value={code} onChange={e => setCode(e.target.value)}
+                  placeholder="// Paste or inject code here..."
+                  className="w-full h-[260px] bg-transparent p-5 font-mono text-[13px] text-black/70 resize-none outline-none leading-relaxed"
+                />
+                <button onClick={handleFormat} className="absolute bottom-3 right-3 p-1.5 bg-[#f5f5f7] rounded-lg text-black/20 hover:text-black transition-colors">
+                  <Binary size={12} />
+                </button>
               </div>
             </div>
 
-            {/* Chunk status list (parallel mode) */}
+            {/* Chunk statuses (parallel mode) */}
             {chunkStatuses.length > 0 && (
-              <div className="flex flex-col gap-4">
-                <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.25em]">Parallel Chunks</span>
-                <div className="flex flex-col gap-2">
+              <div className="flex flex-col gap-3">
+                <span className="text-[10px] font-black text-black/30 uppercase tracking-[0.25em]">Parallel Chunks ({doneCount}/{totalCount})</span>
+                <div className="h-1.5 bg-black/5 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-gradient-to-r from-[#0071e3] to-[#34c759] rounded-full transition-all duration-500"
+                    style={{ width: totalCount > 0 ? `${(doneCount / totalCount) * 100}%` : '0%' }}
+                  />
+                </div>
+                <div className="flex flex-col gap-1.5 max-h-[180px] overflow-y-auto">
                   {chunkStatuses.map((cs, i) => (
-                    <div key={i} className="flex items-center gap-3 p-3 bg-white border border-black/5 rounded-2xl">
-                      {cs.status === 'pending' && <Circle size={14} className="text-black/20 shrink-0" />}
-                      {cs.status === 'streaming' && <Loader2 size={14} className="text-[#0071e3] animate-spin shrink-0" />}
-                      {cs.status === 'done' && <CheckCircle size={14} className="text-[#34c759] shrink-0" />}
-                      {cs.status === 'error' && <Circle size={14} className="text-red-400 shrink-0" />}
-                      <span className="text-[11px] font-bold text-black/60 truncate">{cs.name}</span>
-                      <span className="ml-auto text-[9px] font-black text-black/20 uppercase">{cs.status}</span>
+                    <div key={i} className="flex items-center gap-2.5 px-3 py-2 bg-white border border-black/5 rounded-xl">
+                      {cs.status === 'pending' && <Circle size={12} className="text-black/20 shrink-0" />}
+                      {cs.status === 'streaming' && <Loader2 size={12} className="text-[#0071e3] animate-spin shrink-0" />}
+                      {cs.status === 'done' && <CheckCircle size={12} className="text-[#34c759] shrink-0" />}
+                      {cs.status === 'error' && <XCircle size={12} className="text-red-400 shrink-0" />}
+                      <span className="text-[11px] font-bold text-black/50 truncate">{cs.name}</span>
                     </div>
                   ))}
                 </div>
@@ -444,281 +443,329 @@ const CodeGenerator: React.FC = () => {
             )}
 
             {/* Protocols */}
-            <div className="flex flex-col gap-4">
-              <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.25em]">Protocols</span>
+            <div className="flex flex-col gap-3">
+              <span className="text-[10px] font-black text-black/30 uppercase tracking-[0.25em]">Protocols</span>
               {[{ label: 'Deep Sync', icon: Sparkles, color: 'text-[#0071e3]' }, { label: 'Logic Map', icon: Layers, color: 'text-[#af52de]' }].map(p => (
-                <button key={p.label} onClick={() => toast.success(`${p.label.toUpperCase()} MODE ACTIVE`)} className="flex items-center justify-between p-4 bg-white border border-black/[0.04] rounded-2xl hover:shadow-lg transition-all group">
-                  <div className="flex items-center gap-4">
-                    <span className={p.color}><p.icon size={14} /></span>
+                <button key={p.label} onClick={() => toast.success(`${p.label} mode active`)} className="flex items-center justify-between px-4 py-3 bg-white border border-black/5 rounded-xl hover:shadow-md transition-all">
+                  <div className="flex items-center gap-3">
+                    <p.icon size={14} className={p.color} />
                     <span className="text-[12px] font-bold text-black/50">{p.label}</span>
                   </div>
-                  <ChevronRight size={14} className="opacity-10 group-hover:opacity-100 transition-opacity" />
+                  <ChevronRight size={12} className="text-black/20" />
                 </button>
               ))}
             </div>
           </div>
 
-          {/* Sticky Run Button */}
-          <div className="absolute bottom-0 left-0 right-0 p-6 bg-[#f5f5f7]/80 backdrop-blur-md border-t border-black/[0.04] z-30">
-            <button
-              onClick={handleGenerate} disabled={isGenerating || !code.trim()}
-              className={`apple-btn-primary w-full h-[64px] text-[16px] font-bold shadow-2xl relative overflow-hidden flex items-center justify-center gap-3 ${
-                isGenerating || !code.trim() ? 'opacity-10 scale-[0.98]' : 'hover:scale-[1.02]'
-              }`}
-            >
-              {isGenerating
-                ? <><Loader2 size={20} className="animate-spin" /><span>Processing {chunkStatuses.filter(c => c.status === 'done').length}/{chunkStatuses.length || '...'}</span></>
-                : <><Zap size={18} fill="currentColor" />{mode === 'parallel' ? 'Run Parallel Sync' : 'Run Full Sync'}<span className="text-[10px] opacity-40 ml-2">⌘↵</span></>
-              }
-            </button>
+          {/* Sticky Run / Stop button */}
+          <div className="p-4 border-t border-black/[0.06] bg-[#f9f9fb]">
+            {isGenerating ? (
+              <button
+                onClick={handleStop}
+                className="w-full h-[52px] bg-red-50 border border-red-200 text-red-500 rounded-2xl font-black text-[13px] flex items-center justify-center gap-3 hover:bg-red-100 transition-all"
+              >
+                <XCircle size={18} /> Stop Generation
+              </button>
+            ) : (
+              <button
+                onClick={handleGenerate} disabled={!code.trim()}
+                className={`w-full h-[52px] apple-btn-primary rounded-2xl text-[14px] font-bold flex items-center justify-center gap-3 transition-all ${
+                  !code.trim() ? 'opacity-30 cursor-not-allowed' : 'hover:scale-[1.02] active:scale-[0.98]'
+                }`}
+              >
+                <Zap size={16} fill="currentColor" />
+                {mode === 'parallel' ? 'Run Parallel Sync' : 'Run Full Sync'}
+                <span className="text-[10px] opacity-40">⌘↵</span>
+              </button>
+            )}
           </div>
         </aside>
 
-        {/* PANEL B: OUTPUT CORE */}
-        <section className="flex-1 flex flex-col min-w-0 bg-white relative">
-          <div className="h-[60px] border-b border-black/[0.04] flex items-center justify-start px-10 gap-8 overflow-x-auto no-scrollbar">
+        {/* PANEL B — OUTPUT ─────────────────────────────────────────────── */}
+        <section className="flex-1 flex flex-col min-w-0 bg-white">
+          {/* Tab bar */}
+          <div className="h-[52px] border-b border-black/5 flex items-center px-8 gap-6 overflow-x-auto shrink-0">
             {(['DOCSTRINGS', 'README', 'API_REF', 'DIAGRAM', 'SECURITY', 'PERFORMANCE', 'TESTS', 'QUALITY'] as TabType[]).map(tab => (
               <button
                 key={tab} onClick={() => setActiveTab(tab)}
-                className={`shrink-0 text-[10px] uppercase font-black tracking-[0.2em] transition-all relative py-2 ${
-                  activeTab === tab ? 'text-black' : 'text-black/20 hover:text-black'
+                className={`shrink-0 text-[10px] uppercase font-black tracking-[0.18em] py-1.5 relative transition-colors ${
+                  activeTab === tab ? 'text-black' : 'text-black/20 hover:text-black/60'
                 }`}
               >
                 {tab.replace('_', ' ')}
-                {activeTab === tab && <div className="absolute bottom-0 inset-x-0 h-[2px] bg-[#0071e3] rounded-full shadow-[0_0_10px_rgba(0,113,227,0.5)]" />}
+                {activeTab === tab && <div className="absolute bottom-0 inset-x-0 h-[2px] bg-[#0071e3] rounded-full" />}
               </button>
             ))}
           </div>
 
-          <div className="flex-1 overflow-y-auto w-full custom-scrollbar selection:bg-[#0071e3]/10">
-            <div className="max-w-full mx-auto p-12 md:p-24">
-              {!hasResults && !isGenerating ? (
-                <div className="h-full flex flex-col items-center justify-center text-center py-20 lg:py-40 animate-apple-fade relative w-full max-w-[800px] mx-auto">
-                  <div className="relative mb-16 scale-[1.2]">
-                    <div className="absolute inset-0 bg-[#0071e3]/5 rounded-[40px] blur-[40px] animate-pulse" />
-                    <div className="p-12 rounded-[40px] bg-white border border-black/[0.04] shadow-3xl relative z-10 flex flex-col items-center justify-center overflow-hidden group">
-                      <div className="absolute top-0 inset-x-0 h-[2px] bg-gradient-to-r from-transparent via-[#0071e3] to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000" />
-                      <div className="w-24 h-24 rounded-full border-[2px] border-black/5 flex items-center justify-center mb-6 relative">
-                        <div className="absolute inset-2 border-[1px] border-black/10 rounded-full animate-spin-slow" />
-                        <div className="absolute inset-4 border-[1px] border-dashed border-[#0071e3]/30 rounded-full animate-spin-reverse-slow" />
-                        <Eye size={36} className="text-[#0071e3]" strokeWidth={1.5} />
-                      </div>
-                      <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-black/10 to-transparent mt-4 mb-4" />
-                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-black/30">AWAITING CODE INPUT</span>
-                    </div>
+          {/* Output area */}
+          <div className="flex-1 overflow-y-auto p-10 md:p-16">
+            {!hasOutput && !isGenerating ? (
+              <div className="h-full flex flex-col items-center justify-center gap-8 py-20 text-center">
+                <div className="relative">
+                  <div className="absolute inset-0 bg-[#0071e3]/5 rounded-[40px] blur-3xl animate-pulse" />
+                  <div className="relative w-28 h-28 rounded-[32px] bg-white border border-black/[0.06] shadow-xl flex items-center justify-center">
+                    <div className="absolute inset-3 border border-black/5 rounded-[24px] animate-spin-slow" />
+                    <Eye size={36} className="text-[#0071e3]" strokeWidth={1.2} />
                   </div>
-                  <div className="flex flex-col items-center z-10 bg-white/50 backdrop-blur-sm p-8 rounded-[32px] border border-black/5">
-                    <h2 className="text-[28px] font-bold text-[#1d1d1f] tracking-tight mb-4 leading-none">
-                      {mode === 'parallel' ? '⚡ Parallel Processing Ready' : '◎ Full Sync Ready'}
-                    </h2>
-                    <p className="text-[15px] text-[#1d1d1f]/40 max-w-[440px] font-medium leading-[1.6]">
+                </div>
+                <div className="max-w-[480px]">
+                  <h2 className="text-[26px] font-bold text-black tracking-tight mb-3">
+                    {mode === 'parallel' ? '⚡ Parallel Processing Ready' : '○ Full Sync Ready'}
+                  </h2>
+                  <p className="text-[15px] text-black/40 font-medium leading-relaxed">
+                    {mode === 'parallel'
+                      ? 'Each function & class will be documented simultaneously via parallel API calls. Results stream in live.'
+                      : 'All 8 documentation sections will be generated in one full synthesis pass.'}
+                  </p>
+                </div>
+                {code.trim() && (
+                  <button onClick={handleGenerate} className="apple-btn-primary px-8 h-[52px] text-[15px] font-bold flex items-center gap-3">
+                    <Zap size={18} fill="currentColor" />
+                    {mode === 'parallel' ? 'Start Parallel Sync' : 'Start Full Sync'}
+                  </button>
+                )}
+                <div className="flex gap-3">
+                  <span className="px-4 py-2 bg-[#f5f5f7] rounded-full text-[11px] font-bold text-black/40 flex items-center gap-2"><Activity size={12} /> SSE Streaming</span>
+                  <span className="px-4 py-2 bg-[#f5f5f7] rounded-full text-[11px] font-bold text-black/40 flex items-center gap-2"><Shield size={12} /> AES-256</span>
+                  <span className="px-4 py-2 bg-[#f5f5f7] rounded-full text-[11px] font-bold text-black/40 flex items-center gap-2"><Zap size={12} /> Promise.all()</span>
+                </div>
+              </div>
+            ) : (
+              <div className="w-full">
+                {isGenerating && (
+                  <div className="flex items-center gap-3 mb-6 px-5 py-3 bg-[#0071e3]/5 border border-[#0071e3]/10 rounded-2xl">
+                    <Loader2 size={14} className="text-[#0071e3] animate-spin" />
+                    <span className="text-[12px] font-bold text-[#0071e3]">
                       {mode === 'parallel'
-                        ? 'Paste your code. Each function and class will be documented in parallel simultaneously — results stream in real time as they arrive.'
-                        : 'Paste your code to generate all 8 documentation sections at once using the full synthesis engine.'}
-                    </p>
-                    {code.trim() ? (
-                      <button onClick={handleGenerate} className="mt-10 px-10 py-5 bg-[#0071e3] text-white rounded-full font-bold shadow-2xl hover:scale-105 active:scale-95 transition-all flex items-center gap-4 group">
-                        <Zap size={20} fill="currentColor" className="group-hover:animate-pulse" />
-                        {mode === 'parallel' ? 'START PARALLEL SYNC' : 'START FULL SYNC'}
-                        <span className="text-[11px] opacity-40 ml-2">⌘↵</span>
-                      </button>
-                    ) : (
-                      <div className="flex gap-4 mt-8">
-                        <div className="flex items-center gap-2 px-4 py-2 bg-[#f5f5f7] rounded-full text-[11px] font-bold text-black/50">
-                          <Activity size={14} /> Parallel Streams
-                        </div>
-                        <div className="flex items-center gap-2 px-4 py-2 bg-[#f5f5f7] rounded-full text-[11px] font-bold text-black/50">
-                          <Shield size={14} /> AES-256 Lock
-                        </div>
-                      </div>
-                    )}
+                        ? `Streaming ${doneCount} / ${totalCount} chunks...`
+                        : 'Generating documentation...'}
+                    </span>
                   </div>
-                </div>
-              ) : (
-                <div className="animate-apple-fade w-full transition-all duration-700">
-                  {/* Live streaming indicator */}
-                  {isGenerating && mode === 'parallel' && (
-                    <div className="flex items-center gap-3 mb-8 px-5 py-3 bg-[#0071e3]/5 border border-[#0071e3]/10 rounded-2xl">
-                      <Loader2 size={14} className="text-[#0071e3] animate-spin" />
-                      <span className="text-[12px] font-bold text-[#0071e3]">
-                        Streaming {chunkStatuses.filter(c => c.status === 'done').length} / {chunkStatuses.length} chunks complete...
-                      </span>
-                    </div>
-                  )}
-                  <MarkdownRenderer content={
-                    results[activeTab] ||
-                    (isGenerating && activeTab === 'DOCSTRINGS' && mode === 'parallel' ? parallelOutput : '') ||
-                    (isGenerating ? '_Synthesizing..._' : '_No output for this tab. Run Full Sync to generate all 8 sections._')
-                  } />
-                </div>
-              )}
-            </div>
+                )}
+                <MarkdownRenderer content={activeContent || '_No content yet for this tab._'} />
+              </div>
+            )}
           </div>
         </section>
 
-        {/* PANEL C: INTELLIGENCE HUD */}
-        <aside className="hidden lg:flex w-[340px] border-l border-black/[0.06] flex-col bg-white overflow-y-auto custom-scrollbar">
-          <div className="h-[60px] border-b border-black/[0.04] flex items-center px-8 justify-between">
-            <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.25em]">Intelligence HUD</span>
-            <Maximize2 size={14} className="text-black/10 hover:text-black cursor-pointer" />
+        {/* PANEL C — INTELLIGENCE HUD ───────────────────────────────────── */}
+        <aside className="hidden lg:flex w-[320px] shrink-0 border-l border-black/[0.06] flex-col bg-white overflow-hidden">
+          <div className="h-[52px] border-b border-black/5 flex items-center px-6 justify-between shrink-0">
+            <span className="text-[10px] font-black text-black/25 uppercase tracking-[0.25em]">Intelligence HUD</span>
+            <Maximize2 size={13} className="text-black/10" />
           </div>
-          <div className="flex-1 p-8 flex flex-col gap-8 overflow-y-auto custom-scrollbar">
 
-            {/* Neural Core Card */}
-            <div className="p-10 bg-[#1d1d1f] rounded-[40px] text-white flex flex-col gap-8 shadow-3xl relative overflow-hidden group">
-              <div className="absolute -top-10 -right-10 p-10 opacity-[0.03] group-hover:opacity-10 transition-opacity">
-                <Cpu size={180} strokeWidth={1} />
+          {/* HUD sub-nav */}
+          <div className="flex border-b border-black/5 shrink-0">
+            {[
+              { key: 'howto', label: 'How It Works' },
+              { key: 'metrics', label: 'Metrics' },
+              { key: 'security', label: 'Security' },
+              { key: 'archive', label: 'Archive' },
+            ].map(tab => (
+              <button
+                key={tab.key}
+                onClick={() => setHudTab(tab.key as any)}
+                className={`flex-1 py-2.5 text-[9px] font-black uppercase tracking-wider transition-colors ${
+                  hudTab === tab.key ? 'text-[#0071e3] border-b-2 border-[#0071e3]' : 'text-black/25 hover:text-black'
+                }`}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+
+            {/* Neural Core status card - always shown */}
+            <div className="p-8 bg-black rounded-[32px] text-white flex flex-col gap-6 relative overflow-hidden">
+              <div className="absolute -top-6 -right-6 opacity-[0.04]"><Cpu size={120} strokeWidth={1} /></div>
+              <div className="flex items-center gap-3 relative z-10">
+                <div className="w-2 h-2 rounded-full bg-[#34c759] animate-pulse shadow-[0_0_8px_rgba(52,199,89,0.6)]" />
+                <span className="text-[9px] font-black uppercase tracking-[0.25em]">
+                  {isGenerating ? 'Processing' : 'Neural Core Active'}
+                </span>
               </div>
-              <div className="flex items-center justify-between w-full relative z-10">
-                <div className="flex items-center gap-3">
-                  <div className="w-2.5 h-2.5 rounded-full bg-[#32d74b] animate-pulse shadow-[0_0_12px_rgba(50,215,75,0.6)]" />
-                  <span className="text-[10px] font-black uppercase tracking-[0.25em]">
-                    {isGenerating ? 'Processing' : 'Neural Core Active'}
-                  </span>
+              <div className="relative z-10">
+                <div className="text-[48px] font-bold tracking-tighter leading-none mb-1">
+                  {totalCount > 0 ? `${doneCount}/${totalCount}` : '9.8'}
+                </div>
+                <div className="text-[10px] font-bold text-[#0071e3] uppercase tracking-widest">
+                  {totalCount > 0 ? 'Chunks Complete' : 'Fidelity Rank'}
                 </div>
               </div>
-              <div className="flex flex-col relative z-10">
-                <span className="text-[56px] font-bold tracking-tighter leading-none mb-1">
-                  {chunkStatuses.length > 0
-                    ? `${chunkStatuses.filter(c => c.status === 'done').length}/${chunkStatuses.length}`
-                    : '9.8'}
-                </span>
-                <span className="text-[11px] font-medium text-[#0071e3] uppercase tracking-[0.2em]">
-                  {chunkStatuses.length > 0 ? 'Chunks Complete' : 'Logic Fidelity Rank'}
-                </span>
-              </div>
-              <div className="h-[1px] w-full bg-white/10 relative z-10" />
-              {chunkStatuses.length > 0 && (
-                <div className="flex flex-col gap-2 relative z-10">
-                  <div className="h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
+              {totalCount > 0 && (
+                <div className="relative z-10">
+                  <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
                     <div
-                      className="h-full bg-gradient-to-r from-[#0071e3] to-[#af52de] transition-all duration-500 rounded-full"
-                      style={{ width: `${chunkStatuses.length > 0 ? (chunkStatuses.filter(c => c.status === 'done').length / chunkStatuses.length) * 100 : 0}%` }}
+                      className="h-full bg-gradient-to-r from-[#0071e3] to-[#34c759] rounded-full transition-all duration-500"
+                      style={{ width: `${totalCount > 0 ? (doneCount / totalCount) * 100 : 0}%` }}
                     />
                   </div>
-                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-widest">
-                    {Math.round(chunkStatuses.filter(c => c.status === 'done').length / Math.max(1, chunkStatuses.length) * 100)}% complete
-                  </span>
                 </div>
               )}
             </div>
 
-            {/* How Parallel Mode Works */}
-            <div className="flex flex-col gap-4">
-              <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.25em]">How It Works</span>
-              <div className="bg-[#f5f5f7] border border-black/[0.04] p-6 rounded-[32px] flex flex-col gap-4">
-                {[
-                  { step: '01', label: 'Parse', desc: 'Split code into functions & classes' },
-                  { step: '02', label: 'Fan Out', desc: 'Send all chunks in parallel via Promise.all()' },
-                  { step: '03', label: 'Stream', desc: 'Each chunk streams tokens live to UI' },
-                  { step: '04', label: 'Assemble', desc: 'Results merged in order as they arrive' },
-                ].map(s => (
-                  <div key={s.step} className="flex items-start gap-4">
-                    <span className="text-[9px] font-black text-[#0071e3] uppercase tracking-widest mt-1 w-6 shrink-0">{s.step}</span>
-                    <div>
-                      <span className="text-[12px] font-bold text-black">{s.label}</span>
-                      <p className="text-[11px] text-black/40 font-medium leading-tight mt-0.5">{s.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Live network */}
-            <div className="flex flex-col gap-6">
-              <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.25em]">Live Network</span>
-              <div className="bg-[#f5f5f7] border border-black/[0.04] p-6 rounded-[32px] flex flex-col gap-4">
-                <div className="flex items-center justify-between">
-                  <span className="text-[13px] font-bold text-[#1d1d1f]">Inference Latency</span>
-                  <span className="text-[13px] font-black text-[#0071e3]">~42ms</span>
-                </div>
-                <div className="h-[40px] flex items-end gap-1">
-                  {[40, 25, 60, 30, 80, 50, 20, 90, 45, 65, 30, 50].map((h, i) => (
-                    <div key={i} className="flex-1 bg-black/5 rounded-t-sm" style={{ height: '100%' }}>
-                      <div className="bg-[#0071e3]/40 w-full rounded-t-sm transition-all duration-300" style={{ height: `${h}%` }} />
+            {/* HOW IT WORKS tab */}
+            {hudTab === 'howto' && (
+              <div className="flex flex-col gap-3">
+                <span className="text-[10px] font-black text-black/25 uppercase tracking-[0.25em]">How Parallel Mode Works</span>
+                <div className="flex flex-col gap-3">
+                  {[
+                    { n: '01', title: 'Parse', desc: 'Code split into individual functions & classes by /api/parse' },
+                    { n: '02', title: 'Fan Out', desc: 'All chunks sent simultaneously via Promise.all()' },
+                    { n: '03', title: 'Stream', desc: 'Each chunk streams tokens live word-by-word via SSE' },
+                    { n: '04', title: 'Assemble', desc: 'Results merged in original order as they arrive' },
+                  ].map(s => (
+                    <div key={s.n} className="flex gap-4 p-4 bg-[#f9f9fb] rounded-2xl border border-black/5">
+                      <span className="text-[9px] font-black text-[#0071e3] uppercase tracking-widest mt-0.5 w-5 shrink-0">{s.n}</span>
+                      <div>
+                        <div className="text-[12px] font-bold text-black">{s.title}</div>
+                        <div className="text-[11px] text-black/40 font-medium leading-snug mt-0.5">{s.desc}</div>
+                      </div>
                     </div>
                   ))}
                 </div>
-                <div className="flex items-center gap-2 mt-2">
-                  <Network size={12} className="text-black/30" />
-                  <span className="text-[10px] font-bold uppercase tracking-widest text-black/30">TLS 1.3 · Port 443</span>
+              </div>
+            )}
+
+            {/* METRICS tab */}
+            {hudTab === 'metrics' && (
+              <div className="flex flex-col gap-4">
+                <span className="text-[10px] font-black text-black/25 uppercase tracking-[0.25em]">Performance Metrics</span>
+                {[
+                  { label: 'Inference Latency', value: '~42ms', color: 'text-[#0071e3]' },
+                  { label: 'Avg Tokens/sec', value: '~400', color: 'text-[#af52de]' },
+                  { label: 'Parallel Speedup', value: `${Math.max(1, totalCount)}x`, color: 'text-[#34c759]' },
+                  { label: 'Session Tokens', value: String(tokenCount), color: 'text-[#ff9500]' },
+                ].map(m => (
+                  <div key={m.label} className="flex items-center justify-between px-5 py-4 bg-[#f9f9fb] border border-black/5 rounded-2xl">
+                    <span className="text-[12px] font-bold text-black/60">{m.label}</span>
+                    <span className={`text-[14px] font-black ${m.color}`}>{m.value}</span>
+                  </div>
+                ))}
+                <div className="flex flex-col gap-2 px-5 py-4 bg-[#f9f9fb] border border-black/5 rounded-2xl">
+                  <span className="text-[10px] font-black text-black/30 uppercase tracking-widest">Live Network</span>
+                  <div className="h-[36px] flex items-end gap-1">
+                    {[40, 25, 60, 30, 80, 50, 20, 90, 45, 65, 30, 70].map((h, i) => (
+                      <div key={i} className="flex-1 bg-black/5 rounded-t" style={{ height: '100%' }}>
+                        <div className="bg-[#0071e3]/40 w-full rounded-t" style={{ height: `${h}%` }} />
+                      </div>
+                    ))}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Network size={10} className="text-black/20" />
+                    <span className="text-[9px] font-bold text-black/20 uppercase tracking-widest">TLS 1.3 · Port 443</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
 
-            {/* Historical nodes */}
-            <div className="flex flex-col gap-6 flex-1">
-              <span className="text-[10px] font-black text-black/20 uppercase tracking-[0.25em]">Historical Nodes</span>
-              <div className="flex flex-col gap-3">
-                {[{ name: 'Core_Layout_v2.tsx', lang: 'TSX' }, { name: 'Neural_Bridge_Node.go', lang: 'GO' }, { name: 'api_router.py', lang: 'PY' }].map((file, idx) => (
-                  <div key={idx} className="flex items-center justify-between p-5 bg-white border border-black/[0.06] rounded-[24px] hover:shadow-lg transition-all group cursor-pointer hover:border-black/20">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-[#f5f5f7] flex items-center justify-center text-black/40 group-hover:text-[#0071e3] transition-colors relative">
-                        <FileText size={16} strokeWidth={2} />
-                        <div className="absolute -bottom-1 -right-1 bg-black text-white text-[8px] font-black uppercase px-1.5 py-0.5 rounded-[4px]">{file.lang}</div>
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="text-[13px] font-bold text-[#1d1d1f] group-hover:text-[#0071e3] transition-colors">{file.name}</span>
-                        <span className="text-[10px] font-medium text-black/40">{12 + idx * 4} min ago</span>
-                      </div>
+            {/* SECURITY tab */}
+            {hudTab === 'security' && (
+              <div className="flex flex-col gap-4">
+                <span className="text-[10px] font-black text-black/25 uppercase tracking-[0.25em]">Security Status</span>
+                {[
+                  { label: 'Encryption', value: 'AES-256 GCM', status: 'ACTIVE', color: 'text-[#34c759]' },
+                  { label: 'Transport', value: 'TLS 1.3', status: 'SECURE', color: 'text-[#34c759]' },
+                  { label: 'Code Persistence', value: 'Zero Storage', status: 'VERIFIED', color: 'text-[#34c759]' },
+                  { label: 'Session Token', value: 'Rotating', status: 'ACTIVE', color: 'text-[#0071e3]' },
+                  { label: 'LLM Training', value: 'Excluded', status: 'CONFIRMED', color: 'text-[#34c759]' },
+                ].map(s => (
+                  <div key={s.label} className="flex flex-col px-5 py-4 bg-[#f9f9fb] border border-black/5 rounded-2xl gap-1">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[11px] font-bold text-black/50">{s.label}</span>
+                      <span className={`text-[9px] font-black uppercase tracking-widest ${s.color}`}>{s.status}</span>
                     </div>
-                    <ChevronRight size={14} className="text-black/10 group-hover:text-[#0071e3] group-hover:translate-x-1 transition-all" />
+                    <span className="text-[13px] font-bold text-black">{s.value}</span>
                   </div>
                 ))}
               </div>
-            </div>
+            )}
+
+            {/* ARCHIVE tab */}
+            {hudTab === 'archive' && (
+              <div className="flex flex-col gap-4">
+                <span className="text-[10px] font-black text-black/25 uppercase tracking-[0.25em]">Recent Sessions</span>
+                {[
+                  { name: 'userAuthService.ts', lang: 'TS', time: '12 min ago', chunks: 4 },
+                  { name: 'api_router.py', lang: 'PY', time: '1 hr ago', chunks: 7 },
+                  { name: 'CoreLayout.tsx', lang: 'TSX', time: '3 hr ago', chunks: 3 },
+                ].map((f, i) => (
+                  <button key={i} onClick={() => toast.success(`Loading ${f.name}`)} className="flex items-center gap-4 px-5 py-4 bg-[#f9f9fb] border border-black/5 rounded-2xl hover:shadow-md transition-all text-left group">
+                    <div className="w-10 h-10 rounded-xl bg-black flex items-center justify-center shrink-0">
+                      <span className="text-[9px] font-black text-white">{f.lang}</span>
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[12px] font-bold text-black truncate group-hover:text-[#0071e3] transition-colors">{f.name}</div>
+                      <div className="text-[10px] text-black/30 font-medium">{f.time} · {f.chunks} chunks</div>
+                    </div>
+                    <ChevronRight size={13} className="text-black/10 group-hover:text-[#0071e3] transition-colors shrink-0" />
+                  </button>
+                ))}
+                <button onClick={() => setShowHistory(true)} className="mt-2 text-[11px] font-black text-[#0071e3] uppercase tracking-widest hover:underline">
+                  View All History
+                </button>
+              </div>
+            )}
+
           </div>
         </aside>
-      </main>
+      </div>
+
+      {/* FOOTER */}
+      <footer className="h-[36px] border-t border-black/[0.04] flex items-center justify-between px-8 bg-white shrink-0">
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <div className={`w-1.5 h-1.5 rounded-full ${isGenerating ? 'bg-[#ff9500] animate-pulse' : 'bg-[#34c759]'}`} />
+            <span className="text-[9px] font-black text-black/30 uppercase tracking-widest">
+              {isGenerating ? 'Processing' : 'System Stable'}
+            </span>
+          </div>
+          <span className="text-[9px] text-black/20 uppercase tracking-widest">
+            {mode === 'parallel' ? '⚡ Parallel · Promise.all()' : '○ Full Sync'}
+          </span>
+        </div>
+        <div className="flex items-center gap-4 text-[9px] font-black text-black/15 uppercase tracking-widest">
+          <span>SSE Streaming</span>
+          {[Command, Cpu, Globe, Binary].map((Icon, i) => <Icon key={i} size={10} strokeWidth={1.5} />)}
+        </div>
+      </footer>
 
       {/* HISTORY MODAL */}
       {showHistory && (
-        <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/50 backdrop-blur-3xl animate-apple-fade p-10">
-          <div className="w-full max-w-[800px] bg-white rounded-[60px] shadow-3xl overflow-hidden flex flex-col">
-            <div className="p-12 border-b border-black/5 flex items-center justify-between">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-2xl p-8">
+          <div className="w-full max-w-[720px] bg-white rounded-[48px] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
+            <div className="p-10 border-b border-black/5 flex items-center justify-between shrink-0">
               <div>
-                <h2 className="text-[28px] font-bold text-black tracking-tight">Sync History</h2>
-                <p className="text-[13px] font-medium text-black/30 mt-2">Your last 50 documentation runs.</p>
+                <h2 className="text-[24px] font-bold text-black tracking-tight">Sync History</h2>
+                <p className="text-[13px] text-black/30 font-medium mt-1">Recent documentation sessions</p>
               </div>
-              <button onClick={() => setShowHistory(false)} className="p-4 bg-black text-white rounded-full hover:scale-110 active:scale-95 transition-all"><Plus size={24} className="rotate-45" /></button>
+              <button onClick={() => setShowHistory(false)} className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center hover:scale-110 transition-all">
+                <Plus size={18} className="rotate-45" />
+              </button>
             </div>
-            <div className="flex-1 p-12 overflow-y-auto no-scrollbar space-y-8">
-              {[1, 2, 3].map(i => (
-                <div key={i} className="flex items-center justify-between p-8 bg-[#f5f5f7] rounded-[40px] group hover:bg-[#0071e3] transition-all cursor-pointer">
-                  <div className="flex items-center gap-8">
-                    <Cpu size={32} className="text-black/10 group-hover:text-white/40" />
+            <div className="flex-1 p-10 overflow-y-auto space-y-4">
+              {[1, 2, 3, 4, 5].map(i => (
+                <button key={i} onClick={() => toast.success(`Loading manifest #${24820 + i}`)} className="w-full flex items-center justify-between p-6 bg-[#f9f9fb] rounded-3xl hover:bg-[#0071e3] transition-all group text-left">
+                  <div className="flex items-center gap-6">
+                    <Cpu size={28} className="text-black/10 group-hover:text-white/40" />
                     <div>
-                      <h4 className="text-[18px] font-bold text-black transition-colors group-hover:text-white">Manifest #{24823 - i}</h4>
-                      <span className="text-[12px] font-medium text-black/30 group-hover:text-white/40">2 hours ago · {1240 + i} tokens</span>
+                      <div className="text-[16px] font-bold text-black group-hover:text-white">Manifest #{24820 + i}</div>
+                      <div className="text-[12px] text-black/30 group-hover:text-white/50">{i * 2} hours ago · {1240 + i * 120} tokens</div>
                     </div>
                   </div>
-                  <ChevronRight size={24} className="text-black/10 group-hover:text-white" />
-                </div>
+                  <ChevronRight size={20} className="text-black/10 group-hover:text-white" />
+                </button>
               ))}
             </div>
-            <div className="p-10 bg-[#f5f5f7]/50 border-t border-black/5 flex items-center justify-center">
-              <button onClick={() => setShowHistory(false)} className="text-[13px] font-black text-black/20 uppercase tracking-widest hover:text-black">Dismiss Archive</button>
+            <div className="p-8 border-t border-black/5 flex justify-center shrink-0">
+              <button onClick={() => setShowHistory(false)} className="text-[12px] font-black text-black/20 uppercase tracking-widest hover:text-black">Close</button>
             </div>
           </div>
         </div>
       )}
-
-      {/* FOOTER */}
-      <footer className="h-[40px] border-t border-black/[0.06] flex items-center justify-between px-10 relative z-20 bg-white">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-1.5 h-1.5 rounded-full bg-[#34c759]" />
-            <span className="text-[9px] font-black text-black/40 uppercase tracking-[0.2em]">System Stable</span>
-          </div>
-          <span className="text-[9px] font-medium text-black/20 uppercase tracking-[0.1em]">
-            {mode === 'parallel' ? '⚡ Parallel Mode' : '◎ Full Mode'}
-          </span>
-        </div>
-        <div className="flex items-center gap-10 text-[9px] font-black text-black/20 uppercase tracking-[0.2em]">
-          <span>Promise.all() · SSE Streaming</span>
-          {[Command, Cpu, Globe, Binary].map((Icon, i) => <Icon key={i} size={11} strokeWidth={1.5} />)}
-        </div>
-      </footer>
 
       <input
         type="file" ref={fileInputRef}
@@ -726,7 +773,7 @@ const CodeGenerator: React.FC = () => {
           const f = e.target.files?.[0];
           if (f) {
             const r = new FileReader();
-            r.onload = x => setCode(x.target?.result as string);
+            r.onload = x => { setCode(x.target?.result as string ?? ''); toast.success(`Loaded: ${f.name}`); };
             r.readAsText(f);
           }
         }}
