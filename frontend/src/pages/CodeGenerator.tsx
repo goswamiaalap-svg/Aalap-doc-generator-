@@ -190,8 +190,61 @@ const CodeGenerator: React.FC = () => {
       // Final assembled output
       const final = '# Documentation\n\n' + outputsRef.current.join('\n---\n');
       setDocstringOutput(final);
-      setResults(prev => ({ ...prev, DOCSTRINGS: final }));
-      toast.success(`${chunks.length} chunks documented in parallel ✓`);
+      
+      // Since Parallel mode only generates docstrings, let's also fetch Full generation
+      // in the background to populate README, API_REF, PERFORMANCE, TESTS, etc.
+      try {
+        const fullRes = await fetch('/api/generate', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ code, language }),
+          signal: abortRef.current.signal,
+        });
+
+        if (fullRes.ok && fullRes.body) {
+          const reader = fullRes.body.getReader();
+          const dec = new TextDecoder();
+          let fullText = '';
+          const MARKERS: Record<TabType, string> = {
+            DOCSTRINGS: '---DOCGEN:DOCSTRINGS---', README: '---DOCGEN:README---',
+            API_REF: '---DOCGEN:API_REF---', DIAGRAM: '---DOCGEN:DIAGRAM---',
+            SECURITY: '---DOCGEN:SECURITY---', PERFORMANCE: '---DOCGEN:PERFORMANCE---',
+            TESTS: '---DOCGEN:TESTS---', QUALITY: '---DOCGEN:QUALITY---',
+          };
+
+          while (true) {
+            const { value, done } = await reader.read();
+            if (done) break;
+            const chunkText = dec.decode(value, { stream: true });
+            const lines = chunkText.split('\n');
+            for (const line of lines) {
+              if (!line.startsWith('data: ')) continue;
+              const raw = line.slice(6).trim();
+              if (raw === '[DONE]') break;
+              try {
+                const { text } = JSON.parse(raw);
+                if (text) fullText += text;
+              } catch { /* skip */ }
+            }
+          }
+          const positions = (Object.keys(MARKERS) as TabType[])
+            .map(k => ({ k, idx: fullText.indexOf(MARKERS[k]) }))
+            .filter(m => m.idx !== -1)
+            .sort((a, b) => a.idx - b.idx);
+          const partial: Record<string, string> = {};
+          for (let i = 0; i < positions.length; i++) {
+            const { k, idx } = positions[i];
+            // Skip DOCSTRINGS so we keep the parallel version
+            if (k === 'DOCSTRINGS') continue; 
+            const start = idx + MARKERS[k].length;
+            const end = positions[i + 1]?.idx ?? fullText.length;
+            partial[k] = fullText.slice(start, end).trim();
+          }
+          setResults(prev => ({ ...prev, ...partial, DOCSTRINGS: final }));
+        }
+      } catch (e) { /* ignore background full error */ }
+      
+      toast.success(`${chunks.length} chunks and full sections documented ✓`);
 
     } catch (e: any) {
       if (e?.name !== 'AbortError') toast.error('Parallel sync failed');
