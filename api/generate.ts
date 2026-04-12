@@ -78,21 +78,21 @@ export default async function handler(req: Request) {
   // 🧠 SMART HEURISTIC EXTRACTION - HIGHLY DYNAMIC
   const isJson = rawCode.trim().startsWith('{') || rawCode.trim().startsWith('[');
   
-  const functions = (rawCode.match(/(?:async\\s+)?(?:function\\s+|const\\s+[a-zA-Z0-9_]+\\s*=\\s*(?:\\(.*\\)\\s*=>|function))\\s*([a-zA-Z0-9_]*)/g) || [])
-    .map(f => f.replace(/.*function\\s+|.*const\\s+|\\s*=.*/g, '').trim())
+  const functions = (rawCode.match(/(?:async\s+)?(?:function\s+|const\s+[a-zA-Z0-9_]+\s*=\s*(?:\(.*\)\s*=>|function))\s*([a-zA-Z0-9_]*)/g) || [])
+    .map(f => f.replace(/.*function\s+|.*const\s+|\s*=.*/g, '').trim())
     .filter(f => f.length > 1)
     .slice(0, 5);
     
-  const imports = (rawCode.match(/import\\s+.*?from\\s+['"]([^'"]+)['"]/g) || [])
+  const imports = (rawCode.match(/import\s+.*?from\s+['"]([^'"]+)['"]/g) || [])
     .map(i => i.split('from').pop()?.replace(/['"]/g, '').trim() || 'module')
     .slice(0, 5);
     
-  const classes = (rawCode.match(/class\\s+([a-zA-Z0-9_]+)/g) || [])
+  const classes = (rawCode.match(/class\s+([a-zA-Z0-9_]+)/g) || [])
     .map(c => c.split(' ').pop() || 'Entity')
     .slice(0, 3);
 
   // Fallback concept extraction if it's plain text (like a license agreement)
-  const concepts = Array.from(new Set(rawCode.match(/\\b[A-Z][a-z0-9_]{4,}\\b/g) || rawCode.split(/\\s+/).filter(w => w.length > 5 && !w.includes('{'))))
+  const concepts = Array.from(new Set(rawCode.match(/\b[A-Z][a-z0-9_]{4,}\b/g) || rawCode.split(/\s+/).filter(w => w.length > 5 && !w.includes('{'))))
     .slice(0, 4);
 
   const fallbackNames = ["Sovereign Logic Module", "Core Protocol", "Execution Buffer", "Data Artifact", "Stream Handler"];
@@ -101,8 +101,8 @@ export default async function handler(req: Request) {
   let mainEntity = classes[0] || functions[0] || concepts[0] || dynamicFallback;
   if (isJson && rawCode.includes('"file"')) mainEntity = "Source Map Artifact";
 
-  const numLines = rawCode.split('\\n').length;
-  const estimatedTokens = Math.floor(rawCode.split(/\\s+/).length * 1.3);
+  const numLines = rawCode.split('\n').length;
+  const estimatedTokens = Math.floor(rawCode.split(/\s+/).length * 1.3);
   const hashId = Math.abs(rawCode.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0)).toString(16).toUpperCase().padStart(8, '0');
   const exactOperations = [...classes, ...functions, ...concepts.slice(0,2)].join(', ') || 'Static Text / Configuration';
 
@@ -266,8 +266,8 @@ ${isJson ? `    it('should parse the root-level keys flawlessly', () => {
 
 ---DOCGEN:QUALITY---
 ${Math.min(9.9, 9.0 + (numLines / 2000)).toFixed(1)}
-\`;
-  return new Response(encoder.encode(\`data: \${JSON.stringify({ text: mockContent })}\\n\\ndata: [DONE]\\n\\n\`), {
+`;
+  return new Response(encoder.encode(`data: ${JSON.stringify({ text: mockContent })}\n\ndata: [DONE]\n\n`), {
     headers: { 'Content-Type': 'text/event-stream' },
   });
 }
