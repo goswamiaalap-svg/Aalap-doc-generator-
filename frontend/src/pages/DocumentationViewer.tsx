@@ -15,13 +15,14 @@ import MarkdownRenderer from '../components/MarkdownRenderer';
 import { docs } from '../api/docs';
 
 const DocumentationViewer: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id, docId } = useParams<{ id?: string; docId?: string }>();
+  const activeId = docId || id;
   const [copied, setCopied] = useState(false);
   const [scrollDir, setScrollDir] = useState<'up' | 'down'>('up');
   const [lastScrollY, setLastScrollY] = useState(0);
   const [readingProgress, setReadingProgress] = useState(0);
 
-  const doc = docs.find((d: any) => d.id === id) || docs[0];
+  const doc = docs.find((d: any) => d.id === activeId) || docs[0];
 
   useEffect(() => {
     const handleScroll = () => {
@@ -63,11 +64,11 @@ const DocumentationViewer: React.FC = () => {
           
           {/* HEADER METADATA OVERLAY */}
           <div className="flex flex-wrap items-center gap-6 mb-16 opacity-40">
-            <span className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.2em]"><Zap size={14} fill="currentColor" /> Neural Verified</span>
+            <span className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.2em]"><Zap size={14} fill="currentColor" /> Verified</span>
             <div className="h-1 w-1 bg-black rounded-full" />
-            <span className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.2em]"><Clock size={14} /> 4 Min Sync</span>
+            <span className="flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.2em]"><Clock size={14} /> 4 Min Read</span>
             <div className="h-1 w-1 bg-black rounded-full" />
-            <span className="text-[11px] font-black uppercase tracking-[0.2em]">HGM-06 LABS</span>
+            <span className="text-[11px] font-black uppercase tracking-[0.2em]">DocGen AI</span>
           </div>
 
           <h1 className="text-5xl md:text-[80px] font-bold tracking-tight leading-[1] text-[#1d1d1f] mb-32 selection:bg-[#0071e3]/10 break-words">
@@ -81,17 +82,17 @@ const DocumentationViewer: React.FC = () => {
           {/* RELATED SYNAPSES — ADVANCED NAVIGATION */}
           <div className="mt-60 pt-20 border-t border-black/[0.06] grid grid-cols-1 md:grid-cols-2 gap-10">
              <Link to="/docs/intro" className="group p-10 bg-[#f5f5f7] border border-black/[0.02] rounded-[48px] hover:bg-white hover:shadow-2xl transition-all">
-                <span className="text-[10px] font-black text-[#0071e3] uppercase tracking-widest mb-4 block">PREVIOUS NODES</span>
-                <h4 className="text-[24px] font-bold text-black tracking-tight">Neural Introduction</h4>
+                <span className="text-[10px] font-black text-[#0071e3] uppercase tracking-widest mb-4 block">PREVIOUS</span>
+                <h4 className="text-[24px] font-bold text-black tracking-tight">Introduction</h4>
                 <div className="mt-8 flex items-center text-[10px] font-black text-black/30 uppercase tracking-widest group-hover:text-black">
-                   <ChevronLeft size={16} /> Backto Foundations
+                   <ChevronLeft size={16} /> Back to Foundations
                 </div>
              </Link>
              <Link to="/docs/adv-core" className="group p-10 bg-[#f5f5f7] border border-black/[0.02] rounded-[48px] hover:bg-white hover:shadow-2xl transition-all text-right items-end flex flex-col">
-                <span className="text-[10px] font-black text-[#ff375f] uppercase tracking-widest mb-4 block">NEXT SEQUENCE</span>
-                <h4 className="text-[24px] font-bold text-black tracking-tight text-right">Advanced Core Sync</h4>
+                <span className="text-[10px] font-black text-[#ff375f] uppercase tracking-widest mb-4 block">NEXT</span>
+                <h4 className="text-[24px] font-bold text-black tracking-tight text-right">Advanced Core</h4>
                 <div className="mt-8 flex items-center text-[10px] font-black text-black/30 uppercase tracking-widest group-hover:text-black">
-                   Proceed to Protocols <ChevronRight size={16} />
+                   Continue Reading <ChevronRight size={16} />
                 </div>
              </Link>
           </div>

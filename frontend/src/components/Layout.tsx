@@ -90,12 +90,12 @@ export default function Layout() {
              <div className="w-8 h-8 bg-black rounded-lg flex items-center justify-center shadow-lg group-hover:scale-105 transition-transform">
                 <Zap size={16} fill="white" className="text-white rotate-12" />
              </div>
-             <span className="ml-3 text-[15px] font-bold tracking-tight text-black">HGM-06</span>
+             <span className="ml-3 text-[15px] font-bold tracking-tight text-black">DocGen AI</span>
           </Link>
           <nav className="hidden lg:flex items-center gap-10">
-             {['Guide', 'Studio', 'Resources'].map(item => (
-               <Link key={item} to="/codegen" className="text-[12px] font-bold tracking-tight text-black/40 hover:text-black transition-colors">{item}</Link>
-             ))}
+             <Link to="/docs/intro" className="text-[12px] font-bold tracking-tight text-black/40 hover:text-black transition-colors">Guide</Link>
+             <Link to="/codegen" className="text-[12px] font-bold tracking-tight text-black/40 hover:text-black transition-colors">Studio</Link>
+             <Link to="/docs/api-reference" className="text-[12px] font-bold tracking-tight text-black/40 hover:text-black transition-colors">Resources</Link>
           </nav>
           <div className="flex items-center gap-6 shrink-0">
              <button onClick={() => setSearchOpen(true)} className="p-2 opacity-30 hover:opacity-100 transition-opacity"><Search size={18} /></button>
@@ -148,14 +148,14 @@ export default function Layout() {
              <div className="flex-1 overflow-y-auto pt-14 pb-10 no-scrollbar scroll-smooth">
                 {[
                    { group: 'Foundations', items: [
-                     { label: 'Neural Intro', to: '/docs/intro', icon: <FileText size={16} /> },
-                     { label: 'Adv. Core', to: '/docs/architecture', icon: <Cpu size={16} /> },
+                     { label: 'Introduction', to: '/docs/intro', icon: <FileText size={16} /> },
+                     { label: 'Advanced Core', to: '/docs/adv-core', icon: <Cpu size={16} /> },
                      { label: 'API Reference', to: '/docs/api-reference', icon: <Search size={16} /> }
                    ]},
                    { group: 'Protocols', items: [
-                      { label: 'Sec. Rotation', to: '/docs/security', icon: <Shield size={16} /> },
+                      { label: 'Sec. Rotation', to: '/docs/sec-rotation', icon: <Shield size={16} /> },
                       { label: 'Deployment', to: '/docs/deployment', icon: <Zap size={16} /> },
-                      { label: 'Refactor Ops', to: '/docs/best-practices', icon: <Layers size={16} /> }
+                      { label: 'Refactor Ops', to: '/docs/refactor-ops', icon: <Layers size={16} /> }
                    ]}
                 ].map(group => (
                   <div key={group.group} className="mb-10">
@@ -190,7 +190,7 @@ export default function Layout() {
                 <div className="flex items-center gap-4 opacity-55 hover:opacity-100 transition-opacity">
                    <div className="w-9 h-9 rounded-[10px] bg-black/[0.05] border border-black/[0.06] flex items-center justify-center text-[11px] font-bold text-black/80">AG</div>
                    <div className="flex flex-col">
-                      <span className="text-[14px] font-semibold text-black tracking-tight">HGM Pro Lab</span>
+                      <span className="text-[14px] font-semibold text-black tracking-tight">Pro Lab</span>
                       <span className="text-[11px] text-black/25 uppercase font-bold tracking-widest">Premium</span>
                    </div>
                 </div>
@@ -223,7 +223,7 @@ export default function Layout() {
               </div>
               <div className="flex-1 p-10 overflow-y-auto no-scrollbar flex flex-col gap-10">
                  <div className="self-start max-w-[85%] bg-[#0071e3] text-white p-6 rounded-[22px] rounded-tl-[4px] text-[16px] leading-[1.5] shadow-sm font-medium">
-                    Hello. This is the HGM-06 Neural Assistant. I can help resolve architectural debt or answer questions about your documentation manifest.
+                    Hello. I'm your DocGen AI Assistant. I can help resolve architectural debt or answer questions about your documentation.
                  </div>
               </div>
               <div className="p-8 bg-white border-t border-black/[0.04]">
