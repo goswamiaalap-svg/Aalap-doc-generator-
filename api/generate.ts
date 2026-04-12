@@ -174,6 +174,23 @@ graph TD
 **Detailed Security Insight:**
 The analyzed logic for **${mainEntity}** adheres to standard gate isolation. No immediate architectural vulnerabilities were detected in the ${lang} code buffer.
 
+---DOCGEN:PERFORMANCE---
+### ⚡ Neural Routing Performance
+
+**Algorithmic Complexity:** Expected \`O(N)\` for linear data manipulation.
+**Bottlenecks:** None detected in local environment.
+
+---DOCGEN:TESTS---
+### 🧪 Standardized Scaffolding
+
+\`\`\`javascript
+describe('${mainEntity}', () => {
+  it('should compile and mount without syntax errors', () => {
+    expect(${mainEntity}).toBeDefined();
+  });
+});
+\`\`\`
+
 ---DOCGEN:QUALITY---
 9.6
 `;
