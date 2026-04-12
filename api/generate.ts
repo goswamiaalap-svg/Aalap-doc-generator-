@@ -71,7 +71,18 @@ export default async function handler(req: Request) {
     });
 
     return new Response(responseStream, {
-  function generateFailoverResponse(code: string, lang: string) {
+      headers: {
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache',
+        'Connection': 'keep-alive',
+      },
+    });
+  } catch (error: any) {
+    return generateFailoverResponse("Internal Analysis", "Auto-Detected");
+  }
+}
+
+function generateFailoverResponse(code: string, lang: string) {
   const encoder = new TextEncoder();
   const rawCode = code || '';
   
@@ -95,13 +106,14 @@ export default async function handler(req: Request) {
   const concepts = Array.from(new Set(rawCode.match(/\b[A-Z][a-z0-9_]{4,}\b/g) || rawCode.split(/\s+/).filter(w => w.length > 5 && !w.includes('{'))))
     .slice(0, 4);
 
+  const numLines = rawCode.split('\n').length;
   const fallbackNames = ["Sovereign Logic Module", "Core Protocol", "Execution Buffer", "Data Artifact", "Stream Handler"];
   const dynamicFallback = fallbackNames[(rawCode.length + numLines) % fallbackNames.length] || "Sovereign Logic Module";
 
   let mainEntity = classes[0] || functions[0] || concepts[0] || dynamicFallback;
   if (isJson && rawCode.includes('"file"')) mainEntity = "Source Map Artifact";
 
-  const numLines = rawCode.split('\n').length;
+
   const estimatedTokens = Math.floor(rawCode.split(/\s+/).length * 1.3);
   const hashId = Math.abs(rawCode.split('').reduce((a, b) => { a = ((a << 5) - a) + b.charCodeAt(0); return a & a }, 0)).toString(16).toUpperCase().padStart(8, '0');
   const exactOperations = [...classes, ...functions, ...concepts.slice(0,2)].join(', ') || 'Static Text / Configuration';
