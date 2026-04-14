@@ -33,13 +33,15 @@ export default function Layout() {
         e.preventDefault();
         setSearchOpen(true);
       }
-      if (e.key === 'Escape') setSearchOpen(false);
+      if (e.key === 'Escape') {
+        setSearchOpen(false);
+      }
     };
-    window.addEventListener('keydown', handleKeyDown);
+    document.addEventListener('keydown', handleKeyDown);
 
     return () => {
       window.removeEventListener('scroll', handleScroll);
-      window.removeEventListener('keydown', handleKeyDown);
+      document.removeEventListener('keydown', handleKeyDown);
     };
   }, []);
 
@@ -93,14 +95,16 @@ export default function Layout() {
              <span className="ml-3 text-[15px] font-bold tracking-tight text-black">DocGen AI</span>
           </Link>
           <nav className="hidden lg:flex items-center gap-10">
+             <Link to="/" className="text-[12px] font-bold tracking-tight text-black/40 hover:text-black transition-colors">Home</Link>
              <Link to="/docs/intro" className="text-[12px] font-bold tracking-tight text-black/40 hover:text-black transition-colors">Guide</Link>
              <Link to="/codegen" className="text-[12px] font-bold tracking-tight text-black/40 hover:text-black transition-colors">Studio</Link>
-             <Link to="/docs/api-reference" className="text-[12px] font-bold tracking-tight text-black/40 hover:text-black transition-colors">Resources</Link>
+             <Link to="/#pricing" className="text-[12px] font-bold tracking-tight text-black/40 hover:text-black transition-colors">Pricing</Link>
+             <Link to="/docs/api-reference" className="text-[12px] font-bold tracking-tight text-black/40 hover:text-black transition-colors">API Reference</Link>
           </nav>
           <div className="flex items-center gap-6 shrink-0">
              <button onClick={() => setSearchOpen(true)} className="p-2 opacity-30 hover:opacity-100 transition-opacity"><Search size={18} /></button>
-             <Link to="/codegen" className="hidden sm:block text-[12px] font-bold text-black/40 hover:text-black transition-colors">Support</Link>
-             <Link to="/codegen" className="apple-btn-primary h-9 px-6 text-[12px] font-bold">Try Pro</Link>
+             <a href="mailto:support@docgen.ai" className="hidden sm:block text-[12px] font-bold text-black/40 hover:text-black transition-colors">Support</a>
+             <Link to="/#pricing" className="apple-btn-primary h-9 px-6 text-[12px] font-bold">Upgrade</Link>
           </div>
         </div>
       </header>
@@ -111,40 +115,35 @@ export default function Layout() {
             <div className="flex items-center gap-4">
                <div className="flex items-center gap-2.5 bg-black/[0.03] px-4 py-1.5 rounded-full border border-black/[0.05]">
                   <div className="w-2 h-2 rounded-full bg-[#32d74b] animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-black/60">Stage 4 Synthesis Hub</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-black/60">v1.0.0 · Beta</span>
                </div>
                <div className="h-4 w-[1px] bg-black/[0.1]" />
                <span className="text-[11px] font-bold text-black/40 uppercase tracking-wider">Project: Neural_Manifest_v2.4</span>
             </div>
             <div className="flex items-center gap-8">
-               {['Live Logs', 'Analytical Nodes', 'Export Ops'].map(item => (
-                  <span key={item} className="text-[11px] font-bold text-black/40 hover:text-black cursor-pointer transition-colors lowercase tracking-wider">{item}</span>
-               ))}
+               {/* Non-functional items removed until built */}
             </div>
          </div>
       </div>
 
       {/* 🍏 LAYER 3: TERTIARY TABS BAR (H-12, TOP-[7.5rem], Z-30) */}
-      <div className="fixed top-[7.5rem] inset-x-0 h-12 z-[80] bg-white border-b border-black/[0.06]">
-         <div className="max-w-[1440px] mx-auto px-8 h-full flex items-center gap-12 overflow-x-auto no-scrollbar">
-            {['Metrics', 'Security', 'Performance', 'Tests', 'Quality'].map(tab => (
-               <button 
-                 key={tab} 
-                 className={`h-full text-[11px] font-black uppercase tracking-[0.2em] relative transition-colors ${tab === 'Metrics' ? 'text-black' : 'text-black/25 hover:text-black'}`}
-               >
-                  {tab}
-                  {tab === 'Metrics' && <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-black rounded-full" />}
-               </button>
-            ))}
-         </div>
-      </div>
+      {location.pathname.startsWith('/docs') && (
+        <div className="fixed top-[7.5rem] inset-x-0 h-12 z-[80] bg-white border-b border-black/[0.06]">
+           <div className="max-w-[1440px] mx-auto px-8 h-full flex items-center gap-12 overflow-x-auto no-scrollbar">
+              <button className="h-full text-[11px] font-black uppercase tracking-[0.2em] relative transition-colors text-black">
+                 Documentation
+                 <div className="absolute bottom-0 left-0 right-0 h-[2px] bg-black rounded-full" />
+              </button>
+           </div>
+        </div>
+      )}
 
       {/* MAIN CONTAINER — SYNCED WITH TRIPLE HEADERS (H-16 + H-14 + H-12 = 168px = 10.5rem) */}
       <div className="flex-1 flex pt-[10.5rem] w-full relative min-h-0 bg-white">
         
         {/* 🍏 MINIMALIST SIDEBAR (APPLE SETTINGS STYLE) */}
         {location.pathname !== '/' && (
-          <aside className="hidden lg:flex w-[260px] flex-col apple-sidebar sticky top-12 h-[calc(100vh-48px)] overflow-hidden">
+          <aside className="hidden lg:flex w-[260px] flex-col apple-sidebar sticky top-0 h-screen overflow-y-auto">
              <div className="flex-1 overflow-y-auto pt-14 pb-10 no-scrollbar scroll-smooth">
                 {[
                    { group: 'Foundations', items: [
@@ -187,13 +186,13 @@ export default function Layout() {
              </div>
 
              <div className="mt-auto border-t border-black/[0.04] p-8">
-                <div className="flex items-center gap-4 opacity-55 hover:opacity-100 transition-opacity">
-                   <div className="w-9 h-9 rounded-[10px] bg-black/[0.05] border border-black/[0.06] flex items-center justify-center text-[11px] font-bold text-black/80">AG</div>
+                <Link to="/#pricing" className="flex items-center gap-4 opacity-55 hover:opacity-100 transition-opacity">
+                   <div className="w-9 h-9 rounded-[10px] bg-black/[0.05] border border-black/[0.06] flex items-center justify-center text-[11px] font-bold text-black/80">PRO</div>
                    <div className="flex flex-col">
-                      <span className="text-[14px] font-semibold text-black tracking-tight">Pro Lab</span>
+                      <span className="text-[14px] font-semibold text-black tracking-tight">Upgrade to Pro</span>
                       <span className="text-[11px] text-black/25 uppercase font-bold tracking-widest">Premium</span>
                    </div>
-                </div>
+                </Link>
              </div>
           </aside>
         )}
@@ -203,52 +202,8 @@ export default function Layout() {
         </main>
       </div>
 
-      {/* 🍏 APPLE NEURAL CHAT (MESSAGES STYLE) */}
-      <div className="fixed bottom-10 right-10 z-[100] flex flex-col items-end gap-6">
-         {chatOpen && (
-           <div className="w-[420px] h-[640px] bg-white/95 backdrop-blur-2xl border border-black/[0.1] rounded-[28px] shadow-[0_40px_80px_-16px_rgba(0,0,0,0.15)] flex flex-col overflow-hidden animate-apple-slide">
-              <div className="px-10 py-10 bg-[#f5f5f7] border-b border-black/[0.06] flex items-center justify-between">
-                 <div className="flex items-center gap-5">
-                    <div className="w-10 h-10 rounded-full bg-black flex items-center justify-center shadow-lg shadow-black/10">
-                       <Sparkles size={18} fill="white" className="text-white" />
-                    </div>
-                    <div className="flex flex-col">
-                       <span className="text-[17px] font-bold text-black tracking-tight leading-none">Neural Support</span>
-                       <span className="text-[12px] font-medium text-black/30 mt-2">v2.4 Active Session</span>
-                    </div>
-                 </div>
-                 <button onClick={() => setChatOpen(false)} className="p-3 bg-black/[0.03] rounded-full hover:bg-black/[0.06] transition-colors">
-                    <X size={18} className="text-black/40" />
-                 </button>
-              </div>
-              <div className="flex-1 p-10 overflow-y-auto no-scrollbar flex flex-col gap-10">
-                 <div className="self-start max-w-[85%] bg-[#0071e3] text-white p-6 rounded-[22px] rounded-tl-[4px] text-[16px] leading-[1.5] shadow-sm font-medium">
-                    Hello. I'm your DocGen AI Assistant. I can help resolve architectural debt or answer questions about your documentation.
-                 </div>
-              </div>
-              <div className="p-8 bg-white border-t border-black/[0.04]">
-                 <div className="relative">
-                    <input 
-                      placeholder="Consult the neural bridge..." 
-                      className="w-full bg-[#f5f5f7] border border-black/[0.03] rounded-[18px] py-4 pl-6 pr-14 text-[16px] outline-none placeholder:text-black/20 font-medium"
-                    />
-                    <button className="absolute right-2 top-1/2 -translate-y-1/2 w-11 h-11 bg-black text-white rounded-full flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all">
-                       <ArrowRight size={20} strokeWidth={1.5} />
-                    </button>
-                 </div>
-              </div>
-           </div>
-         )}
-         <button 
-           onClick={() => setChatOpen(!chatOpen)}
-           className="w-16 h-16 bg-white border border-black/[0.08] text-black rounded-full flex items-center justify-center shadow-2xl hover:scale-110 active:scale-95 transition-all relative group"
-         >
-            {chatOpen ? <X size={24} strokeWidth={1.5} /> : <MessageSquare size={24} strokeWidth={1.2} className="group-hover:rotate-12 transition-transform" />}
-            {!chatOpen && (
-               <div className="absolute top-0 right-0 w-4 h-4 bg-[#0071e3] rounded-full border-[3px] border-white shadow-sm" />
-            )}
-         </button>
-      </div>
+      {/* 🍏 APPLE NEURAL CHAT (REMOVED UNTIL BUILT) */}
+
 
     </div>
   );

@@ -11,6 +11,16 @@ export const config = { runtime: 'edge' };
  * The frontend assembles all chunk results into the DOCSTRINGS tab.
  */
 export default async function handler(req: Request) {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
+    });
+  }
   if (req.method !== 'POST') return new Response(null, { status: 405 });
 
   const { name, type, code, language } = await req.json();
@@ -71,6 +81,7 @@ export default async function handler(req: Request) {
       'Content-Type': 'text/event-stream',
       'Cache-Control': 'no-cache',
       'Connection': 'keep-alive',
+      'Access-Control-Allow-Origin': '*',
     }
   });
 }
@@ -116,6 +127,10 @@ function fallbackChunk(name: string, type: string, code: string) {
 
   return new Response(
     encoder.encode(`data: ${JSON.stringify({ text })}\n\ndata: [DONE]\n\n`),
-    { headers: { 'Content-Type': 'text/event-stream' } }
+    { headers: { 
+        'Content-Type': 'text/event-stream',
+        'Access-Control-Allow-Origin': '*',
+      } 
+    }
   );
 }

@@ -27,10 +27,9 @@ export default function LandingPage() {
   return (
     <div className="flex-1 flex flex-col items-center bg-white relative overflow-x-hidden font-sans">
       
-      {/* 🍏 DYNAMIC BACKGROUND ARCHITECTURE */}
+      {/* 🍏 STATIC BACKGROUND ARCHITECTURE */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0 flex items-center justify-center">
          <div className="absolute top-[-200px] left-1/2 -translate-x-1/2 w-[1200px] h-[800px] bg-gradient-to-b from-[#0071e3]/10 via-[#af52de]/5 to-transparent rounded-full blur-[140px] opacity-60" />
-         <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoMCwgMCwgMCwgMC4wNCkiLz48L3N2Zz4=')] opacity-[0.3]" />
       </div>
 
       <main className="flex-1 w-full relative z-10 flex flex-col items-center">
@@ -62,8 +61,8 @@ export default function LandingPage() {
                  </span>
               </h1>
               
-              {/* DECORATIVE ELEMENT (Isolated via Absolute-Outside-Stack to prevent collision) */}
-              <div className="hidden xl:block absolute -right-20 top-1/2 -translate-y-1/2 animate-vertical-float transition-all opacity-40 hover:opacity-100">
+              {/* DECORATIVE ELEMENT (Static) */}
+              <div className="hidden xl:block absolute -right-20 top-1/2 -translate-y-1/2 transition-all opacity-100">
                  <div className="bg-white/80 backdrop-blur-md border border-black/10 rounded-2xl p-5 shadow-3xl flex items-center gap-4">
                     <Terminal size={24} className="text-[#0071e3]" />
                     <div className="flex flex-col text-left">
@@ -92,51 +91,50 @@ export default function LandingPage() {
         </section>
 
         {/* 🍏 FEATURE GRID — BENTO SYSTEM */}
-        <section className="w-full max-w-[1240px] mx-auto px-6 pb-40">
+        <section id="pricing" className="w-full max-w-[1240px] mx-auto px-6 pb-40">
            <div className="grid grid-cols-1 md:grid-cols-12 gap-8">
               
-              <div className="md:col-span-8 bg-[#f9f9fb] border border-black/[0.04] rounded-[48px] p-12 flex flex-col justify-between hover:shadow-2xl transition-all duration-700 group h-[480px] relative overflow-hidden">
-                 <div className="absolute right-0 top-0 bottom-0 w-[50%] bg-gradient-to-l from-[#0071e3]/5 to-transparent pointer-events-none" />
-                 <div className="w-16 h-16 bg-white rounded-[22px] shadow-sm flex items-center justify-center mb-10 group-hover:scale-110 transition-transform relative z-10 border border-black/5">
+              <div className="md:col-span-8 bg-white border border-[#0071e3]/20 rounded-[48px] p-12 flex flex-col justify-between hover:shadow-2xl transition-all duration-700 group h-[480px] relative overflow-hidden">
+                 <div className="w-16 h-16 bg-[#0071e3]/5 rounded-[22px] shadow-sm flex items-center justify-center mb-10 group-hover:scale-110 transition-transform relative z-10 border border-[#0071e3]/10">
                     <Activity size={32} className="text-[#0071e3]" />
                  </div>
                  <div className="relative z-10">
                     <h3 className="text-[42px] font-bold text-[#1d1d1f] tracking-tight leading-none mb-6">Sub-10ms Latency.</h3>
-                    <p className="text-[20px] text-[#1d1d1f]/50 font-medium max-w-[380px]">Powered by Vercel Edge compute. Neural documentation synthesizes instantaneously.</p>
+                    <p className="text-[20px] text-[#1d1d1f]/70 font-medium max-w-[380px]">Powered by Vercel Edge compute. Neural documentation synthesizes instantaneously.</p>
                  </div>
-                 <Globe size={400} className="absolute -right-20 -bottom-20 opacity-10 group-hover:opacity-30 transition-opacity" strokeWidth={0.5} />
+                 <Globe size={400} className="absolute -right-20 -bottom-20 text-[#0071e3]/5 hover:text-[#0071e3]/10 transition-colors" strokeWidth={0.5} />
               </div>
 
-              <div className="md:col-span-4 bg-[#1d1d1f] border border-black/[0.04] rounded-[48px] p-12 flex flex-col justify-between hover:shadow-2xl transition-all duration-700 group h-[480px] relative overflow-hidden">
-                 <div className="w-16 h-16 bg-white/10 rounded-[22px] border border-white/10 flex items-center justify-center mb-10 group-hover:rotate-12 transition-transform relative z-10">
+              <div className="md:col-span-4 bg-white border border-[#32d74b]/20 rounded-[48px] p-12 flex flex-col justify-between hover:shadow-2xl transition-all duration-700 group h-[480px] relative overflow-hidden">
+                 <div className="w-16 h-16 bg-[#32d74b]/5 rounded-[22px] border border-[#32d74b]/10 flex items-center justify-center mb-10 group-hover:rotate-12 transition-transform relative z-10">
                     <Shield size={32} className="text-[#32d74b]" />
                  </div>
                  <div className="relative z-10">
-                    <h3 className="text-[36px] font-bold text-white tracking-tight leading-[1.1] mb-6">Sovereign Security.</h3>
-                    <p className="text-[18px] text-white/50 font-medium">AES-256 rolling-key logic protection. Your source code is instantly purged.</p>
+                    <h3 className="text-[36px] font-bold text-[#1d1d1f] tracking-tight leading-[1.1] mb-6">Sovereign Security.</h3>
+                    <p className="text-[18px] text-[#1d1d1f]/70 font-medium">AES-256 rolling-key logic protection. Your source code is instantly purged.</p>
                  </div>
               </div>
 
-              <div className="md:col-span-12 bg-gradient-to-br from-white to-[#f5f5f7] border border-black/[0.06] rounded-[56px] p-12 md:p-20 flex flex-col lg:flex-row items-center justify-between gap-16 group overflow-hidden">
+              <div className="md:col-span-12 bg-white border border-[#af52de]/20 rounded-[56px] p-12 md:p-20 flex flex-col lg:flex-row items-center justify-between gap-16 group overflow-hidden">
                  <div className="flex flex-col max-w-[500px]">
                     <div className="flex items-center gap-4 mb-8">
-                       <div className="w-14 h-14 bg-black rounded-[18px] shadow-lg flex items-center justify-center">
-                          <Network size={28} className="text-white" />
+                       <div className="w-14 h-14 bg-[#af52de]/5 rounded-[18px] border border-[#af52de]/10 flex items-center justify-center">
+                          <Network size={28} className="text-[#af52de]" />
                        </div>
-                       <span className="text-[12px] font-black uppercase tracking-widest text-[#0071e3] bg-[#0071e3]/10 px-4 py-2 rounded-full">Manifest Export</span>
+                       <span className="text-[12px] font-black uppercase tracking-widest text-[#af52de] bg-[#af52de]/5 px-4 py-2 rounded-full">Manifest Export</span>
                     </div>
                     <h3 className="text-[48px] font-bold text-[#1d1d1f] tracking-tight leading-[1.05] mb-8">Deep Architectural Infrastructure.</h3>
-                    <p className="text-[20px] text-[#1d1d1f]/50 font-medium">Not just comments. Full API references, automated diagrams, and multi-dependency resolution completely generated.</p>
+                    <p className="text-[20px] text-[#1d1d1f]/70 font-medium">Not just comments. Full API references, automated diagrams, and multi-dependency resolution completely generated.</p>
                  </div>
-                 <div className="w-full max-w-[400px] bg-white border border-black/10 rounded-[40px] p-10 shadow-3xl relative animate-apple-fade">
+                 <div className="w-full max-w-[400px] bg-[#fbfbfd] border border-black/5 rounded-[40px] p-10 shadow-lg relative">
                     <div className="space-y-6">
                        <div className="h-4 w-[40%] bg-black/5 rounded-full" />
                        <div className="h-4 w-[90%] bg-black/5 rounded-full" />
                        <div className="h-4 w-[70%] bg-[#0071e3]/20 rounded-full" />
                        <div className="h-4 w-[50%] bg-black/5 rounded-full" />
                     </div>
-                    <div className="absolute -right-8 -top-8 bg-black text-white px-8 py-5 rounded-2xl shadow-2xl flex items-center gap-3 animate-bounce">
-                       <Zap size={18} className="text-yellow-400" />
+                    <div className="absolute -right-8 -top-8 bg-black text-white px-8 py-5 rounded-2xl shadow-xl flex items-center gap-3">
+                       <Zap size={18} className="text-[#32d74b]" />
                        <span className="text-[15px] font-bold">100% Coverage</span>
                     </div>
                  </div>
@@ -159,10 +157,19 @@ export default function LandingPage() {
                   <p className="text-[14px] text-[#1d1d1f]/40 font-medium">© 2026 Neural Documentation manifest.</p>
                </div>
             </div>
-            <div className="flex gap-10">
-               {['Docs', 'Architecture', 'Privacy'].map(item => (
-                 <Link key={item} to="#" className="text-[15px] font-bold text-black/40 hover:text-black transition-colors">{item}</Link>
-               ))}
+            <div className="flex flex-col items-center gap-6">
+               <div className="flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+                 <Link to="/" className="text-[15px] font-bold text-black/50 hover:text-black transition-colors">Home</Link>
+                 <Link to="/docs/intro" className="text-[15px] font-bold text-black/50 hover:text-black transition-colors">Guide</Link>
+                 <Link to="/codegen" className="text-[15px] font-bold text-black/50 hover:text-black transition-colors">Studio</Link>
+                 <Link to="/docs/terms" className="text-[15px] font-bold text-black/50 hover:text-black transition-colors">Terms of Service</Link>
+                 <Link to="/docs/privacy" className="text-[15px] font-bold text-black/50 hover:text-black transition-colors">Privacy Policy</Link>
+               </div>
+               <div className="flex items-center gap-6">
+                  {['Twitter', 'GitHub', 'LinkedIn'].map(social => (
+                     <a key={social} href="#" className="text-[13px] font-black text-[#0071e3] uppercase tracking-widest hover:underline">{social}</a>
+                  ))}
+               </div>
             </div>
          </div>
       </footer>

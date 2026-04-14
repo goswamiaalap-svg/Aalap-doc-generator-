@@ -4,6 +4,7 @@ import 'highlight.js/styles/github.css';
 import mermaid from 'mermaid';
 import { Copy, CheckCircle2, Maximize2, Share2, Volume2 } from 'lucide-react';
 import toast from 'react-hot-toast';
+import DOMPurify from 'dompurify';
 
 mermaid.initialize({ 
   startOnLoad: false, 
@@ -78,7 +79,7 @@ export default function MarkdownRenderer({ content }: { content: string }) {
                </div>
                <div 
                  className={`flex justify-center p-12 bg-white/40 border border-black/[0.04] rounded-[40px] shadow-sm transition-all overflow-auto ${isFullscreen ? 'fixed inset-0 z-[1000] bg-white flex items-center justify-center' : ''}`}
-                 dangerouslySetInnerHTML={{ __html: renderedMermaid[code] }} 
+                 dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(renderedMermaid[code], { USE_PROFILES: { svg: true, html: true } }) }} 
                />
                {isFullscreen && (
                  <button onClick={() => setIsFullscreen(false)} className="fixed top-10 right-10 z-[1100] apple-btn-primary p-6 rounded-full font-bold uppercase text-[12px]">Close Sync</button>
@@ -112,7 +113,8 @@ export default function MarkdownRenderer({ content }: { content: string }) {
            return `<div class="overflow-x-auto w-full my-12 font-sans border border-black/[0.06] rounded-[24px] shadow-sm overflow-hidden"><table class="w-full border-collapse text-[14px]"><tr class="bg-black/[0.02]">${cells}</tr></table></div>`;
         });
 
-      return <div key={index} className="font-sans leading-[1.8] text-[#1d1d1f]/75 text-[18px] md:text-[20px] selection:bg-[#0071e3]/10" dangerouslySetInnerHTML={{ __html: htmlText }} />;
+      const sanitizedHtml = DOMPurify.sanitize(htmlText);
+      return <div key={index} className="font-sans leading-[1.8] text-[#1d1d1f]/75 text-[18px] md:text-[20px] selection:bg-[#0071e3]/10" dangerouslySetInnerHTML={{ __html: sanitizedHtml }} />;
     });
   };
 

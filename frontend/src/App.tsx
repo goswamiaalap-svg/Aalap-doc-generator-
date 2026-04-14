@@ -14,8 +14,8 @@ function App() {
           <Route path="/" element={<LandingPage />} />
           <Route path="docs" element={<DocumentationViewer />} />
           <Route path="docs/:docId" element={<DocumentationViewer />} />
-          <Route path="codegen" element={<CodeGenerator />} />
         </Route>
+        <Route path="codegen" element={<CodeGenerator />} />
       </Routes>
     </>
   );

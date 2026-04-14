@@ -18,20 +18,36 @@ interface CodeChunk {
 }
 
 export default async function handler(req: Request) {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      },
+    });
+  }
   if (req.method !== 'POST') return new Response(null, { status: 405 });
 
   const { code, language } = await req.json() as { code: string; language: string };
 
   if (!code || !code.trim()) {
     return new Response(JSON.stringify({ chunks: [] }), {
-      headers: { 'Content-Type': 'application/json' }
+      headers: { 
+        'Content-Type': 'application/json',
+        'Access-Control-Allow-Origin': '*',
+      }
     });
   }
 
   const chunks = parseChunks(code, language);
 
   return new Response(JSON.stringify({ chunks }), {
-    headers: { 'Content-Type': 'application/json' }
+    headers: { 
+      'Content-Type': 'application/json',
+      'Access-Control-Allow-Origin': '*',
+    }
   });
 }
 

@@ -345,6 +345,22 @@ const CodeGenerator: React.FC = () => {
     toast.success('Formatted');
   };
 
+  const handleExportPDF = () => {
+    window.print();
+  };
+
+  const handleExportMarkdown = () => {
+    const fullMD = `# Generated Documentation\n\n` + 
+                   (activeTab === 'DOCSTRINGS' ? docstringOutput : (results[activeTab] || Object.values(results).join('\n\n')));
+    const blob = new Blob([fullMD], { type: 'text/markdown' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `DocGen_${activeTab}.md`;
+    a.click();
+    URL.revokeObjectURL(url);
+  };
+
   const hasOutput = Object.values(results).some(v => v?.length > 5) || docstringOutput.length > 5;
 
   const doneCount = chunkStatuses.filter(c => c.status === 'done').length;
@@ -356,7 +372,7 @@ const CodeGenerator: React.FC = () => {
     (isGenerating ? '_Synthesizing..._' : '');
 
   return (
-    <div className="flex-1 flex flex-col min-h-0 bg-white relative font-sans overflow-hidden">
+    <div className="h-screen w-screen flex flex-col min-h-0 bg-white relative font-sans overflow-hidden">
 
       {/* ── STUDIO HEADER ───────────────────────────────────────────────── */}
       <header className="h-[64px] border-b border-black/[0.06] flex items-center justify-between px-8 bg-white/95 backdrop-blur-xl z-20 shrink-0">
@@ -413,6 +429,8 @@ const CodeGenerator: React.FC = () => {
             <Activity size={12} className="text-[#0071e3]" />
             {tokenCount} <span className="opacity-40 ml-1">TOKENS</span>
           </div>
+          <button onClick={handleExportPDF} className="px-3 py-1.5 bg-[#f5f5f7] rounded-lg text-[10px] font-bold tracking-widest uppercase hover:bg-black/5 transition-colors">Export PDF</button>
+          <button onClick={handleExportMarkdown} className="px-3 py-1.5 bg-[#f5f5f7] rounded-lg text-[10px] font-bold tracking-widest uppercase hover:bg-black/5 transition-colors">Export MD</button>
           <button onClick={() => toast.success('Settings panel')} className="p-2 text-black/20 hover:text-black transition-colors"><Settings size={18} /></button>
           <button onClick={() => setShowHistory(true)} className="p-2 text-black/20 hover:text-black transition-colors relative">
             <History size={18} />
