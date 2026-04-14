@@ -54,7 +54,7 @@ export default function Layout() {
       
       {/* 🍏 APPLE SPOTLIGHT SEARCH (ULTRA MINIMAL) */}
       {searchOpen && (
-        <div className="fixed inset-0 z-[100] bg-white/40 backdrop-blur-3xl flex items-start justify-center pt-[120px] px-4 animate-apple-fade">
+        <div className="fixed inset-0 z-[100] bg-white/40 backdrop-blur-3xl flex items-start justify-center pt-[120px] px-4">
            <div className="w-full max-w-[680px] bg-white border border-black/[0.08] rounded-[24px] shadow-[0_30px_60px_-12px_rgba(0,0,0,0.18)] p-4 overflow-hidden">
               <div className="flex items-center gap-4 px-5 py-3 border-b border-black/[0.06]">
                  <Search size={22} className="text-black/30" strokeWidth={1.5} />

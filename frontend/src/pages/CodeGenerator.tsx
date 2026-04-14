@@ -3,8 +3,9 @@ import {
   Zap, Loader2, Cpu, Sparkles, Command, FileText, Layers,
   ChevronRight, Maximize2, Binary, Shield, Activity, Network,
   Globe, Database, Search, Eye, Settings, History, Plus,
-  Upload, Clock, CheckCircle, XCircle, Circle,
+  Upload, Clock, CheckCircle, XCircle, Circle, ArrowLeft
 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import MarkdownRenderer from '../components/MarkdownRenderer';
 
@@ -377,6 +378,9 @@ const CodeGenerator: React.FC = () => {
       {/* ── STUDIO HEADER ───────────────────────────────────────────────── */}
       <header className="h-[64px] border-b border-black/[0.06] flex items-center justify-between px-8 bg-white/95 backdrop-blur-xl z-20 shrink-0">
         <div className="flex items-center gap-6">
+          <Link to="/" className="w-9 h-9 rounded-xl bg-black/5 hover:bg-black/10 flex items-center justify-center transition-colors">
+             <ArrowLeft size={16} className="text-black/60" />
+          </Link>
           <div className="flex items-center gap-4">
             <div className="w-9 h-9 rounded-xl bg-black flex items-center justify-center">
               <Zap size={16} fill="white" className="text-white" />
@@ -413,7 +417,7 @@ const CodeGenerator: React.FC = () => {
           ].map((item) => (
             <button
               key={item.key}
-              onClick={() => { setHudTab(item.key as any); toast.success(`${item.label} panel open`); }}
+              onClick={() => { setHudTab(item.key as any); }}
               className={`flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.14em] transition-colors ${
                 hudTab === item.key ? 'text-[#0071e3]' : 'text-black/25 hover:text-black'
               }`}
@@ -431,7 +435,7 @@ const CodeGenerator: React.FC = () => {
           </div>
           <button onClick={handleExportPDF} className="px-3 py-1.5 bg-[#f5f5f7] rounded-lg text-[10px] font-bold tracking-widest uppercase hover:bg-black/5 transition-colors">Export PDF</button>
           <button onClick={handleExportMarkdown} className="px-3 py-1.5 bg-[#f5f5f7] rounded-lg text-[10px] font-bold tracking-widest uppercase hover:bg-black/5 transition-colors">Export MD</button>
-          <button onClick={() => toast.success('Settings panel')} className="p-2 text-black/20 hover:text-black transition-colors"><Settings size={18} /></button>
+          <button className="p-2 text-black/20 hover:text-black transition-colors"><Settings size={18} /></button>
           <button onClick={() => setShowHistory(true)} className="p-2 text-black/20 hover:text-black transition-colors relative">
             <History size={18} />
             <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#0071e3] rounded-full" />
@@ -517,7 +521,7 @@ const CodeGenerator: React.FC = () => {
             <div className="flex flex-col gap-3">
               <span className="text-[10px] font-black text-black/30 uppercase tracking-[0.25em]">Protocols</span>
               {[{ label: 'Deep Sync', icon: Sparkles, color: 'text-[#0071e3]' }, { label: 'Logic Map', icon: Layers, color: 'text-[#af52de]' }].map(p => (
-                <button key={p.label} onClick={() => toast.success(`${p.label} mode active`)} className="flex items-center justify-between px-4 py-3 bg-white border border-black/5 rounded-xl hover:shadow-md transition-all">
+                <button key={p.label} className="flex items-center justify-between px-4 py-3 bg-white border border-black/5 rounded-xl hover:shadow-md transition-all">
                   <div className="flex items-center gap-3">
                     <p.icon size={14} className={p.color} />
                     <span className="text-[12px] font-bold text-black/50">{p.label}</span>
@@ -764,7 +768,7 @@ const CodeGenerator: React.FC = () => {
                   { name: 'api_router.py', lang: 'PY', time: '1 hr ago', chunks: 7 },
                   { name: 'CoreLayout.tsx', lang: 'TSX', time: '3 hr ago', chunks: 3 },
                 ].map((f, i) => (
-                  <button key={i} onClick={() => toast.success(`Loading ${f.name}`)} className="flex items-center gap-4 px-5 py-4 bg-[#f9f9fb] border border-black/5 rounded-2xl hover:shadow-md transition-all text-left group">
+                  <button key={i} className="flex items-center gap-4 px-5 py-4 bg-[#f9f9fb] border border-black/5 rounded-2xl hover:shadow-md transition-all text-left group">
                     <div className="w-10 h-10 rounded-xl bg-black flex items-center justify-center shrink-0">
                       <span className="text-[9px] font-black text-white">{f.lang}</span>
                     </div>

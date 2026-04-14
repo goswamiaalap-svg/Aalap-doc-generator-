@@ -22,7 +22,10 @@ const DocumentationViewer: React.FC = () => {
   const [lastScrollY, setLastScrollY] = useState(0);
   const [readingProgress, setReadingProgress] = useState(0);
 
-  const doc = docs.find((d: any) => d.id === activeId) || docs[0];
+  const docIndex = docs.findIndex((d: any) => d.id === activeId);
+  const doc = docIndex !== -1 ? docs[docIndex] : docs[0];
+  const prevDoc = docIndex > 0 ? docs[docIndex - 1] : null;
+  const nextDoc = docIndex !== -1 && docIndex < docs.length - 1 ? docs[docIndex + 1] : null;
 
   useEffect(() => {
     const handleScroll = () => {
@@ -81,20 +84,24 @@ const DocumentationViewer: React.FC = () => {
 
           {/* RELATED SYNAPSES — ADVANCED NAVIGATION */}
           <div className="mt-60 pt-20 border-t border-black/[0.06] grid grid-cols-1 md:grid-cols-2 gap-10">
-             <Link to="/docs/intro" className="group p-10 bg-[#f5f5f7] border border-black/[0.02] rounded-[48px] hover:bg-white hover:shadow-2xl transition-all">
-                <span className="text-[10px] font-black text-[#0071e3] uppercase tracking-widest mb-4 block">PREVIOUS</span>
-                <h4 className="text-[24px] font-bold text-black tracking-tight">Introduction</h4>
-                <div className="mt-8 flex items-center text-[10px] font-black text-black/30 uppercase tracking-widest group-hover:text-black">
-                   <ChevronLeft size={16} /> Back to Foundations
-                </div>
-             </Link>
-             <Link to="/docs/adv-core" className="group p-10 bg-[#f5f5f7] border border-black/[0.02] rounded-[48px] hover:bg-white hover:shadow-2xl transition-all text-right items-end flex flex-col">
-                <span className="text-[10px] font-black text-[#ff375f] uppercase tracking-widest mb-4 block">NEXT</span>
-                <h4 className="text-[24px] font-bold text-black tracking-tight text-right">Advanced Core</h4>
-                <div className="mt-8 flex items-center text-[10px] font-black text-black/30 uppercase tracking-widest group-hover:text-black">
-                   Continue Reading <ChevronRight size={16} />
-                </div>
-             </Link>
+             {prevDoc ? (
+                 <Link to={`/docs/${prevDoc.id}`} className="group p-10 bg-[#f5f5f7] border border-black/[0.02] rounded-[48px] hover:bg-white hover:shadow-2xl transition-all">
+                    <span className="text-[10px] font-black text-[#0071e3] uppercase tracking-widest mb-4 block">PREVIOUS</span>
+                    <h4 className="text-[24px] font-bold text-black tracking-tight">{prevDoc.title}</h4>
+                    <div className="mt-8 flex items-center text-[10px] font-black text-black/30 uppercase tracking-widest group-hover:text-black">
+                       <ChevronLeft size={16} /> Back to {prevDoc.section}
+                    </div>
+                 </Link>
+             ) : <div />}
+             {nextDoc ? (
+                 <Link to={`/docs/${nextDoc.id}`} className="group p-10 bg-[#f5f5f7] border border-black/[0.02] rounded-[48px] hover:bg-white hover:shadow-2xl transition-all text-right items-end flex flex-col">
+                    <span className="text-[10px] font-black text-[#ff375f] uppercase tracking-widest mb-4 block">NEXT</span>
+                    <h4 className="text-[24px] font-bold text-black tracking-tight text-right">{nextDoc.title}</h4>
+                    <div className="mt-8 flex items-center text-[10px] font-black text-black/30 uppercase tracking-widest group-hover:text-black">
+                       Continue Reading <ChevronRight size={16} />
+                    </div>
+                 </Link>
+             ) : <div />}
           </div>
         </div>
       </div>
@@ -142,7 +149,7 @@ const DocumentationViewer: React.FC = () => {
       </aside>
 
       {/* FLOATING ACTION TRAY */}
-      <div className={`fixed bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-4 p-3 bg-white/80 backdrop-blur-2xl border border-black/5 rounded-[32px] shadow-2xl z-[100] transition-all duration-700 ${scrollDir === 'down' ? 'translate-y-24 opacity-0' : 'translate-y-0 opacity-100'}`}>
+      <div className={`fixed bottom-12 left-1/2 -translate-x-1/2 flex items-center gap-4 p-3 bg-white/80 backdrop-blur-2xl border border-black/5 rounded-[32px] shadow-2xl z-[100] transition-all duration-700`}>
          <button onClick={handleReadAloud} className="w-14 h-14 flex items-center justify-center bg-black text-white rounded-full hover:scale-110 active:scale-95 transition-all"><Volume2 size={20} /></button>
          <button onClick={handleCopy} className="px-8 h-14 bg-[#f5f5f7] rounded-full text-[14px] font-bold hover:bg-black hover:text-white transition-all">{copied ? 'LINK COPIED' : 'Share Synthesis'}</button>
          <button onClick={() => window.print()} className="w-14 h-14 flex items-center justify-center bg-[#f5f5f7] rounded-full hover:bg-black hover:text-white transition-all"><Printer size={20} /></button>
