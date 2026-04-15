@@ -1,6 +1,6 @@
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
-  Menu, X, Search, MessageSquare, Cpu, ArrowRight, Shield, Layers, Zap, Activity, FileText, Command, Sparkles 
+  Menu, X, Search, MessageSquare, Cpu, ArrowRight, Shield, Layers, Zap, Activity, FileText, Command, Sparkles, Network, Download 
 } from 'lucide-react';
 import { useState, useEffect, useRef, useMemo } from 'react';
 import Fuse from 'fuse.js';
