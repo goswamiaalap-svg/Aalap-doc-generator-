@@ -1,5 +1,3 @@
-import type { VercelRequest, VercelResponse } from '@vercel/node';
-
 export const docs = [
   {
     id: 'intro',
@@ -657,10 +655,3 @@ export const docs = [
     ].join('\n')
   }
 ];
-
-export default function handler(
-  request: VercelRequest,
-  response: VercelResponse
-) {
-  response.status(200).json(docs);
-}
