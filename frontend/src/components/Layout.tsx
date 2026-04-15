@@ -2,7 +2,7 @@ import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
   Menu, X, Search, MessageSquare, Cpu, ArrowRight, Shield, Layers, Zap, Activity, FileText, Command, Sparkles, Network, Download 
 } from 'lucide-react';
-import { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, cloneElement } from 'react';
 import Fuse from 'fuse.js';
 import { docs } from '../api/docs';
 

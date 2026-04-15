@@ -3,7 +3,7 @@ import {
   Zap, Loader2, Cpu, Sparkles, Command, FileText, Layers,
   ChevronRight, Maximize2, Binary, Shield, Activity, Network,
   Globe, Database, Search, Eye, Settings, History, Plus,
-  Upload, Clock, CheckCircle, XCircle, Circle, ArrowLeft, X 
+  Upload, Clock, CheckCircle, XCircle, Circle, ArrowLeft, X, Download 
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import toast from 'react-hot-toast';
