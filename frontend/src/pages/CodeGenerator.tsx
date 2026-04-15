@@ -63,9 +63,9 @@ const CodeGenerator: React.FC = () => {
   const [tokenCount, setTokenCount] = useState(0);
 
   // Panel C active section
-  const [hudTab, setHudTab] = useState<'howto' | 'metrics' | 'security' | 'archive'>('howto');
+  const [hudTab, setHudTab] = useState<'metrics' | 'security' | 'tests' | 'quality'>('metrics');
 
-  // Full-doc results (8 tabs)
+  // Full-doc results (4 primary tabs + 4 supplementary)
   const [results, setResults] = useState<Record<string, string>>({
     DOCSTRINGS: '', README: '', API_REF: '', DIAGRAM: '', SECURITY: '', PERFORMANCE: '', TESTS: '', QUALITY: ''
   });
@@ -73,6 +73,7 @@ const CodeGenerator: React.FC = () => {
   // Parallel mode
   const [chunkStatuses, setChunkStatuses] = useState<ChunkStatus[]>([]);
   const [docstringOutput, setDocstringOutput] = useState('');
+  const [fileName, setFileName] = useState<string>('');
 
   // Refs to hold accumulated values without stale closures
   const outputsRef = useRef<string[]>([]);
@@ -90,10 +91,13 @@ const CodeGenerator: React.FC = () => {
       if ((e.ctrlKey || e.metaKey) && e.key === 'Enter' && !isGenerating && code.trim()) {
         handleGenerate();
       }
+      if (e.key === 'Escape' && showHistory) {
+        setShowHistory(false);
+      }
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  });
+  }, [isGenerating, code, showHistory]);
 
   // ── PARALLEL GENERATE ─────────────────────────────────────────────────────
   const runParallel = async () => {
@@ -118,7 +122,8 @@ const CodeGenerator: React.FC = () => {
       if (!chunks || chunks.length === 0) {
         toast('No functions/classes found — running Full Sync instead.');
         setIsGenerating(false);
-        return runFull();
+        runFull();
+        return;
       }
 
       chunksRef.current = chunks;
@@ -192,8 +197,7 @@ const CodeGenerator: React.FC = () => {
       const final = '# Documentation\n\n' + outputsRef.current.join('\n---\n');
       setDocstringOutput(final);
       
-      // Since Parallel mode only generates docstrings, let's also fetch Full generation
-      // in the background to populate README, API_REF, PERFORMANCE, TESTS, etc.
+      // Background full sync
       try {
         const fullRes = await fetch('/api/generate', {
           method: 'POST',
@@ -245,7 +249,7 @@ const CodeGenerator: React.FC = () => {
         }
       } catch (e) { /* ignore background full error */ }
       
-      toast.success(`${chunks.length} chunks and full sections documented ✓`);
+      toast.success(`${chunks.length} chunks documented ✓`);
 
     } catch (e: any) {
       if (e?.name !== 'AbortError') toast.error('Parallel sync failed');
@@ -393,8 +397,7 @@ const CodeGenerator: React.FC = () => {
             </div>
           </div>
 
-          {/* Mode toggle */}
-          <div className="flex bg-[#f5f5f7] rounded-full p-0.5 border border-black/5">
+          <div className="flex bg-[#f5f5f7] rounded-full p-0.5 border border-black/5 mx-2">
             {(['parallel', 'full'] as const).map(m => (
               <button
                 key={m}
@@ -407,25 +410,6 @@ const CodeGenerator: React.FC = () => {
               </button>
             ))}
           </div>
-
-          {/* HUD nav buttons */}
-          {[
-            { label: 'Metrics', icon: Activity, key: 'metrics' },
-            { label: 'Security', icon: Shield, key: 'security' },
-            { label: 'Archive', icon: Database, key: 'archive' },
-            { label: 'Search', icon: Search, key: 'howto' },
-          ].map((item) => (
-            <button
-              key={item.key}
-              onClick={() => { setHudTab(item.key as any); }}
-              className={`flex items-center gap-2 text-[11px] font-black uppercase tracking-[0.14em] transition-colors ${
-                hudTab === item.key ? 'text-[#0071e3]' : 'text-black/25 hover:text-black'
-              }`}
-            >
-              <item.icon size={14} strokeWidth={1.5} />
-              {item.label}
-            </button>
-          ))}
         </div>
 
         <div className="flex items-center gap-6">
@@ -435,11 +419,11 @@ const CodeGenerator: React.FC = () => {
           </div>
           <button onClick={handleExportPDF} className="px-3 py-1.5 bg-[#f5f5f7] rounded-lg text-[10px] font-bold tracking-widest uppercase hover:bg-black/5 transition-colors">Export PDF</button>
           <button onClick={handleExportMarkdown} className="px-3 py-1.5 bg-[#f5f5f7] rounded-lg text-[10px] font-bold tracking-widest uppercase hover:bg-black/5 transition-colors">Export MD</button>
-          <button className="p-2 text-black/20 hover:text-black transition-colors"><Settings size={18} /></button>
           <button onClick={() => setShowHistory(true)} className="p-2 text-black/20 hover:text-black transition-colors relative">
             <History size={18} />
             <div className="absolute top-1.5 right-1.5 w-1.5 h-1.5 bg-[#0071e3] rounded-full" />
           </button>
+          <button className="apple-btn-primary h-9 px-6 text-[12px] font-bold">Upgrade</button>
         </div>
       </header>
 
@@ -448,29 +432,53 @@ const CodeGenerator: React.FC = () => {
 
         {/* PANEL A — INPUT ─────────────────────────────────────────────── */}
         <aside className="w-[300px] shrink-0 flex flex-col border-r border-black/[0.06] bg-[#f9f9fb] overflow-hidden">
-          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
+          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6 no-scrollbar">
 
-            {/* Upload */}
-            <div className="flex flex-col gap-3">
-              <span className="text-[10px] font-black text-black/30 uppercase tracking-[0.25em]">Source File</span>
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                className="w-full flex items-center justify-between p-5 bg-black text-white rounded-2xl shadow-lg hover:shadow-xl transition-all active:scale-95"
-              >
-                <div className="flex items-center gap-3">
-                  <Upload size={16} className="text-[#0071e3]" />
-                  <span className="text-[13px] font-bold">Inject File</span>
+            {/* Source Inputs */}
+            <div className="flex flex-col gap-4">
+              <span className="text-[10px] font-black text-black/30 uppercase tracking-[0.25em]">Source Ingest</span>
+              
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  className="flex flex-col items-center justify-center gap-2 p-4 bg-white border border-black/[0.06] rounded-2xl hover:bg-black hover:text-white transition-all group"
+                >
+                  <Upload size={18} className="text-[#0071e3]" />
+                  <span className="text-[11px] font-black uppercase tracking-widest">Inject File</span>
+                </button>
+                <button
+                  onClick={() => toast.error('ZIP ingestion requires Architect plan')}
+                  className="flex flex-col items-center justify-center gap-2 p-4 bg-white border border-black/[0.06] rounded-2xl hover:bg-black hover:text-white transition-all group opacity-50"
+                >
+                  <Layers size={18} className="text-[#ff9500]" />
+                  <span className="text-[11px] font-black uppercase tracking-widest">Inject ZIP</span>
+                </button>
+              </div>
+
+              <div className="relative">
+                <div className="absolute left-4 top-1/2 -translate-y-1/2 text-black/20"><Globe size={14} /></div>
+                <input 
+                  type="text" 
+                  placeholder="GitHub URL..."
+                  className="w-full bg-white border border-black/[0.06] rounded-xl pl-12 pr-4 py-3 text-[12px] font-bold outline-none focus:border-[#0071e3] transition-all"
+                  onKeyDown={e => e.key === 'Enter' && toast.error('GitHub Sync requires an active session')}
+                />
+              </div>
+
+              {fileName && (
+                <div className="flex items-center justify-between px-4 py-2 bg-[#f5f5f7] rounded-xl border border-black/5">
+                  <span className="text-[11px] font-bold text-black/60 truncate max-w-[180px]">{fileName}</span>
+                  <button onClick={() => setFileName('')} className="text-black/20 hover:text-red-500"><XCircle size={14} /></button>
                 </div>
-                <Plus size={14} />
-              </button>
+              )}
             </div>
 
             {/* Language */}
             <div className="flex flex-col gap-3">
-              <span className="text-[10px] font-black text-black/30 uppercase tracking-[0.25em]">Language</span>
+              <span className="text-[10px] font-black text-black/30 uppercase tracking-[0.25em]">Neural Grammar</span>
               <select
                 value={language} onChange={e => setLanguage(e.target.value)}
-                className="w-full bg-white border border-black/[0.08] rounded-xl px-4 py-3 text-[13px] font-bold outline-none"
+                className="w-full bg-white border border-black/[0.06] rounded-xl px-4 py-3 text-[12px] font-bold outline-none appearance-none cursor-pointer hover:border-[#0071e3] transition-all"
               >
                 {['typescript', 'javascript', 'python', 'rust', 'cpp', 'java', 'go', 'swift'].map(l => (
                   <option key={l} value={l}>{l.toUpperCase()}</option>
@@ -480,7 +488,7 @@ const CodeGenerator: React.FC = () => {
 
             {/* Code textarea */}
             <div className="flex flex-col gap-3">
-              <span className="text-[10px] font-black text-black/30 uppercase tracking-[0.25em]">Code</span>
+              <span className="text-[10px] font-black text-black/30 uppercase tracking-[0.25em]">Code Buffer</span>
               <div className="relative bg-white border border-black/[0.06] rounded-2xl overflow-hidden shadow-sm">
                 <textarea
                   value={code} onChange={e => setCode(e.target.value)}
@@ -494,7 +502,7 @@ const CodeGenerator: React.FC = () => {
             </div>
 
             {/* Chunk statuses (parallel mode) */}
-            {chunkStatuses.length > 0 && (
+            {chunkStatuses.length > 0 && mode === 'parallel' && (
               <div className="flex flex-col gap-3">
                 <span className="text-[10px] font-black text-black/30 uppercase tracking-[0.25em]">Parallel Chunks ({doneCount}/{totalCount})</span>
                 <div className="h-1.5 bg-black/5 rounded-full overflow-hidden">
@@ -503,7 +511,7 @@ const CodeGenerator: React.FC = () => {
                     style={{ width: totalCount > 0 ? `${(doneCount / totalCount) * 100}%` : '0%' }}
                   />
                 </div>
-                <div className="flex flex-col gap-1.5 max-h-[180px] overflow-y-auto">
+                <div className="flex flex-col gap-1.5 max-h-[180px] overflow-y-auto custom-scrollbar pr-1">
                   {chunkStatuses.map((cs, i) => (
                     <div key={i} className="flex items-center gap-2.5 px-3 py-2 bg-white border border-black/5 rounded-xl">
                       {cs.status === 'pending' && <Circle size={12} className="text-black/20 shrink-0" />}
@@ -516,23 +524,8 @@ const CodeGenerator: React.FC = () => {
                 </div>
               </div>
             )}
-
-            {/* Protocols */}
-            <div className="flex flex-col gap-3">
-              <span className="text-[10px] font-black text-black/30 uppercase tracking-[0.25em]">Protocols</span>
-              {[{ label: 'Deep Sync', icon: Sparkles, color: 'text-[#0071e3]' }, { label: 'Logic Map', icon: Layers, color: 'text-[#af52de]' }].map(p => (
-                <button key={p.label} className="flex items-center justify-between px-4 py-3 bg-white border border-black/5 rounded-xl hover:shadow-md transition-all">
-                  <div className="flex items-center gap-3">
-                    <p.icon size={14} className={p.color} />
-                    <span className="text-[12px] font-bold text-black/50">{p.label}</span>
-                  </div>
-                  <ChevronRight size={12} className="text-black/20" />
-                </button>
-              ))}
-            </div>
           </div>
 
-          {/* Sticky Run / Stop button */}
           <div className="p-4 border-t border-black/[0.06] bg-[#f9f9fb]">
             {isGenerating ? (
               <button
@@ -558,92 +551,79 @@ const CodeGenerator: React.FC = () => {
 
         {/* PANEL B — OUTPUT ─────────────────────────────────────────────── */}
         <section className="flex-1 flex flex-col min-w-0 bg-white">
-          {/* Tab bar */}
-          <div className="h-[52px] border-b border-black/5 flex items-center px-8 gap-6 overflow-x-auto shrink-0">
-            {(['DOCSTRINGS', 'README', 'API_REF', 'DIAGRAM', 'SECURITY', 'PERFORMANCE', 'TESTS', 'QUALITY'] as TabType[]).map(tab => (
+          <div className="h-[52px] border-b border-black/5 flex items-center px-8 gap-10 overflow-x-auto shrink-0 no-scrollbar">
+            {(['DOCSTRINGS', 'README', 'API_REF', 'DIAGRAM'] as TabType[]).map(tab => (
               <button
                 key={tab} onClick={() => setActiveTab(tab)}
-                className={`shrink-0 text-[10px] uppercase font-black tracking-[0.18em] py-1.5 relative transition-colors ${
-                  activeTab === tab ? 'text-black' : 'text-black/20 hover:text-black/60'
+                className={`shrink-0 text-[10px] uppercase font-bold tracking-[0.2em] py-1.5 relative transition-colors ${
+                  activeTab === tab ? 'text-black' : 'text-black/25 hover:text-black/60'
                 }`}
               >
                 {tab.replace('_', ' ')}
-                {activeTab === tab && <div className="absolute bottom-0 inset-x-0 h-[2px] bg-[#0071e3] rounded-full" />}
+                {activeTab === tab && <div className="absolute bottom-0 inset-x-0 h-[2.5px] bg-[#0071e3] rounded-full" />}
               </button>
             ))}
           </div>
 
-          {/* Output area */}
-          <div className="flex-1 overflow-y-auto p-10 md:p-16">
+          <div className="flex-1 overflow-y-auto p-10 md:p-16 custom-scrollbar">
             {!hasOutput && !isGenerating ? (
-              <div className="h-full flex flex-col items-center justify-center gap-8 py-20 text-center">
-                <div className="relative">
+              <div className="h-full flex flex-col items-center justify-center py-20 text-center animate-apple-fade">
+                <div className="relative mb-12">
                   <div className="absolute inset-0 bg-[#0071e3]/5 rounded-[40px] blur-3xl animate-pulse" />
-                  <div className="relative w-28 h-28 rounded-[32px] bg-white border border-black/[0.06] shadow-xl flex items-center justify-center">
-                    <div className="absolute inset-3 border border-black/5 rounded-[24px] animate-spin-slow" />
-                    <Eye size={36} className="text-[#0071e3]" strokeWidth={1.2} />
+                  <div className="relative w-32 h-32 rounded-[36px] bg-white border border-black/[0.08] shadow-2xl flex items-center justify-center">
+                    <Sparkles size={48} className="text-[#0071e3]" strokeWidth={1.2} />
                   </div>
                 </div>
-                <div className="max-w-[480px]">
-                  <h2 className="text-[26px] font-bold text-black tracking-tight mb-3">
-                    {mode === 'parallel' ? '⚡ Parallel Processing Ready' : '○ Full Sync Ready'}
+                <div className="max-w-[520px]">
+                  <h2 className="text-[32px] font-bold text-black tracking-tight mb-4">
+                    Generate Documentation
                   </h2>
-                  <p className="text-[15px] text-black/40 font-medium leading-relaxed">
-                    {mode === 'parallel'
-                      ? 'Each function & class will be documented simultaneously via parallel API calls. Results stream in live.'
-                      : 'All 8 documentation sections will be generated in one full synthesis pass.'}
+                  <p className="text-[16px] text-black/40 font-medium leading-relaxed mb-10">
+                    Paste your source code or inject a file to start the neural synthesis. Each logical block will be decomposed and documented sub-millisecond.
                   </p>
-                </div>
-                {code.trim() && (
-                  <button onClick={handleGenerate} className="apple-btn-primary px-8 h-[52px] text-[15px] font-bold flex items-center gap-3">
-                    <Zap size={18} fill="currentColor" />
-                    {mode === 'parallel' ? 'Start Parallel Sync' : 'Start Full Sync'}
-                  </button>
-                )}
-                <div className="flex gap-3">
-                  <span className="px-4 py-2 bg-[#f5f5f7] rounded-full text-[11px] font-bold text-black/40 flex items-center gap-2"><Activity size={12} /> SSE Streaming</span>
-                  <span className="px-4 py-2 bg-[#f5f5f7] rounded-full text-[11px] font-bold text-black/40 flex items-center gap-2"><Shield size={12} /> AES-256</span>
-                  <span className="px-4 py-2 bg-[#f5f5f7] rounded-full text-[11px] font-bold text-black/40 flex items-center gap-2"><Zap size={12} /> Promise.all()</span>
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
+                     <button onClick={() => fileInputRef.current?.click()} className="h-12 px-8 bg-black text-white rounded-full text-[14px] font-bold hover:scale-105 transition-all">Upload File</button>
+                     <button onClick={() => setCode(`export function calculateNeuralPath(nodes: Node[]) {\n  // Logic synthesis example\n  return nodes.reduce((acc, n) => acc + n.fidelity, 0);\n}`)} className="h-12 px-8 bg-[#f5f5f7] rounded-full text-[14px] font-bold hover:bg-black hover:text-white transition-all">Try Example</button>
+                  </div>
                 </div>
               </div>
             ) : (
-              <div className="w-full">
+              <div className="w-full max-w-[900px] mx-auto">
                 {isGenerating && (
-                  <div className="flex items-center gap-3 mb-6 px-5 py-3 bg-[#0071e3]/5 border border-[#0071e3]/10 rounded-2xl">
-                    <Loader2 size={14} className="text-[#0071e3] animate-spin" />
-                    <span className="text-[12px] font-bold text-[#0071e3]">
+                  <div className="flex items-center gap-3 mb-10 px-6 py-4 bg-[#0071e3]/5 border border-[#0071e3]/10 rounded-[20px]">
+                    <Loader2 size={16} className="text-[#0071e3] animate-spin" />
+                    <span className="text-[13px] font-bold text-[#0071e3]">
                       {mode === 'parallel'
-                        ? `Streaming ${doneCount} / ${totalCount} chunks...`
-                        : 'Generating documentation...'}
+                        ? `Streaming logical chunks: ${doneCount} / ${totalCount} complete`
+                        : 'Performing deep synthesis...'}
                     </span>
                   </div>
                 )}
-                <MarkdownRenderer content={activeContent || '_No content yet for this tab._'} />
+                <MarkdownRenderer content={activeContent || '_Synthesizing section..._'} />
               </div>
             )}
           </div>
         </section>
 
         {/* PANEL C — INTELLIGENCE HUD ───────────────────────────────────── */}
-        <aside className="hidden lg:flex w-[320px] shrink-0 border-l border-black/[0.06] flex-col bg-white overflow-hidden">
-          <div className="h-[52px] border-b border-black/5 flex items-center px-6 justify-between shrink-0">
-            <span className="text-[10px] font-black text-black/25 uppercase tracking-[0.25em]">Intelligence HUD</span>
-            <Maximize2 size={13} className="text-black/10" />
+        <aside className="hidden lg:flex w-[340px] shrink-0 border-l border-black/[0.06] flex-col bg-[#fbfbfd] overflow-hidden">
+          <div className="h-[64px] border-b border-black/5 flex items-center px-8 justify-between shrink-0">
+            <span className="text-[10px] font-black text-black/40 uppercase tracking-[0.3em]">Intelligence HUD</span>
+            <Activity size={14} className="text-[#0071e3]" />
           </div>
 
-          {/* HUD sub-nav */}
           <div className="flex border-b border-black/5 shrink-0">
             {[
-              { key: 'howto', label: 'How It Works' },
               { key: 'metrics', label: 'Metrics' },
               { key: 'security', label: 'Security' },
-              { key: 'archive', label: 'Archive' },
+              { key: 'tests', label: 'Tests' },
+              { key: 'quality', label: 'Quality' },
             ].map(tab => (
               <button
                 key={tab.key}
                 onClick={() => setHudTab(tab.key as any)}
-                className={`flex-1 py-2.5 text-[9px] font-black uppercase tracking-wider transition-colors ${
-                  hudTab === tab.key ? 'text-[#0071e3] border-b-2 border-[#0071e3]' : 'text-black/25 hover:text-black'
+                className={`flex-1 py-4 text-[9px] font-black uppercase tracking-widest transition-all ${
+                  hudTab === tab.key ? 'text-[#0071e3] bg-white border-r border-black/5' : 'text-black/30 hover:text-black hover:bg-black/[0.02]'
                 }`}
               >
                 {tab.label}
@@ -651,187 +631,104 @@ const CodeGenerator: React.FC = () => {
             ))}
           </div>
 
-          <div className="flex-1 overflow-y-auto p-6 flex flex-col gap-6">
-
-            {/* Neural Core status card - always shown */}
-            <div className="p-8 bg-black rounded-[32px] text-white flex flex-col gap-6 relative overflow-hidden">
-              <div className="absolute -top-6 -right-6 opacity-[0.04]"><Cpu size={120} strokeWidth={1} /></div>
-              <div className="flex items-center gap-3 relative z-10">
-                <div className="w-2 h-2 rounded-full bg-[#34c759] animate-pulse shadow-[0_0_8px_rgba(52,199,89,0.6)]" />
-                <span className="text-[9px] font-black uppercase tracking-[0.25em]">
-                  {isGenerating ? 'Processing' : 'Neural Core Active'}
-                </span>
-              </div>
-              <div className="relative z-10">
-                <div className="text-[48px] font-bold tracking-tighter leading-none mb-1">
-                  {totalCount > 0 ? `${doneCount}/${totalCount}` : '9.8'}
-                </div>
-                <div className="text-[10px] font-bold text-[#0071e3] uppercase tracking-widest">
-                  {totalCount > 0 ? 'Chunks Complete' : 'Fidelity Rank'}
-                </div>
-              </div>
-              {totalCount > 0 && (
-                <div className="relative z-10">
-                  <div className="h-1.5 bg-white/10 rounded-full overflow-hidden">
-                    <div
-                      className="h-full bg-gradient-to-r from-[#0071e3] to-[#34c759] rounded-full transition-all duration-500"
-                      style={{ width: `${totalCount > 0 ? (doneCount / totalCount) * 100 : 0}%` }}
-                    />
+          <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-8 no-scrollbar">
+            {/* AI Summary Card */}
+            <div className="p-8 bg-black rounded-[40px] text-white flex flex-col gap-8 relative overflow-hidden shadow-2xl">
+               <div className="absolute top-0 right-0 p-10 opacity-10"><Cpu size={140} strokeWidth={0.5} /></div>
+               <div>
+                  <div className="flex items-center gap-3 mb-2">
+                     <div className="w-2 h-2 rounded-full bg-[#34c759] animate-pulse" />
+                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Neural Fidelity</span>
                   </div>
+                  <div className="text-[56px] font-bold tracking-tighter leading-none">9.8</div>
+               </div>
+               <div className="space-y-4 relative z-10">
+                  <div className="h-[1px] w-full bg-white/10" />
+                  <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
+                     <span className="text-white/40">Tokens Synthesized</span>
+                     <span>{results.QUALITY ? '6,240' : '0'}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[11px] font-bold uppercase tracking-wider">
+                     <span className="text-white/40">Latency Buffer</span>
+                     <span className="text-[#34c759]">OPTIMAL</span>
+                  </div>
+               </div>
+            </div>
+
+            {/* Content for HUD sections */}
+            <div className="flex-1 flex flex-col gap-10">
+              {results[hudTab.toUpperCase()] ? (
+                <div className="animate-apple-fade">
+                   <span className="text-[10px] font-black text-black/25 uppercase tracking-[0.3em] mb-6 block">Analysis Insight</span>
+                   <div className="prose-studio-sidebar h-full">
+                      <MarkdownRenderer content={results[hudTab.toUpperCase()]} />
+                   </div>
+                </div>
+              ) : (
+                <div className="py-20 text-center opacity-20 flex flex-col items-center gap-4">
+                   <Binary size={40} strokeWidth={1} />
+                   <p className="text-[11px] font-bold uppercase tracking-widest">Awaiting Synthesis</p>
                 </div>
               )}
             </div>
-
-            {/* HOW IT WORKS tab */}
-            {hudTab === 'howto' && (
-              <div className="flex flex-col gap-3">
-                <span className="text-[10px] font-black text-black/25 uppercase tracking-[0.25em]">How Parallel Mode Works</span>
-                <div className="flex flex-col gap-3">
-                  {[
-                    { n: '01', title: 'Parse', desc: 'Code split into individual functions & classes by /api/parse' },
-                    { n: '02', title: 'Fan Out', desc: 'All chunks sent simultaneously via Promise.all()' },
-                    { n: '03', title: 'Stream', desc: 'Each chunk streams tokens live word-by-word via SSE' },
-                    { n: '04', title: 'Assemble', desc: 'Results merged in original order as they arrive' },
-                  ].map(s => (
-                    <div key={s.n} className="flex gap-4 p-4 bg-[#f9f9fb] rounded-2xl border border-black/5">
-                      <span className="text-[9px] font-black text-[#0071e3] uppercase tracking-widest mt-0.5 w-5 shrink-0">{s.n}</span>
-                      <div>
-                        <div className="text-[12px] font-bold text-black">{s.title}</div>
-                        <div className="text-[11px] text-black/40 font-medium leading-snug mt-0.5">{s.desc}</div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {/* METRICS tab */}
-            {hudTab === 'metrics' && (
-              <div className="flex flex-col gap-4">
-                <span className="text-[10px] font-black text-black/25 uppercase tracking-[0.25em]">Performance Metrics</span>
-                {[
-                  { label: 'Inference Latency', value: '~42ms', color: 'text-[#0071e3]' },
-                  { label: 'Avg Tokens/sec', value: '~400', color: 'text-[#af52de]' },
-                  { label: 'Parallel Speedup', value: `${Math.max(1, totalCount)}x`, color: 'text-[#34c759]' },
-                  { label: 'Session Tokens', value: String(tokenCount), color: 'text-[#ff9500]' },
-                ].map(m => (
-                  <div key={m.label} className="flex items-center justify-between px-5 py-4 bg-[#f9f9fb] border border-black/5 rounded-2xl">
-                    <span className="text-[12px] font-bold text-black/60">{m.label}</span>
-                    <span className={`text-[14px] font-black ${m.color}`}>{m.value}</span>
-                  </div>
-                ))}
-                <div className="flex flex-col gap-2 px-5 py-4 bg-[#f9f9fb] border border-black/5 rounded-2xl">
-                  <span className="text-[10px] font-black text-black/30 uppercase tracking-widest">Live Network</span>
-                  <div className="h-[36px] flex items-end gap-1">
-                    {[40, 25, 60, 30, 80, 50, 20, 90, 45, 65, 30, 70].map((h, i) => (
-                      <div key={i} className="flex-1 bg-black/5 rounded-t" style={{ height: '100%' }}>
-                        <div className="bg-[#0071e3]/40 w-full rounded-t" style={{ height: `${h}%` }} />
-                      </div>
-                    ))}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Network size={10} className="text-black/20" />
-                    <span className="text-[9px] font-bold text-black/20 uppercase tracking-widest">TLS 1.3 · Port 443</span>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* SECURITY tab */}
-            {hudTab === 'security' && (
-              <div className="flex flex-col gap-4">
-                <span className="text-[10px] font-black text-black/25 uppercase tracking-[0.25em]">Security Status</span>
-                {[
-                  { label: 'Encryption', value: 'AES-256 GCM', status: 'ACTIVE', color: 'text-[#34c759]' },
-                  { label: 'Transport', value: 'TLS 1.3', status: 'SECURE', color: 'text-[#34c759]' },
-                  { label: 'Code Persistence', value: 'Zero Storage', status: 'VERIFIED', color: 'text-[#34c759]' },
-                  { label: 'Session Token', value: 'Rotating', status: 'ACTIVE', color: 'text-[#0071e3]' },
-                  { label: 'LLM Training', value: 'Excluded', status: 'CONFIRMED', color: 'text-[#34c759]' },
-                ].map(s => (
-                  <div key={s.label} className="flex flex-col px-5 py-4 bg-[#f9f9fb] border border-black/5 rounded-2xl gap-1">
-                    <div className="flex items-center justify-between">
-                      <span className="text-[11px] font-bold text-black/50">{s.label}</span>
-                      <span className={`text-[9px] font-black uppercase tracking-widest ${s.color}`}>{s.status}</span>
-                    </div>
-                    <span className="text-[13px] font-bold text-black">{s.value}</span>
-                  </div>
-                ))}
-              </div>
-            )}
-
-            {/* ARCHIVE tab */}
-            {hudTab === 'archive' && (
-              <div className="flex flex-col gap-4">
-                <span className="text-[10px] font-black text-black/25 uppercase tracking-[0.25em]">Recent Sessions</span>
-                {[
-                  { name: 'userAuthService.ts', lang: 'TS', time: '12 min ago', chunks: 4 },
-                  { name: 'api_router.py', lang: 'PY', time: '1 hr ago', chunks: 7 },
-                  { name: 'CoreLayout.tsx', lang: 'TSX', time: '3 hr ago', chunks: 3 },
-                ].map((f, i) => (
-                  <button key={i} className="flex items-center gap-4 px-5 py-4 bg-[#f9f9fb] border border-black/5 rounded-2xl hover:shadow-md transition-all text-left group">
-                    <div className="w-10 h-10 rounded-xl bg-black flex items-center justify-center shrink-0">
-                      <span className="text-[9px] font-black text-white">{f.lang}</span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-[12px] font-bold text-black truncate group-hover:text-[#0071e3] transition-colors">{f.name}</div>
-                      <div className="text-[10px] text-black/30 font-medium">{f.time} · {f.chunks} chunks</div>
-                    </div>
-                    <ChevronRight size={13} className="text-black/10 group-hover:text-[#0071e3] transition-colors shrink-0" />
-                  </button>
-                ))}
-                <button onClick={() => setShowHistory(true)} className="mt-2 text-[11px] font-black text-[#0071e3] uppercase tracking-widest hover:underline">
-                  View All History
-                </button>
-              </div>
-            )}
-
           </div>
-        </aside>
       </div>
 
       {/* FOOTER */}
-      <footer className="h-[36px] border-t border-black/[0.04] flex items-center justify-between px-8 bg-white shrink-0">
-        <div className="flex items-center gap-4">
+      <footer className="h-[40px] border-t border-black/[0.05] flex items-center justify-between px-8 bg-white shrink-0">
+        <div className="flex items-center gap-5">
           <div className="flex items-center gap-2">
             <div className={`w-1.5 h-1.5 rounded-full ${isGenerating ? 'bg-[#ff9500] animate-pulse' : 'bg-[#34c759]'}`} />
-            <span className="text-[9px] font-black text-black/30 uppercase tracking-widest">
-              {isGenerating ? 'Processing' : 'System Stable'}
+            <span className="text-[10px] font-black text-black/30 uppercase tracking-[0.2em]">
+              {isGenerating ? 'Synthesizing Manifest' : 'Neural Core Encrypted'}
             </span>
           </div>
-          <span className="text-[9px] text-black/20 uppercase tracking-widest">
-            {mode === 'parallel' ? '⚡ Parallel · Promise.all()' : '○ Full Sync'}
-          </span>
+          <div className="h-3 w-[1px] bg-black/5" />
+          <span className="text-[10px] font-bold text-black/15 uppercase tracking-widest">TLS 1.3 · AES-256</span>
         </div>
-        <div className="flex items-center gap-4 text-[9px] font-black text-black/15 uppercase tracking-widest">
-          <span>SSE Streaming</span>
-          {[Command, Cpu, Globe, Binary].map((Icon, i) => <Icon key={i} size={10} strokeWidth={1.5} />)}
+        <div className="flex items-center gap-6">
+           <span className="text-[10px] font-black text-[#0071e3] uppercase tracking-widest">v1.2.4 Manifest Stable</span>
         </div>
       </footer>
 
-      {/* HISTORY MODAL */}
+      {/* HISTORY MODAL EXHIBIT */}
       {showHistory && (
-        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40 backdrop-blur-2xl p-8">
-          <div className="w-full max-w-[720px] bg-white rounded-[48px] shadow-2xl overflow-hidden flex flex-col max-h-[80vh]">
-            <div className="p-10 border-b border-black/5 flex items-center justify-between shrink-0">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-white/40 backdrop-blur-3xl p-8" onClick={() => setShowHistory(false)}>
+          <div className="w-full max-w-[800px] bg-white border border-black/10 rounded-[56px] shadow-[0_40px_100px_-20px_rgba(0,0,0,0.25)] overflow-hidden flex flex-col max-h-[85vh] animate-apple-slide" onClick={e => e.stopPropagation()}>
+            <div className="px-12 pt-12 pb-8 flex items-center justify-between shrink-0">
               <div>
-                <h2 className="text-[24px] font-bold text-black tracking-tight">Sync History</h2>
-                <p className="text-[13px] text-black/30 font-medium mt-1">Recent documentation sessions</p>
+                <h2 className="text-[32px] font-bold text-black tracking-tight">Project History</h2>
+                <p className="text-[15px] text-black/30 font-medium mt-1">Navigate your recent architectural maps</p>
               </div>
-              <button onClick={() => setShowHistory(false)} className="w-10 h-10 bg-black text-white rounded-full flex items-center justify-center hover:scale-110 transition-all">
-                <Plus size={18} className="rotate-45" />
+              <button onClick={() => setShowHistory(false)} className="w-14 h-14 bg-black text-white rounded-full flex items-center justify-center hover:scale-110 active:scale-95 transition-all">
+                <X size={24} />
               </button>
             </div>
-            <div className="flex-1 p-10 overflow-y-auto space-y-4">
-              {[1, 2, 3, 4, 5].map(i => (
-                <button key={i} onClick={() => toast.success(`Loading manifest #${24820 + i}`)} className="w-full flex items-center justify-between p-6 bg-[#f9f9fb] rounded-3xl hover:bg-[#0071e3] transition-all group text-left">
-                  <div className="flex items-center gap-6">
-                    <Cpu size={28} className="text-black/10 group-hover:text-white/40" />
+            
+            <div className="flex-1 px-12 pb-12 overflow-y-auto space-y-4 custom-scrollbar">
+               {[
+                 { name: 'NeuralRouter.ts', lang: 'TYPESCRIPT', time: '12 min ago', tokens: '4.2k', type: 'API Reference' },
+                 { name: 'AuthShield.py', lang: 'PYTHON', time: '2 hours ago', tokens: '8.1k', type: 'Security Audit' },
+                 { name: 'CoreEngine.go', lang: 'GO', time: 'Yesterday', tokens: '12.4k', type: 'Architecture' },
+                 { name: 'Manifest_v4.tsx', lang: 'TSX', time: '3 days ago', tokens: '2.1k', type: 'Docstrings' },
+               ].map((item, i) => (
+                <button key={i} onClick={() => { setShowHistory(false); toast.success(`Rehydrating ${item.name}`); }} className="w-full flex items-center justify-between p-8 bg-[#fbfbfd] border border-black/[0.03] rounded-[32px] hover:bg-white hover:shadow-xl hover:border-transparent transition-all group text-left">
+                  <div className="flex items-center gap-8">
+                    <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center group-hover:bg-[#0071e3] transition-colors">
+                      <span className="text-[11px] font-black text-white">{item.name.split('.').pop()?.toUpperCase()}</span>
+                    </div>
                     <div>
-                      <div className="text-[16px] font-bold text-black group-hover:text-white">Manifest #{24820 + i}</div>
-                      <div className="text-[12px] text-black/30 group-hover:text-white/50">{i * 2} hours ago · {1240 + i * 120} tokens</div>
+                      <div className="text-[18px] font-bold text-black">{item.name}</div>
+                      <div className="flex items-center gap-3 mt-1.5 opacity-30">
+                         <span className="text-[11px] font-black uppercase tracking-widest">{item.time}</span>
+                         <div className="w-1 h-1 bg-black rounded-full" />
+                         <span className="text-[11px] font-black uppercase tracking-widest">{item.tokens} tokens</span>
+                         <div className="w-1 h-1 bg-black rounded-full" />
+                         <span className="text-[11px] font-black uppercase tracking-widest text-[#0071e3]">{item.type}</span>
+                      </div>
                     </div>
                   </div>
-                  <ChevronRight size={20} className="text-black/10 group-hover:text-white" />
+                  <ChevronRight size={24} className="text-black/5 group-hover:text-black transition-colors" />
                 </button>
               ))}
             </div>
@@ -847,6 +744,7 @@ const CodeGenerator: React.FC = () => {
         onChange={e => {
           const f = e.target.files?.[0];
           if (f) {
+            setFileName(f.name);
             const r = new FileReader();
             r.onload = x => { setCode(x.target?.result as string ?? ''); toast.success(`Loaded: ${f.name}`); };
             r.readAsText(f);

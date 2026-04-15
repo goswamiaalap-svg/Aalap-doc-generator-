@@ -1,20 +1,10 @@
-import { Outlet, Link, useLocation } from 'react-router-dom';
+import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { 
-  Menu, 
-  X,
-  Search,
-  MessageSquare,
-  Cpu,
-  ArrowRight,
-  Shield,
-  Layers,
-  Zap,
-  Activity,
-  FileText,
-  Command,
-  Sparkles
+  Menu, X, Search, MessageSquare, Cpu, ArrowRight, Shield, Layers, Zap, Activity, FileText, Command, Sparkles 
 } from 'lucide-react';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useMemo } from 'react';
+import Fuse from 'fuse.js';
+import { docs } from '../api/docs';
 
 export default function Layout() {
   const [scrolled, setScrolled] = useState(false);
@@ -22,7 +12,19 @@ export default function Layout() {
   const [chatOpen, setChatOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
+  const navigate = useNavigate();
   const searchInputRef = useRef<HTMLInputElement>(null);
+
+  const fuse = useMemo(() => new Fuse(docs, {
+    keys: ['title', 'content', 'section'],
+    threshold: 0.3,
+    includeMatches: true
+  }), []);
+
+  const searchResults = useMemo(() => {
+    if (!searchQuery.trim()) return [];
+    return fuse.search(searchQuery).slice(0, 5);
+  }, [searchQuery, fuse]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -47,15 +49,21 @@ export default function Layout() {
 
   useEffect(() => {
     if (searchOpen) searchInputRef.current?.focus();
+    else setSearchQuery('');
   }, [searchOpen]);
+
+  const handleSelectResult = (id: string) => {
+    setSearchOpen(false);
+    navigate(`/docs/${id}`);
+  };
 
   return (
     <div className="min-h-screen text-[#1d1d1f] flex flex-col font-sans bg-[#ffffff] selection:bg-blue-500/10">
       
       {/* 🍏 APPLE SPOTLIGHT SEARCH (ULTRA MINIMAL) */}
       {searchOpen && (
-        <div className="fixed inset-0 z-[100] bg-white/40 backdrop-blur-3xl flex items-start justify-center pt-[120px] px-4">
-           <div className="w-full max-w-[680px] bg-white border border-black/[0.08] rounded-[24px] shadow-[0_30px_60px_-12px_rgba(0,0,0,0.18)] p-4 overflow-hidden">
+        <div className="fixed inset-0 z-[100] bg-white/40 backdrop-blur-xl flex items-start justify-center pt-[120px] px-4 transition-none">
+           <div className="w-full max-w-[680px] bg-white border border-black/[0.08] rounded-[24px] shadow-[0_30px_60px_-12px_rgba(0,0,0,0.18)] p-4 overflow-hidden animate-none">
               <div className="flex items-center gap-4 px-5 py-3 border-b border-black/[0.06]">
                  <Search size={22} className="text-black/30" strokeWidth={1.5} />
                  <input 
@@ -68,17 +76,36 @@ export default function Layout() {
                     ESC
                  </kbd>
               </div>
-              <div className="p-4 space-y-2">
-                 <span className="text-[11px] font-semibold text-black/30 uppercase tracking-[0.16em] block px-4 pt-2 mb-4">Quick Links</span>
-                 {['Neural Overview', 'API Manifest Pro', 'Architecture Layer'].map(item => (
-                    <button key={item} onClick={() => setSearchOpen(false)} className="w-full text-left px-5 py-4 rounded-[14px] hover:bg-black/[0.04] transition-all flex items-center justify-between group">
-                       <div className="flex items-center gap-5">
-                          <FileText size={18} className="text-black/20" strokeWidth={1.2} />
-                          <span className="text-[17px] font-normal text-black/80">{item}</span>
-                       </div>
-                       <ArrowRight size={18} className="text-black/0 group-hover:text-black/20 transition-all -translate-x-3 group-hover:translate-x-0" strokeWidth={1.2} />
-                    </button>
-                 ))}
+              <div className="p-4 space-y-2 max-h-[400px] overflow-y-auto custom-scrollbar">
+                 <span className="text-[11px] font-semibold text-black/30 uppercase tracking-[0.16em] block px-4 pt-2 mb-4">
+                   {searchQuery.trim() ? 'Search Results' : 'Quick Links'}
+                 </span>
+                 
+                 {searchQuery.trim() ? (
+                   searchResults.length > 0 ? (
+                     searchResults.map(result => (
+                        <button key={result.item.id} onClick={() => handleSelectResult(result.item.id)} className="w-full text-left px-5 py-4 rounded-[14px] hover:bg-black/[0.04] transition-all flex items-center justify-between group">
+                           <div className="flex flex-col gap-1">
+                              <span className="text-[17px] font-medium text-black/80">{result.item.title}</span>
+                              <span className="text-[11px] font-bold text-black/30 uppercase tracking-wider">{result.item.section}</span>
+                           </div>
+                           <ArrowRight size={18} className="text-black/0 group-hover:text-black/20 transition-all -translate-x-3 group-hover:translate-x-0" strokeWidth={1.2} />
+                        </button>
+                     ))
+                   ) : (
+                     <div className="px-5 py-8 text-center text-black/40 text-[14px] font-medium">No documentation found for "{searchQuery}"</div>
+                   )
+                 ) : (
+                   ['Introduction', 'API Reference', 'Sec. Rotation'].map(item => (
+                      <button key={item} onClick={() => handleSelectResult(docs.find(d => d.title === item)?.id || 'intro')} className="w-full text-left px-5 py-4 rounded-[14px] hover:bg-black/[0.04] transition-all flex items-center justify-between group">
+                         <div className="flex items-center gap-5">
+                            <FileText size={18} className="text-black/20" strokeWidth={1.2} />
+                            <span className="text-[17px] font-normal text-black/80">{item}</span>
+                         </div>
+                         <ArrowRight size={18} className="text-black/0 group-hover:text-black/20 transition-all -translate-x-3 group-hover:translate-x-0" strokeWidth={1.2} />
+                      </button>
+                   ))
+                 )}
               </div>
            </div>
            <div className="fixed inset-0 -z-10" onClick={() => setSearchOpen(false)} />
@@ -96,7 +123,7 @@ export default function Layout() {
           </Link>
           <nav className="hidden lg:flex items-center gap-10">
              <Link to="/" className="text-[12px] font-bold tracking-tight text-black/40 hover:text-black transition-colors">Home</Link>
-             <Link to="/docs/intro" className="text-[12px] font-bold tracking-tight text-black/40 hover:text-black transition-colors">Guide</Link>
+             <Link to="/docs/intro" className="text-[12px] font-bold tracking-tight text-black/40 hover:text-black transition-colors">Documentation</Link>
              <Link to="/codegen" className="text-[12px] font-bold tracking-tight text-black/40 hover:text-black transition-colors">Studio</Link>
              <Link to="/#pricing" className="text-[12px] font-bold tracking-tight text-black/40 hover:text-black transition-colors">Pricing</Link>
              <Link to="/docs/api-reference" className="text-[12px] font-bold tracking-tight text-black/40 hover:text-black transition-colors">API Reference</Link>
@@ -120,8 +147,22 @@ export default function Layout() {
                <div className="h-4 w-[1px] bg-black/[0.1]" />
                <span className="text-[11px] font-bold text-black/40 uppercase tracking-wider">Project: Neural_Manifest_v2.4</span>
             </div>
-            <div className="flex items-center gap-8">
-               {/* Non-functional items removed until built */}
+            <div className="flex items-center gap-10">
+               {[
+                  { label: 'Live Logs', icon: <Activity size={14} />, status: 'ACTIVE' },
+                  { label: 'Analytical Nodes', icon: <Network size={14} />, status: 'SYNCED' },
+                  { label: 'Export Ops', icon: <Download size={14} />, status: 'READY' }
+               ].map(util => (
+                  <button key={util.label} className="flex items-center gap-3 group">
+                     <div className="p-2 rounded-lg bg-black/[0.02] group-hover:bg-black/5 transition-colors">
+                        {React.cloneElement(util.icon as React.ReactElement, { className: 'text-black/30 group-hover:text-black transition-colors' })}
+                     </div>
+                     <div className="flex flex-col items-start leading-none">
+                        <span className="text-[10px] font-black uppercase tracking-widest text-black/20 group-hover:text-black/40 transition-colors">{util.label}</span>
+                        <span className="text-[9px] font-bold text-[#32d74b] mt-1">{util.status}</span>
+                     </div>
+                  </button>
+               ))}
             </div>
          </div>
       </div>
@@ -142,8 +183,8 @@ export default function Layout() {
       <div className="flex-1 flex pt-[10.5rem] w-full relative min-h-0 bg-white">
         
         {/* 🍏 MINIMALIST SIDEBAR (APPLE SETTINGS STYLE) */}
-        {location.pathname !== '/' && (
-          <aside className="hidden lg:flex w-[260px] flex-col apple-sidebar sticky top-0 h-screen overflow-y-auto">
+        {location.pathname.startsWith('/docs') && (
+          <aside className="hidden lg:flex w-[260px] flex-col apple-sidebar sticky top-[10.5rem] h-[calc(100vh-10.5rem)] overflow-y-auto no-print">
              <div className="flex-1 overflow-y-auto pt-14 pb-10 no-scrollbar scroll-smooth">
                 {[
                    { group: 'Foundations', items: [
@@ -155,6 +196,10 @@ export default function Layout() {
                       { label: 'Sec. Rotation', to: '/docs/sec-rotation', icon: <Shield size={16} /> },
                       { label: 'Deployment', to: '/docs/deployment', icon: <Zap size={16} /> },
                       { label: 'Refactor Ops', to: '/docs/refactor-ops', icon: <Layers size={16} /> }
+                   ]},
+                   { group: 'Legal', items: [
+                      { label: 'Privacy Policy', to: '/docs/privacy', icon: <Shield size={16} /> },
+                      { label: 'Terms of Service', to: '/docs/terms', icon: <FileText size={16} /> }
                    ]}
                 ].map(group => (
                   <div key={group.group} className="mb-10">
