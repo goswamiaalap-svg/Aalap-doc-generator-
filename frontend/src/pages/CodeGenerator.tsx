@@ -740,6 +740,7 @@ const CodeGenerator: React.FC = () => {
               )}
             </div>
           </div>
+        </aside>
       </div>
 
       {/* FOOTER */}
