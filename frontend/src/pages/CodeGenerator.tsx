@@ -59,11 +59,12 @@ const CodeGenerator: React.FC = () => {
   const [language, setLanguage] = useState('typescript');
   const [mode, setMode] = useState<'parallel' | 'full'>('parallel');
   const [isGenerating, setIsGenerating] = useState(false);
+  const [history, setHistory] = useState<{name: string, lang: string, time: string, tokens: number, type: string, code: string}[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const [tokenCount, setTokenCount] = useState(0);
 
   // Panel C active section
-  const [hudTab, setHudTab] = useState<'metrics' | 'security' | 'tests' | 'quality'>('metrics');
+  const [hudTab, setHudTab] = useState<'how-it-works' | 'metrics' | 'security' | 'archive'>('how-it-works');
 
   // Full-doc results (4 primary tabs + 4 supplementary)
   const [results, setResults] = useState<Record<string, string>>({
@@ -82,6 +83,23 @@ const CodeGenerator: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const abortRef = useRef<AbortController | null>(null);
 
+  // Load history from localStorage on mount
+  useEffect(() => {
+    const saved = localStorage.getItem('docgen_history');
+    if (saved) {
+      try {
+        setHistory(JSON.parse(saved));
+      } catch (e) {
+        console.error('Failed to load history', e);
+      }
+    }
+  }, []);
+
+  // Save history to localStorage when it changes
+  useEffect(() => {
+    localStorage.setItem('docgen_history', JSON.stringify(history));
+  }, [history]);
+
   useEffect(() => {
     setTokenCount(code.split(/\s+/).filter(Boolean).length);
   }, [code]);
@@ -99,6 +117,18 @@ const CodeGenerator: React.FC = () => {
     return () => window.removeEventListener('keydown', onKey);
   }, [isGenerating, code, showHistory]);
 
+  const addToHistory = (name: string, lang: string, tokens: number, type: string, codeContent: string) => {
+    const newItem = {
+      name: name || 'Untitled Module',
+      lang: lang.toUpperCase(),
+      time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+      tokens,
+      type,
+      code: codeContent
+    };
+    setHistory(prev => [newItem, ...prev.slice(0, 9)]); // Keep last 10
+  };
+
   // ── PARALLEL GENERATE ─────────────────────────────────────────────────────
   const runParallel = async () => {
     setIsGenerating(true);
@@ -106,6 +136,8 @@ const CodeGenerator: React.FC = () => {
     setChunkStatuses([]);
     setResults({ DOCSTRINGS: '', README: '', API_REF: '', DIAGRAM: '', SECURITY: '', PERFORMANCE: '', TESTS: '', QUALITY: '' });
     abortRef.current = new AbortController();
+    
+    addToHistory(fileName || 'Parallel Sync', language, tokenCount, 'Parallel Sync', code);
 
     try {
       // Step 1 – parse into chunks
@@ -265,6 +297,8 @@ const CodeGenerator: React.FC = () => {
     setDocstringOutput('');
     setResults({ DOCSTRINGS: '', README: '', API_REF: '', DIAGRAM: '', SECURITY: '', PERFORMANCE: '', TESTS: '', QUALITY: '' });
     abortRef.current = new AbortController();
+    
+    addToHistory(fileName || 'Full Sync', language, tokenCount, 'Full Sync', code);
 
     try {
       const res = await fetch('/api/generate', {
@@ -614,10 +648,10 @@ const CodeGenerator: React.FC = () => {
 
           <div className="flex border-b border-black/5 shrink-0">
             {[
+              { key: 'how-it-works', label: 'How it Works' },
               { key: 'metrics', label: 'Metrics' },
               { key: 'security', label: 'Security' },
-              { key: 'tests', label: 'Tests' },
-              { key: 'quality', label: 'Quality' },
+              { key: 'archive', label: 'Archive' },
             ].map(tab => (
               <button
                 key={tab.key}
@@ -633,12 +667,12 @@ const CodeGenerator: React.FC = () => {
 
           <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-8 no-scrollbar">
             {/* AI Summary Card */}
-            <div className="p-8 bg-black rounded-[40px] text-white flex flex-col gap-8 relative overflow-hidden shadow-2xl">
-               <div className="absolute top-0 right-0 p-10 opacity-10"><Cpu size={140} strokeWidth={0.5} /></div>
+            <div className="p-8 bg-black rounded-[40px] text-white flex flex-col gap-8 relative overflow-hidden shadow-2xl group">
+               <div className="absolute top-[-20px] right-[-20px] opacity-10 group-hover:opacity-20 transition-opacity"><Cpu size={160} strokeWidth={0.5} /></div>
                <div>
                   <div className="flex items-center gap-3 mb-2">
                      <div className="w-2 h-2 rounded-full bg-[#34c759] animate-pulse" />
-                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Neural Fidelity</span>
+                     <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Neural Core Active</span>
                   </div>
                   <div className="text-[56px] font-bold tracking-tighter leading-none">9.8</div>
                </div>
@@ -657,7 +691,27 @@ const CodeGenerator: React.FC = () => {
 
             {/* Content for HUD sections */}
             <div className="flex-1 flex flex-col gap-10">
-              {results[hudTab.toUpperCase()] ? (
+              {hudTab === 'how-it-works' ? (
+                <div className="flex flex-col gap-8 animate-apple-fade">
+                   <span className="text-[10px] font-black text-black/25 uppercase tracking-[0.3em]">How Parallel Mode Works</span>
+                   <div className="flex flex-col gap-4">
+                      {[
+                        { step: '01', title: 'Parse', text: 'Code split into individual functions & classes by /api/parse' },
+                        { step: '02', title: 'Fan Out', text: 'All chunks sent simultaneously via Promise.all()' },
+                        { step: '03', title: 'Stream', text: 'Each chunk streams tokens live word-by-word via SSE' },
+                        { step: '04', title: 'Assemble', text: 'Results merged in original order as they arrive' }
+                      ].map(s => (
+                        <div key={s.step} className="p-6 bg-white border border-black/5 rounded-[24px] flex flex-col gap-2 hover:shadow-lg transition-all">
+                           <div className="flex items-center justify-between">
+                              <span className="text-[11px] font-bold text-[#0071e3]">{s.step}</span>
+                              <span className="text-[14px] font-bold text-black">{s.title}</span>
+                           </div>
+                           <p className="text-[12px] text-black/40 font-medium leading-relaxed">{s.text}</p>
+                        </div>
+                      ))}
+                   </div>
+                </div>
+              ) : results[hudTab.toUpperCase()] ? (
                 <div className="animate-apple-fade">
                    <span className="text-[10px] font-black text-black/25 uppercase tracking-[0.3em] mb-6 block">Analysis Insight</span>
                    <div className="prose-studio-sidebar h-full">
@@ -706,16 +760,19 @@ const CodeGenerator: React.FC = () => {
             </div>
             
             <div className="flex-1 px-12 pb-12 overflow-y-auto space-y-4 custom-scrollbar">
-               {[
-                 { name: 'NeuralRouter.ts', lang: 'TYPESCRIPT', time: '12 min ago', tokens: '4.2k', type: 'API Reference' },
-                 { name: 'AuthShield.py', lang: 'PYTHON', time: '2 hours ago', tokens: '8.1k', type: 'Security Audit' },
-                 { name: 'CoreEngine.go', lang: 'GO', time: 'Yesterday', tokens: '12.4k', type: 'Architecture' },
-                 { name: 'Manifest_v4.tsx', lang: 'TSX', time: '3 days ago', tokens: '2.1k', type: 'Docstrings' },
-               ].map((item, i) => (
-                <button key={i} onClick={() => { setShowHistory(false); toast.success(`Rehydrating ${item.name}`); }} className="w-full flex items-center justify-between p-8 bg-[#fbfbfd] border border-black/[0.03] rounded-[32px] hover:bg-white hover:shadow-xl hover:border-transparent transition-all group text-left">
+               {history.length > 0 ? history.map((item, i) => (
+                <button 
+                  key={i} 
+                  onClick={() => { 
+                    setCode(item.code); 
+                    setShowHistory(false); 
+                    toast.success(`Restored: ${item.name}`); 
+                  }} 
+                  className="w-full flex items-center justify-between p-8 bg-[#fbfbfd] border border-black/[0.03] rounded-[32px] hover:bg-white hover:shadow-xl hover:border-transparent transition-all group text-left outline-none"
+                >
                   <div className="flex items-center gap-8">
                     <div className="w-16 h-16 bg-black rounded-2xl flex items-center justify-center group-hover:bg-[#0071e3] transition-colors">
-                      <span className="text-[11px] font-black text-white">{item.name.split('.').pop()?.toUpperCase()}</span>
+                      <span className="text-[11px] font-black text-white">{item.lang.substring(0, 3)}</span>
                     </div>
                     <div>
                       <div className="text-[18px] font-bold text-black">{item.name}</div>
@@ -730,7 +787,12 @@ const CodeGenerator: React.FC = () => {
                   </div>
                   <ChevronRight size={24} className="text-black/5 group-hover:text-black transition-colors" />
                 </button>
-              ))}
+              )) : (
+                <div className="py-20 text-center opacity-20 flex flex-col items-center gap-4">
+                   <Clock size={40} strokeWidth={1} />
+                   <p className="text-[11px] font-bold uppercase tracking-widest">No Recent Manifests</p>
+                </div>
+              )}
             </div>
             <div className="p-8 border-t border-black/5 flex justify-center shrink-0">
               <button onClick={() => setShowHistory(false)} className="text-[12px] font-black text-black/20 uppercase tracking-widest hover:text-black">Close</button>

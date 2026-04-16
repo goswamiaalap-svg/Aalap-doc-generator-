@@ -9,6 +9,7 @@ import { docs } from '../api/docs';
 export default function Layout() {
   const [scrolled, setScrolled] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [chatOpen, setChatOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const location = useLocation();
@@ -54,7 +55,9 @@ export default function Layout() {
 
   const handleSelectResult = (id: string) => {
     setSearchOpen(false);
-    navigate(`/docs/${id}`);
+    if (id === 'studio') navigate('/codegen');
+    else if (id === 'pricing') navigate('/#pricing');
+    else navigate(`/docs/${id}`);
   };
 
   return (
@@ -96,10 +99,16 @@ export default function Layout() {
                      <div className="px-5 py-8 text-center text-black/40 text-[14px] font-medium">No documentation found for "{searchQuery}"</div>
                    )
                  ) : (
-                   ['Introduction', 'API Reference', 'Sec. Rotation'].map(item => (
-                      <button key={item} onClick={() => handleSelectResult(docs.find(d => d.title === item)?.id || 'intro')} className="w-full text-left px-5 py-4 rounded-[14px] hover:bg-black/[0.04] transition-all flex items-center justify-between group">
+                   ['Introduction', 'API Reference', 'Studio', 'Pricing'].map(item => (
+                      <button key={item} onClick={() => {
+                        if (item === 'Studio') handleSelectResult('studio');
+                        else if (item === 'Pricing') handleSelectResult('pricing');
+                        else handleSelectResult(docs.find(d => d.title === item)?.id || 'intro');
+                      }} className="w-full text-left px-5 py-4 rounded-[14px] hover:bg-black/[0.04] transition-all flex items-center justify-between group">
                          <div className="flex items-center gap-5">
-                            <FileText size={18} className="text-black/20" strokeWidth={1.2} />
+                            {item === 'Studio' ? <Zap size={18} className="text-[#0071e3]" strokeWidth={1.2} /> : 
+                             item === 'Pricing' ? <Layers size={18} className="text-[#ff375f]" strokeWidth={1.2} /> :
+                             <FileText size={18} className="text-black/20" strokeWidth={1.2} />}
                             <span className="text-[17px] font-normal text-black/80">{item}</span>
                          </div>
                          <ArrowRight size={18} className="text-black/0 group-hover:text-black/20 transition-all -translate-x-3 group-hover:translate-x-0" strokeWidth={1.2} />
@@ -131,10 +140,29 @@ export default function Layout() {
           <div className="flex items-center gap-6 shrink-0">
              <button onClick={() => setSearchOpen(true)} className="p-2 opacity-30 hover:opacity-100 transition-opacity"><Search size={18} /></button>
              <a href="mailto:support@docgen.ai" className="hidden sm:block text-[12px] font-bold text-black/40 hover:text-black transition-colors">Support</a>
-             <Link to="/#pricing" className="apple-btn-primary h-9 px-6 text-[12px] font-bold">Upgrade</Link>
+             <Link to="/#pricing" className="hidden sm:flex apple-btn-primary h-9 px-6 text-[12px] font-bold">Upgrade</Link>
+             <button onClick={() => setMobileMenuOpen(!mobileMenuOpen)} className="lg:hidden p-2 text-black/60">
+                {mobileMenuOpen ? <X size={22} /> : <Menu size={22} />}
+             </button>
           </div>
         </div>
       </header>
+
+      {/* 🍏 MOBILE NAVIGATION OVERLAY */}
+      {mobileMenuOpen && (
+        <div className="fixed inset-0 z-[150] bg-white animate-apple-fade lg:hidden">
+           <div className="flex flex-col h-full pt-20 px-10 gap-8">
+              <Link to="/" onClick={() => setMobileMenuOpen(false)} className="text-[28px] font-bold tracking-tight text-black border-b border-black/5 pb-6">Home</Link>
+              <Link to="/docs/intro" onClick={() => setMobileMenuOpen(false)} className="text-[28px] font-bold tracking-tight text-black border-b border-black/5 pb-6">Documentation</Link>
+              <Link to="/codegen" onClick={() => setMobileMenuOpen(false)} className="text-[28px] font-bold tracking-tight text-black border-b border-black/5 pb-6">Studio</Link>
+              <Link to="/#pricing" onClick={() => setMobileMenuOpen(false)} className="text-[28px] font-bold tracking-tight text-black border-b border-black/5 pb-6">Pricing</Link>
+              <div className="mt-auto pb-12 flex flex-col gap-4">
+                 <Link to="/#pricing" onClick={() => setMobileMenuOpen(false)} className="apple-btn-primary h-14 text-[16px] font-bold">Upgrade to Pro</Link>
+                 <button onClick={() => setMobileMenuOpen(false)} className="text-[14px] font-bold text-black/40 text-center">Close Menu</button>
+              </div>
+           </div>
+        </div>
+      )}
 
       {/* 🍏 LAYER 2: SECONDARY HUB TOOLBAR (H-14, TOP-16, Z-40) */}
       <div className="fixed top-16 inset-x-0 h-14 z-[90] bg-white border-b border-black/[0.04]">
@@ -142,7 +170,7 @@ export default function Layout() {
             <div className="flex items-center gap-4">
                <div className="flex items-center gap-2.5 bg-black/[0.03] px-4 py-1.5 rounded-full border border-black/[0.05]">
                   <div className="w-2 h-2 rounded-full bg-[#32d74b] animate-pulse" />
-                  <span className="text-[10px] font-black uppercase tracking-widest text-black/60">v1.0.0 · Beta</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-black/60">v1.2.4 · Manifest Stable</span>
                </div>
                <div className="h-4 w-[1px] bg-black/[0.1]" />
                <span className="text-[11px] font-bold text-black/40 uppercase tracking-wider">Project: Neural_Manifest_v2.4</span>
@@ -191,6 +219,10 @@ export default function Layout() {
                      { label: 'Introduction', to: '/docs/intro', icon: <FileText size={16} /> },
                      { label: 'Advanced Core', to: '/docs/adv-core', icon: <Cpu size={16} /> },
                      { label: 'API Reference', to: '/docs/api-reference', icon: <Search size={16} /> }
+                   ]},
+                   { group: 'Platform', items: [
+                     { label: 'Studio', to: '/codegen', icon: <Zap size={16} /> },
+                     { label: 'Pricing', to: '/#pricing', icon: <Layers size={16} /> }
                    ]},
                    { group: 'Protocols', items: [
                       { label: 'Sec. Rotation', to: '/docs/sec-rotation', icon: <Shield size={16} /> },

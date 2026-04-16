@@ -107,10 +107,15 @@ export default function MarkdownRenderer({ content }: { content: string }) {
         .replace(/\n\n/g, '<br/><br/>')
         .replace(/`([^`]+)`/g, '<code class="bg-[#f5f5f7] px-2 py-1 rounded-lg text-[14px] font-bold text-[#1d1d1f] font-mono border border-black/[0.02]">$1</code>')
         .replace(/^> (.*$)/gim, '<blockquote class="border-l-[5px] border-[#0071e3]/40 bg-[#f5f5f7]/50 px-10 py-8 text-[#1d1d1f]/45 font-medium italic my-12 rounded-r-[24px] shadow-sm">$1</blockquote>')
-        .replace(/\|(.+)\|/g, (match) => {
-           if(match.includes('---')) return ''; 
-           const cells = match.split('|').filter(c => c.trim()).map((c, i) => `<td class="border-b border-black/[0.06] px-6 py-4 ${i === 0 ? 'font-bold text-black border-r border-black/[0.04]' : 'text-black/50'} font-sans">${c.trim()}</td>`).join('');
-           return `<div class="overflow-x-auto w-full my-12 font-sans border border-black/[0.06] rounded-[24px] shadow-sm overflow-hidden"><table class="w-full border-collapse text-[14px]"><tr class="bg-black/[0.02]">${cells}</tr></table></div>`;
+        .replace(/((?:\|.+\|\s*\n?)+)/g, (tableBlock) => {
+           const lines = tableBlock.trim().split('\n');
+           const rows = lines.filter(l => !l.includes('---')).map(l => {
+              const cells = l.split('|').filter(c => c.trim()).map((c, i) => 
+                 `<td class="border-b border-black/[0.06] px-6 py-4 ${i === 0 ? 'font-bold text-black border-r border-black/[0.04]' : 'text-black/50'} font-sans">${c.trim()}</td>`
+              ).join('');
+              return `<tr class="hover:bg-black/[0.01] transition-colors">${cells}</tr>`;
+           }).join('');
+           return `<div class="overflow-x-auto w-full my-12 font-sans border border-black/[0.06] rounded-[24px] shadow-sm overflow-hidden"><table class="w-full border-collapse text-[14px]"><tbody>${rows}</tbody></table></div>`;
         });
 
       const sanitizedHtml = DOMPurify.sanitize(htmlText);

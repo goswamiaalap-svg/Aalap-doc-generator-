@@ -42,7 +42,7 @@ export default function LandingPage() {
               <div className="inline-flex items-center gap-3 bg-white/50 backdrop-blur-md px-5 py-2.5 rounded-full border border-black/[0.08] shadow-sm hover:scale-105 transition-transform cursor-pointer group">
                  <div className="flex items-center gap-1.5 bg-[#0071e3]/10 text-[#0071e3] px-2 py-0.5 rounded-full">
                     <SparkleIcon />
-                    <span className="text-[10px] font-bold uppercase tracking-wider">v4.2</span>
+                    <span className="text-[10px] font-bold uppercase tracking-wider">v1.2.4</span>
                  </div>
                  <span className="text-[13px] font-bold text-[#1d1d1f] tracking-wide">Synthetic Logic Engine Live</span>
                  <ChevronRight size={14} strokeWidth={3} className="text-black/20 group-hover:text-black transition-colors" />

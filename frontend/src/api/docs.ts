@@ -596,6 +596,36 @@ export const docs = [
     ].join('\n')
   },
   {
+    id: 'studio',
+    title: 'DocGen Studio',
+    section: 'PLATFORM',
+    content: [
+      '# DocGen AI Studio',
+      '',
+      'The Studio is our premier documentation workshop. It features sub-millisecond logical decomposition and parallel synthesis across eight distinct neurological layers.',
+      '',
+      '## Key Features',
+      '- **Parallel Sync**: Process multiple logical blocks simultaneously for ultra-fast artifacts.',
+      '- **Multi-Layer Analysis**: Generates docstrings, READMEs, API guides, and architecture diagrams in one pass.',
+      '- **Real-time Streaming**: Watch your documentation synthesize as the neural engine thinks.'
+    ].join('\n')
+  },
+  {
+    id: 'pricing',
+    title: 'Pricing & Tiers',
+    section: 'PLATFORM',
+    content: [
+      '# Scalable Solutions for Every Team',
+      '',
+      'From solo architects to sovereign enterprise clusters, DocGen AI offers performance-tuned plans.',
+      '',
+      '## Tier Comparison',
+      '- **Base**: Core documentation for individuals.',
+      '- **Architect**: Parallel sync and unlimited manifests for power users.',
+      '- **Sovereign**: Full on-prem deployment and custom neural models for large organizations.'
+    ].join('\n')
+  },
+  {
     id: 'privacy',
     title: 'Privacy Policy',
     section: 'LEGAL',
@@ -604,26 +634,19 @@ export const docs = [
       '',
       '**Last Updated:** April 2026',
       '',
-      'At DocGen AI, we recognize that your source code is your most valuable asset. This policy explicitly outlines how we handle your data, what is stored, and your rights.',
+      'At DocGen AI, we recognize that your source code is your most valuable asset. Our Zero-Persistence architecture ensures that your IP remains exclusively yours.',
       '',
-      '## 1. Zero-Persistence Data Handling',
-      'The core principle of DocGen AI is **Zero Persistence**.',
-      '- **Source Code Is Not Stored:** Your code is processed in volatile memory (RAM) at the edge.',
-      '- **Output Is Not Stored:** Generated documentation is streamed directly to your browser and never saved to our databases.',
+      '## 1. Absolute Zero-Persistence',
+      'The core engine processes data in volatile memory buffers. Input payloads are purged the millisecond documentation is finalized. We never write your source logic to persistent disks, databases, or log systems.',
       '',
-      '## 2. AI Providers and Processing',
-      'We use **Groq** (via the LLAMA 3.3 70B model) and **Anthropic** for our neural synthesis engines.',
-      '- **No Training:** We have signed Enterprise Data Processing Agreements (DPAs) with our AI providers explicitly prohibiting the use of your source code or generated documentation to train their models.',
-      '- **Transient Processing:** Our providers only process your code for the duration of the API call.',
+      '## 2. Neural Processing Agreements',
+      'Our AI providers (Groq, Anthropic) are bound by strict Data Processing Agreements (DPAs) that explicitly prohibit the use of your submissions for model training or future refinement.',
       '',
-      '## 3. Data We Do Log',
-      'To provide the service and prevent abuse, we collect minimal operational metadata:',
-      '- **Session and Auth Data:** User accounts (email, OAuth ID) and subscription status.',
-      '- **Usage Metrics:** Number of API calls, token counts, language types (e.g., "Python"), and error rates.',
-      '- **Security Logs:** IP addresses and user agents (retained for 30 days for abuse prevention).',
+      '## 3. Minimal Metadata Collection',
+      'We collect only what is necessary for security and abuse prevention: session IDs, language heuristics, and token volumes. IP addresses are purged periodically.',
       '',
-      '## 4. User Rights (GDPR & CCPA)',
-      'You have the right to request a complete export of your account data and operational logs. You also have the right to request immediate account deletion by contacting support@docgen.ai.'
+      '## 4. Your Rights under GDPR/CCPA',
+      'You have full control over your account data. Request immediate deletion or total data export at any time via our sovereign support channel.'
     ].join('\n')
   },
   {
@@ -635,23 +658,17 @@ export const docs = [
       '',
       '**Last Updated:** April 2026',
       '',
-      '## 1. Acceptance of Terms',
-      'By accessing or using DocGen AI, you agree to comply with and be bound by these Terms of Service. If you do not agree to these terms, please do not use the application.',
+      '## 1. Service Scope',
+      'DocGen AI provides an automated neural documentation synthesis platform. The service is provided "as is" with no warranty regarding the absolute accuracy of the AI-generated prose.',
       '',
-      '## 2. Service Scope',
-      'DocGen AI provides automated documentation synthesis tools. The service is provided "AS IS", without warranty of any kind, express or implied.',
+      '## 2. Intellectual Property Assurance',
+      'You retain 100% ownership of your source code and the resulting documentation. DocGen AI claims no rights to your inputs or outputs.',
       '',
-      '## 3. Acceptable Use',
-      'You agree not to:',
-      '- Use the platform for illegal activities.',
-      '- Abuse the API limits through automated bots or circumvent rate limiting.',
-      '- Attempt to decompile, reverse engineer, or otherwise extract the proprietary AI prompt engineering.',
+      '## 3. Usage Boundaries',
+      'Users are prohibited from using the platform for malicious logical extraction or DOS attacks against the neural gateway. Exceeding rate limits may result in temporary throttle or suspension.',
       '',
-      '## 4. Intellectual Property',
-      'You retain full ownership of all source code submitted to the platform and all documentation generated by the platform. DocGen AI claims no ownership rights over your inputs or outputs.',
-      '',
-      '## 5. Liability',
-      'DocGen AI is an AI-assisted tool and may produce inaccurate documentation. You are responsible for reviewing and verifying the generated content before pushing to production environments. In no event shall DocGen AI be liable for any claims, damages, or liabilities arising from the use of the platform.'
+      '## 4. Limitation of Liability',
+      'DocGen AI is an assistant, not a replacement for human engineering review. Use the generated artifacts at your own discretion within production environments.'
     ].join('\n')
   }
 ];
