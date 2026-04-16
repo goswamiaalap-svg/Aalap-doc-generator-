@@ -605,19 +605,34 @@ const CodeGenerator: React.FC = () => {
                 <div className="relative mb-12">
                   <div className="absolute inset-0 bg-[#0071e3]/5 rounded-[40px] blur-3xl animate-pulse" />
                   <div className="relative w-32 h-32 rounded-[36px] bg-white border border-black/[0.08] shadow-2xl flex items-center justify-center">
-                    <Sparkles size={48} className="text-[#0071e3]" strokeWidth={1.2} />
+                    <Zap size={48} className="text-[#0071e3]" strokeWidth={1.2} fill="currentColor" />
                   </div>
                 </div>
                 <div className="max-w-[520px]">
-                  <h2 className="text-[32px] font-bold text-black tracking-tight mb-4">
-                    Generate Documentation
+                  <h2 className="text-[32px] font-bold text-black tracking-tight mb-4 flex items-center justify-center gap-4">
+                    <Zap size={28} className="text-[#0071e3]" fill="currentColor" />
+                    Parallel Processing Ready
                   </h2>
-                  <p className="text-[16px] text-black/40 font-medium leading-relaxed mb-10">
-                    Paste your source code or inject a file to start the neural synthesis. Each logical block will be decomposed and documented sub-millisecond.
+                  <p className="text-[17px] text-black/45 font-medium leading-relaxed mb-12">
+                    Each function & class will be documented simultaneously via parallel API calls. Results stream in live.
                   </p>
+                  <div className="flex flex-wrap items-center justify-center gap-8 mb-16 opacity-40">
+                     <div className="flex items-center gap-2.5">
+                        <Network size={14} />
+                        <span className="text-[11px] font-black uppercase tracking-[0.2em]">SSE Streaming</span>
+                     </div>
+                     <div className="flex items-center gap-2.5">
+                        <Shield size={14} />
+                        <span className="text-[11px] font-black uppercase tracking-[0.2em]">AES-256</span>
+                     </div>
+                     <div className="flex items-center gap-2.5">
+                        <Zap size={14} />
+                        <span className="text-[11px] font-black uppercase tracking-[0.2em]">Promise.all()</span>
+                     </div>
+                  </div>
                   <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-                     <button onClick={() => fileInputRef.current?.click()} className="h-12 px-8 bg-black text-white rounded-full text-[14px] font-bold hover:scale-105 transition-all">Upload File</button>
-                     <button onClick={() => setCode(`export function calculateNeuralPath(nodes: Node[]) {\n  // Logic synthesis example\n  return nodes.reduce((acc, n) => acc + n.fidelity, 0);\n}`)} className="h-12 px-8 bg-[#f5f5f7] rounded-full text-[14px] font-bold hover:bg-black hover:text-white transition-all">Try Example</button>
+                     <button onClick={() => fileInputRef.current?.click()} className="h-14 px-10 bg-black text-white rounded-full text-[15px] font-bold hover:scale-105 transition-all shadow-xl">Inject File</button>
+                     <button onClick={() => setCode(`export function calculateNeuralPath(nodes: Node[]) {\n  // Logic synthesis example\n  return nodes.reduce((acc, n) => acc + n.fidelity, 0);\n}`)} className="h-14 px-10 bg-white border border-black/10 rounded-full text-[15px] font-bold hover:bg-black hover:text-white transition-all shadow-sm">Try Example</button>
                   </div>
                 </div>
               </div>
@@ -667,9 +682,8 @@ const CodeGenerator: React.FC = () => {
 
           <div className="flex-1 overflow-y-auto p-8 flex flex-col gap-8 no-scrollbar">
             {/* AI Summary Card */}
-            <div className="p-8 bg-black rounded-[40px] text-white flex flex-col gap-8 relative overflow-hidden shadow-2xl group">
-               <div className="absolute top-[-20px] right-[-20px] opacity-10 group-hover:opacity-20 transition-opacity"><Cpu size={160} strokeWidth={0.5} /></div>
-               <div>
+            <div className="p-8 bg-black rounded-[40px] text-white flex flex-col gap-8 relative overflow-hidden shadow-2xl group z-10 transition-all hover:bg-[#111]">
+               <div className="relative z-10">
                   <div className="flex items-center gap-3 mb-2">
                      <div className="w-2 h-2 rounded-full bg-[#34c759] animate-pulse" />
                      <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Neural Core Active</span>
